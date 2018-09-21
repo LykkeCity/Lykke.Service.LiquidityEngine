@@ -1,0 +1,104 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0. Solution items", "0. Solution items", "{7664A776-FBC4-4DB1-BE35-29E9664E24B4}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+		settings.yaml = settings.yaml
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		CODEOWNERS = CODEOWNERS
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Domain", "1. Domain", "{CC2067D7-1971-47BB-B491-5649EA3C18B2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.LiquidityEngine.Domain", "src\Lykke.Service.LiquidityEngine.Domain\Lykke.Service.LiquidityEngine.Domain.csproj", "{F5B2F6B8-A8CC-4612-8F1D-C063EB8C8955}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.LiquidityEngine.DomainServices", "src\Lykke.Service.LiquidityEngine.DomainServices\Lykke.Service.LiquidityEngine.DomainServices.csproj", "{2D5F52EC-2A27-4045-81ED-72355E2A6325}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Repositories", "2. Repositories", "{BF745453-B940-470E-81BC-43FB67703D4E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.LiquidityEngine.AzureRepositories", "src\Lykke.Service.LiquidityEngine.AzureRepositories\Lykke.Service.LiquidityEngine.AzureRepositories.csproj", "{4BE49E02-AAAD-460B-8D00-57F412A3D181}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Contract", "3. Contract", "{14B5AF15-F733-4EF0-9FB9-3E61C4C83ADD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.LiquidityEngine.Contract", "contract\Lykke.Service.LiquidityEngine.Contract\Lykke.Service.LiquidityEngine.Contract.csproj", "{931B95E3-AF9F-4A4C-9C6A-5959C2FBCAC9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Client", "4. Client", "{C9A2CFDE-EA32-4946-B679-7CE6EFA816B8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.LiquidityEngine.Client", "client\Lykke.Service.LiquidityEngine.Client\Lykke.Service.LiquidityEngine.Client.csproj", "{3C300C31-97D3-41E8-A627-C53491BDA28B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5. Tests", "5. Tests", "{8F9036B1-5106-4C69-B2D2-B78EE52687A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.LiquidityEngine.Tests", "tests\Lykke.Service.LiquidityEngine.Tests\Lykke.Service.LiquidityEngine.Tests.csproj", "{A61FFDEE-5725-4650-A788-6E55EE5EFD5B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.LiquidityEngine", "src\Lykke.Service.LiquidityEngine\Lykke.Service.LiquidityEngine.csproj", "{E414FDB9-FEEA-4CD0-9BBA-D1541601DF29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lykke.Service.LiquidityEngine.AzureRepositories.Tests", "tests\Lykke.Service.LiquidityEngine.AzureRepositories.Tests\Lykke.Service.LiquidityEngine.AzureRepositories.Tests.csproj", "{3702CE67-0051-4CB3-9E7C-41280F4241D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lykke.Service.LiquidityEngine.DomainServices.Tests", "tests\Lykke.Service.LiquidityEngine.DomainServices.Tests\Lykke.Service.LiquidityEngine.DomainServices.Tests.csproj", "{F5574DD1-B0F1-479E-97CB-F6D69F5421A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+								{E414FDB9-FEEA-4CD0-9BBA-D1541601DF29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+								{E414FDB9-FEEA-4CD0-9BBA-D1541601DF29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+								{E414FDB9-FEEA-4CD0-9BBA-D1541601DF29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+								{E414FDB9-FEEA-4CD0-9BBA-D1541601DF29}.Release|Any CPU.Build.0 = Release|Any CPU
+								{931B95E3-AF9F-4A4C-9C6A-5959C2FBCAC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+								{931B95E3-AF9F-4A4C-9C6A-5959C2FBCAC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+								{931B95E3-AF9F-4A4C-9C6A-5959C2FBCAC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+								{931B95E3-AF9F-4A4C-9C6A-5959C2FBCAC9}.Release|Any CPU.Build.0 = Release|Any CPU
+								{3C300C31-97D3-41E8-A627-C53491BDA28B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+								{3C300C31-97D3-41E8-A627-C53491BDA28B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+								{3C300C31-97D3-41E8-A627-C53491BDA28B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+								{3C300C31-97D3-41E8-A627-C53491BDA28B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5B2F6B8-A8CC-4612-8F1D-C063EB8C8955}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5B2F6B8-A8CC-4612-8F1D-C063EB8C8955}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5B2F6B8-A8CC-4612-8F1D-C063EB8C8955}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5B2F6B8-A8CC-4612-8F1D-C063EB8C8955}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BE49E02-AAAD-460B-8D00-57F412A3D181}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+								{4BE49E02-AAAD-460B-8D00-57F412A3D181}.Debug|Any CPU.Build.0 = Debug|Any CPU
+								{4BE49E02-AAAD-460B-8D00-57F412A3D181}.Release|Any CPU.ActiveCfg = Release|Any CPU
+								{4BE49E02-AAAD-460B-8D00-57F412A3D181}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5F52EC-2A27-4045-81ED-72355E2A6325}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5F52EC-2A27-4045-81ED-72355E2A6325}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5F52EC-2A27-4045-81ED-72355E2A6325}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5F52EC-2A27-4045-81ED-72355E2A6325}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A61FFDEE-5725-4650-A788-6E55EE5EFD5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+								{A61FFDEE-5725-4650-A788-6E55EE5EFD5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+								{A61FFDEE-5725-4650-A788-6E55EE5EFD5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+								{A61FFDEE-5725-4650-A788-6E55EE5EFD5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3702CE67-0051-4CB3-9E7C-41280F4241D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3702CE67-0051-4CB3-9E7C-41280F4241D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3702CE67-0051-4CB3-9E7C-41280F4241D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3702CE67-0051-4CB3-9E7C-41280F4241D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5574DD1-B0F1-479E-97CB-F6D69F5421A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5574DD1-B0F1-479E-97CB-F6D69F5421A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5574DD1-B0F1-479E-97CB-F6D69F5421A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5574DD1-B0F1-479E-97CB-F6D69F5421A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{931B95E3-AF9F-4A4C-9C6A-5959C2FBCAC9} = {14B5AF15-F733-4EF0-9FB9-3E61C4C83ADD}
+		{3C300C31-97D3-41E8-A627-C53491BDA28B} = {C9A2CFDE-EA32-4946-B679-7CE6EFA816B8}
+		{F5B2F6B8-A8CC-4612-8F1D-C063EB8C8955} = {CC2067D7-1971-47BB-B491-5649EA3C18B2}
+		{4BE49E02-AAAD-460B-8D00-57F412A3D181} = {BF745453-B940-470E-81BC-43FB67703D4E}
+		{2D5F52EC-2A27-4045-81ED-72355E2A6325} = {CC2067D7-1971-47BB-B491-5649EA3C18B2}
+		{A61FFDEE-5725-4650-A788-6E55EE5EFD5B} = {8F9036B1-5106-4C69-B2D2-B78EE52687A0}
+		{3702CE67-0051-4CB3-9E7C-41280F4241D6} = {8F9036B1-5106-4C69-B2D2-B78EE52687A0}
+		{F5574DD1-B0F1-479E-97CB-F6D69F5421A2} = {8F9036B1-5106-4C69-B2D2-B78EE52687A0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EB6C0EF4-AA6A-444D-8603-3669F73A58BC}
+	EndGlobalSection
+EndGlobal
