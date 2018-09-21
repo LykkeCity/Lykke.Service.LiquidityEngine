@@ -1,12 +1,12 @@
 LiquidityEngineService:
   Db:
     DataConnectionString:
-      settings-key: DataConnectionString
+      settings-key: LiquidityEngineService-DataConnectionString
       types:
       - AzureTableStorage
 
     LogsConnectionString:
-      settings-key: LogsConnectionString
+      settings-key: LiquidityEngineService-LogsConnectionString
       types:
       - AzureTableStorage
       
