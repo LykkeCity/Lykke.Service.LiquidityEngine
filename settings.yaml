@@ -1,0 +1,24 @@
+LiquidityEngineService:
+  Db:
+    DataConnectionString:
+      settings-key: DataConnectionString
+      types:
+      - AzureTableStorage
+
+    LogsConnectionString:
+      settings-key: LogsConnectionString
+      types:
+      - AzureTableStorage
+      
+SlackNotifications:
+  AzureQueue:
+    ConnectionString:
+      settings-key: SlackNotificationsConnString
+      types:
+      - AzureTableStorage
+    QueueName:
+      settings-key: SlackQueueName
+      
+MonitoringServiceClient:
+  MonitoringServiceUrl:
+    settings-key: MonitoringServiceUrl
