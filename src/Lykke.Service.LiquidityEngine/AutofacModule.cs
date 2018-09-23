@@ -8,15 +8,18 @@ namespace Lykke.Service.LiquidityEngine
     [UsedImplicitly]
     public class AutofacModule : Module
     {
-        private readonly IReloadingManager<AppSettings> _appSettings;
+        private readonly IReloadingManager<AppSettings> _settings;
 
-        public AutofacModule(IReloadingManager<AppSettings> appSettings)
+        public AutofacModule(IReloadingManager<AppSettings> settings)
         {
-            _appSettings = appSettings;
+            _settings = settings;
         }
 
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterModule(new DomainServices.AutofacModule());
+            builder.RegisterModule(new AzureRepositories.AutofacModule(
+                _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
         }
     }
 }

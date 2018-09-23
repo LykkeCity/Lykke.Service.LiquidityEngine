@@ -1,5 +1,8 @@
 using AutoMapper;
 using JetBrains.Annotations;
+using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
+using Lykke.Service.LiquidityEngine.Domain;
 
 namespace Lykke.Service.LiquidityEngine
 {
@@ -8,6 +11,15 @@ namespace Lykke.Service.LiquidityEngine
     {
         public AutoMapperProfile()
         {
+            CreateMap<AssetPairLink, AssetPairLinkModel>(MemberList.Source);
+            CreateMap<AssetPairLinkModel, AssetPairLink>(MemberList.Destination);
+            
+            CreateMap<Instrument, InstrumentModel>(MemberList.Source);
+            CreateMap<InstrumentModel, Instrument>(MemberList.Destination)
+                .ForMember(dest => dest.Levels, opt => opt.Ignore());
+            
+            CreateMap<LevelVolume, LevelVolumeModel>(MemberList.Source);
+            CreateMap<LevelVolumeModel, LevelVolume>(MemberList.Destination);
         }
     }
 }
