@@ -58,5 +58,10 @@ namespace Lykke.Service.LiquidityEngine.Client
         /// Trades API.
         /// </summary>
         ITradesApi Trades { get; }
+
+        /// <summary>
+        /// Settings API.
+        /// </summary>
+        ISettingsApi Settings { get; }
     }
 }

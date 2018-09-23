@@ -2,7 +2,10 @@ using System.Linq;
 using AutoMapper;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
+using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
+using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.Domain;
 
 namespace Lykke.Service.LiquidityEngine.AzureRepositories
@@ -28,6 +31,15 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                         Number = index + 1,
                         Volume = volume
                     })));
+            
+            CreateMap<TimersSettings, TimersSettingsEntity>(MemberList.Source);
+            CreateMap<TimersSettingsEntity, TimersSettings>(MemberList.Destination);
+            
+            CreateMap<BalanceOperation, BalanceOperationEntity>(MemberList.Source);
+            CreateMap<BalanceOperationEntity, BalanceOperation>(MemberList.Destination);
+            
+            CreateMap<Credit, CreditEntity>(MemberList.Source);
+            CreateMap<CreditEntity, Credit>(MemberList.Destination);
         }
     }
 }

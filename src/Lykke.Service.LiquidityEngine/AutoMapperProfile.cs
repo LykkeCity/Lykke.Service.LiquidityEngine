@@ -1,6 +1,7 @@
 using AutoMapper;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.Client.Models.Audit;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 using Lykke.Service.LiquidityEngine.Domain;
 
@@ -20,6 +21,9 @@ namespace Lykke.Service.LiquidityEngine
             
             CreateMap<LevelVolume, LevelVolumeModel>(MemberList.Source);
             CreateMap<LevelVolumeModel, LevelVolume>(MemberList.Destination);
+            
+            CreateMap<BalanceOperation, BalanceOperationModel>(MemberList.Source);
+            CreateMap<BalanceOperationModel, BalanceOperation>(MemberList.Destination);
         }
     }
 }

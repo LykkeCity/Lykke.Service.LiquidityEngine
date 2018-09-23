@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using JetBrains.Annotations;
+using Lykke.Sdk;
 using Lykke.Service.Balances.Client;
+using Lykke.Service.LiquidityEngine.Managers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.SettingsReader;
 
@@ -24,6 +26,12 @@ namespace Lykke.Service.LiquidityEngine
             builder.RegisterModule(new AzureRepositories.AutofacModule(
                 _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
 
+            builder.RegisterType<StartupManager>()
+                .As<IStartupManager>();
+
+            builder.RegisterType<ShutdownManager>()
+                .As<IShutdownManager>();
+            
             RegisterClients(builder);
         }
 

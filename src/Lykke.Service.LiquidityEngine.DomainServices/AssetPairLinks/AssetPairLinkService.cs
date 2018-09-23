@@ -22,7 +22,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks
         public AssetPairLinkService(IAssetPairLinkRepository assetPairLinkRepository, ILogFactory logFactory)
         {
             _assetPairLinkRepository = assetPairLinkRepository;
-            _cache = new InMemoryCache<AssetPairLink>(assetPairLink => assetPairLink.AssetPairId);
+            _cache = new InMemoryCache<AssetPairLink>(assetPairLink => assetPairLink.AssetPairId, false);
             _log = logFactory.CreateLog(this);
         }
         

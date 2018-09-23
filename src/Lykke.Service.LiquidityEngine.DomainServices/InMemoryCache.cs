@@ -12,9 +12,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         public bool Initialized { get; private set; }
 
-        public InMemoryCache(Func<T, string> getKeyFunc)
+        public InMemoryCache(Func<T, string> getKeyFunc, bool initialized)
         {
             _getKeyFunc = getKeyFunc;
+            Initialized = initialized;
         }
         
         public IReadOnlyCollection<T> GetAll()

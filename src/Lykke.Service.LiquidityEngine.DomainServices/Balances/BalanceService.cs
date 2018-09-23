@@ -25,13 +25,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
         {
             _settingsService = settingsService;
             _balancesClient = balancesClient;
-            _cache = new InMemoryCache<Balance>(balance => balance.AssetId);
+            _cache = new InMemoryCache<Balance>(balance => balance.AssetId, true);
             _log = logFactory.CreateLog(this);
         }
-        
+
         public Task<IReadOnlyCollection<Balance>> GetAllAsync()
         {
-            return Task.FromResult(_cache.GetAll() ?? new Balance[0]);
+            return Task.FromResult(_cache.GetAll());
         }
 
         public Task<Balance> GetByAssetIdAsync(string assetId)
@@ -51,10 +51,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
                 IEnumerable<ClientBalanceResponseModel> balances =
                     await _balancesClient.GetClientBalances(walletId);
 
-                if (!_cache.Initialized)
-                    _cache.Initialize(balances.Select(o => new Balance(o.AssetId, o.Balance)).ToArray());
-                else
-                    _cache.Set(balances.Select(o => new Balance(o.AssetId, o.Balance)).ToArray());
+                _cache.Set(balances.Select(o => new Balance(o.AssetId, o.Balance)).ToArray());
             }
             catch (Exception exception)
             {

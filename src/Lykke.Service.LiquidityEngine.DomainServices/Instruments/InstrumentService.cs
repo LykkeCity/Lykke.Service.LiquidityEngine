@@ -20,7 +20,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
         public InstrumentService(IInstrumentRepository instrumentRepository, ILogFactory logFactory)
         {
             _instrumentRepository = instrumentRepository;
-            _cache = new InMemoryCache<Instrument>(instrument => instrument.AssetPairId);
+            _cache = new InMemoryCache<Instrument>(instrument => instrument.AssetPairId, false);
             _log = logFactory.CreateLog(this);
         }
         

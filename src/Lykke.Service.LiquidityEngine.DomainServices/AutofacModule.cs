@@ -2,9 +2,11 @@ using Autofac;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.DomainServices.Audit;
 using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Settings;
+using Lykke.Service.LiquidityEngine.DomainServices.Timers;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
 {
@@ -28,18 +30,30 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IAssetPairLinkService>()
                 .SingleInstance();
 
-            builder.RegisterType<InstrumentService>()
-                .As<IInstrumentService>()
+            builder.RegisterType<BalanceOperationService>()
+                .As<IBalanceOperationService>()
                 .SingleInstance();
 
             builder.RegisterType<BalanceService>()
                 .As<IBalanceService>()
                 .SingleInstance();
-            
+
+            builder.RegisterType<InstrumentService>()
+                .As<IInstrumentService>()
+                .SingleInstance();
+
             builder.RegisterType<SettingsService>()
                 .As<ISettingsService>()
                 .WithParameter(new NamedParameter("instanceName", _instanceName))
                 .WithParameter(new NamedParameter("walletId", _walletId))
+                .SingleInstance();
+
+            builder.RegisterType<TimersSettingsService>()
+                .As<ITimersSettingsService>()
+                .SingleInstance();
+
+            builder.RegisterType<BalancesTimer>()
+                .AsSelf()
                 .SingleInstance();
         }
     }
