@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Lykke.Sdk.Settings;
+using Lykke.Service.Balances.Client;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings;
 
 namespace Lykke.Service.LiquidityEngine.Settings
@@ -8,5 +9,7 @@ namespace Lykke.Service.LiquidityEngine.Settings
     public class AppSettings : BaseAppSettings
     {
         public LiquidityEngineSettings LiquidityEngineService { get; set; }
+        
+        public BalancesServiceClientSettings BalancesServiceClient { get; set; }
     }
 }

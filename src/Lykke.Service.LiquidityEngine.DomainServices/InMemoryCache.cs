@@ -10,7 +10,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private readonly Dictionary<string, T> _cache = new Dictionary<string, T>();
 
-        private bool _initialized;
+        public bool Initialized { get; private set; }
 
         public InMemoryCache(Func<T, string> getKeyFunc)
         {
@@ -21,7 +21,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         {
             lock (_sync)
             {
-                return _initialized ? _cache.Values : null;
+                return Initialized ? _cache.Values : null;
             }
         }
 
@@ -38,7 +38,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         public void Set(T item)
         {
-            if(!_initialized)
+            if(!Initialized)
                 return;
             
             lock (_sync)
@@ -46,21 +46,33 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 _cache[_getKeyFunc(item)] = item;
             }
         }
+        
+        public void Set(IReadOnlyCollection<T> items)
+        {
+            if(!Initialized)
+                return;
+            
+            lock (_sync)
+            {
+                foreach (T item in items)
+                    _cache[_getKeyFunc(item)] = item;
+            }
+        }
 
         public void Initialize(IReadOnlyCollection<T> items)
         {
-            if (_initialized)
+            if (Initialized)
                 return;
 
             lock (_sync)
             {
-                if (_initialized)
+                if (Initialized)
                     return;
 
                 foreach (T item in items)
                     _cache[_getKeyFunc(item)] = item;
 
-                _initialized = true;
+                Initialized = true;
             }
         }
 

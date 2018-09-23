@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using JetBrains.Annotations;
+using Lykke.Service.Balances.Client;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.SettingsReader;
 
@@ -17,9 +18,18 @@ namespace Lykke.Service.LiquidityEngine
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterModule(new DomainServices.AutofacModule());
+            builder.RegisterModule(new DomainServices.AutofacModule(
+                _settings.CurrentValue.LiquidityEngineService.Name,
+                _settings.CurrentValue.LiquidityEngineService.WalletId));
             builder.RegisterModule(new AzureRepositories.AutofacModule(
                 _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
+
+            RegisterClients(builder);
+        }
+
+        private void RegisterClients(ContainerBuilder builder)
+        {
+            builder.RegisterBalancesClient(_settings.CurrentValue.BalancesServiceClient);
         }
     }
 }
