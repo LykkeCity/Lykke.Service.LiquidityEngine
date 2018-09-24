@@ -7,6 +7,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<IReadOnlyCollection<Credit>> GetAllAsync();
 
-        Task UpdateAsync(Credit credit);
+        Task<Credit> GetByAssetIdAsync(string assetId);
+        
+        Task UpdateAsync(string assetId, decimal amount, string comment, string userId);
     }
 }

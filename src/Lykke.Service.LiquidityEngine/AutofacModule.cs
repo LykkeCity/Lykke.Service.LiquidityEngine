@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Lykke.Sdk;
 using Lykke.Service.Balances.Client;
+using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.LiquidityEngine.Managers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.SettingsReader;
@@ -38,6 +39,12 @@ namespace Lykke.Service.LiquidityEngine
         private void RegisterClients(ContainerBuilder builder)
         {
             builder.RegisterBalancesClient(_settings.CurrentValue.BalancesServiceClient);
+            
+            builder.Register(container =>
+                    new ExchangeOperationsServiceClient(_settings.CurrentValue.ExchangeOperationsServiceClient
+                        .ServiceUrl))
+                .As<IExchangeOperationsServiceClient>()
+                .SingleInstance();
         }
     }
 }

@@ -4,6 +4,7 @@ using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.DomainServices.Audit;
 using Lykke.Service.LiquidityEngine.DomainServices.Balances;
+using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Settings;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
@@ -38,6 +39,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IBalanceService>()
                 .SingleInstance();
 
+            builder.RegisterType<CreditService>()
+                .As<ICreditService>()
+                .SingleInstance();
+
             builder.RegisterType<InstrumentService>()
                 .As<IInstrumentService>()
                 .SingleInstance();
@@ -54,6 +59,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<BalancesTimer>()
                 .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<LykkeExchangeService>()
+                .As<ILykkeExchangeService>()
                 .SingleInstance();
         }
     }

@@ -14,8 +14,8 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <summary>
         /// Changes credit amount of asset.
         /// </summary>
-        /// <param name="model">The model which describes credit.</param>
+        /// <param name="model">The model which describes credit operation.</param>
         [Post("/api/credits")]
-        Task SetAsync([Body] CreditModel model);
+        Task SetAsync([Body] CreditOperationModel model);
     }
 }
