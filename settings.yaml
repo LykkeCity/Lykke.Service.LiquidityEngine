@@ -1,4 +1,7 @@
 LiquidityEngineService:
+  Name: Default
+  WalletId:
+    settings-key: LiquidityEngineService-WalletId
   Db:
     DataConnectionString:
       settings-key: LiquidityEngineService-DataConnectionString
@@ -9,7 +12,7 @@ LiquidityEngineService:
       settings-key: LiquidityEngineService-LogsConnectionString
       types:
       - AzureTableStorage
-      
+
 SlackNotifications:
   AzureQueue:
     ConnectionString:
@@ -18,7 +21,7 @@ SlackNotifications:
       - AzureTableStorage
     QueueName:
       settings-key: SlackQueueName
-      
+
 MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl
