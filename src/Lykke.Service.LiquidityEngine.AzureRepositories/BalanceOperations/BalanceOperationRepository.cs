@@ -45,10 +45,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations
             await _storage.InsertAsync(entity);
         }
 
-        private string GetPartitionKey(DateTime time)
+        private static string GetPartitionKey(DateTime time)
             => (DateTime.MaxValue.Ticks - time.Date.Ticks).ToString("D19");
 
-        private string GetRowKey(DateTime time)
+        private static string GetRowKey(DateTime time)
             => time.ToString("O");
     }
 }
