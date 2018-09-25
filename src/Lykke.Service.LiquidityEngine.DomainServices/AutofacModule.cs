@@ -42,6 +42,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<CreditService>()
                 .As<ICreditService>()
                 .SingleInstance();
+            
+            builder.RegisterType<SettlementService>()
+                .As<ISettlementService>()
+                .SingleInstance();
 
             builder.RegisterType<InstrumentService>()
                 .As<IInstrumentService>()

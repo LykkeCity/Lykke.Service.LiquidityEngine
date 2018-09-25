@@ -1,7 +1,9 @@
 LiquidityEngineService:
   Name: Default
+  
   WalletId:
     settings-key: LiquidityEngineService-WalletId
+  
   Db:
     DataConnectionString:
       settings-key: LiquidityEngineService-DataConnectionString
@@ -12,6 +14,18 @@ LiquidityEngineService:
       settings-key: LiquidityEngineService-LogsConnectionString
       types:
       - AzureTableStorage
+  
+  Rabbit:
+    Subscribers:
+      LykkeTrades:
+        ConnectionString:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-ConnectionString
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Exchange
+        Queue:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Queue
 
 SlackNotifications:
   AzureQueue:

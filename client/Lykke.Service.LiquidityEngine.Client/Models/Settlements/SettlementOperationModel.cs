@@ -3,10 +3,10 @@ using JetBrains.Annotations;
 namespace Lykke.Service.LiquidityEngine.Client.Models.Settlements
 {
     /// <summary>
-    /// Represent a settlement details.
+    /// Represent a settlement operation details.
     /// </summary>
     [PublicAPI]
-    public class SettlementModel
+    public class SettlementOperationModel
     {
         /// <summary>
         /// The asset id.
@@ -17,5 +17,15 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Settlements
         /// The amount of a settlement.
         /// </summary>
         public decimal Amount { get; set; }
+
+        /// <summary>
+        /// The comment of the settlement operation.
+        /// </summary>
+        public string Comment { get; set; }
+
+        /// <summary>
+        /// The identifier of the used which execute settlement operation.
+        /// </summary>
+        public string UserId { get; set; }
     }
 }

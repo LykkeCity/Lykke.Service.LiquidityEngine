@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Db;
+using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit;
 
 namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings
 {
@@ -11,5 +12,7 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings
         public string WalletId { get; set; }
         
         public DbSettings Db { get; set; }
+
+        public RabbitSettings Rabbit { get; set; }
     }
 }

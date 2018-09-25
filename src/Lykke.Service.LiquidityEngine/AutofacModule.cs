@@ -4,6 +4,7 @@ using Lykke.Sdk;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.LiquidityEngine.Managers;
+using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.SettingsReader;
 
@@ -34,6 +35,7 @@ namespace Lykke.Service.LiquidityEngine
                 .As<IShutdownManager>();
             
             RegisterClients(builder);
+            RegisterRabbit(builder);
         }
 
         private void RegisterClients(ContainerBuilder builder)
@@ -44,6 +46,13 @@ namespace Lykke.Service.LiquidityEngine
                     new ExchangeOperationsServiceClient(_settings.CurrentValue.ExchangeOperationsServiceClient
                         .ServiceUrl))
                 .As<IExchangeOperationsServiceClient>()
+                .SingleInstance();
+        }
+
+        private void RegisterRabbit(ContainerBuilder builder)
+        {
+            builder.RegisterType<LykkeTradeSubscriber>()
+                .AsSelf()
                 .SingleInstance();
         }
     }
