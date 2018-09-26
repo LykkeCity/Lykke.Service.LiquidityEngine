@@ -7,6 +7,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
+using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Trades;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
@@ -62,6 +63,28 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                     AzureTableStorage<AzureIndex>.Create(_connectionString,
                         "InternalTradesIndices", container.Resolve<ILogFactory>())))
                 .As<IInternalTradeRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new ExternalTradeRepository(
+                    AzureTableStorage<ExternalTradeEntity>.Create(_connectionString,
+                        "ExternalTrades", container.Resolve<ILogFactory>()),
+                    AzureTableStorage<AzureIndex>.Create(_connectionString,
+                        "ExternalTradesIndices", container.Resolve<ILogFactory>())))
+                .As<IExternalTradeRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new PositionRepository(
+                    AzureTableStorage<PositionEntity>.Create(_connectionString,
+                        "Positions", container.Resolve<ILogFactory>()),
+                    AzureTableStorage<AzureIndex>.Create(_connectionString,
+                        "PositionsIndices", container.Resolve<ILogFactory>())))
+                .As<IPositionRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new OpenPositionRepository(
+                    AzureTableStorage<PositionEntity>.Create(_connectionString,
+                        "OpenPositions", container.Resolve<ILogFactory>())))
+                .As<IOpenPositionRepository>()
                 .SingleInstance();
         }
     }

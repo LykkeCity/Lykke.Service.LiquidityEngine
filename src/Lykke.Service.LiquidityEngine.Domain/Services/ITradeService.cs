@@ -8,11 +8,11 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<IReadOnlyCollection<ExternalTrade>>GetExternalTradesAsync(DateTime startDate, DateTime endDate, int limit);
 
-        Task<ExternalTrade> GetExternalTradeByIdAsync(string tradeId);
+        Task<ExternalTrade> GetExternalTradeByIdAsync(string externalTradeId);
 
         Task<IReadOnlyCollection<InternalTrade>>GetInternalTradesAsync(DateTime startDate, DateTime endDate, int limit);
 
-        Task<InternalTrade> GetInternalTradeByIdAsync(string tradeId);
+        Task<InternalTrade> GetInternalTradeByIdAsync(string internalTradeId);
 
         Task RegisterAsync(IReadOnlyCollection<InternalTrade> internalTrades);
 

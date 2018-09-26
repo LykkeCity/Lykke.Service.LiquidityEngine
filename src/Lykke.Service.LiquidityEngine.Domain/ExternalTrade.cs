@@ -46,10 +46,5 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The identifier of the request for quote.
         /// </summary>
         public string RequestId { get; set; }
-        
-        /// <summary>
-        /// The price that was returned by external exchange for the request for quote.
-        /// </summary>
-        public decimal ProposedPrice { get; set; }
     }
 }

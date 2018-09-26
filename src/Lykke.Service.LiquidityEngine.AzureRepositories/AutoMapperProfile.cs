@@ -5,6 +5,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
+using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Trades;
 using Lykke.Service.LiquidityEngine.Domain;
@@ -44,6 +45,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             
             CreateMap<InternalTrade, InternalTradeEntity>(MemberList.Source);
             CreateMap<InternalTradeEntity, InternalTrade>(MemberList.Destination);
+            
+            CreateMap<ExternalTrade, ExternalTradeEntity>(MemberList.Source);
+            CreateMap<ExternalTradeEntity, ExternalTrade>(MemberList.Destination);
+            
+            CreateMap<Position, PositionEntity>(MemberList.Source);
+            CreateMap<PositionEntity, Position>(MemberList.Destination);
         }
     }
 }

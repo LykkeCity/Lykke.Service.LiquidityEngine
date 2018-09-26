@@ -2,8 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
+using Lykke.Common.Api.Contract.Responses;
+using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.LiquidityEngine.Client.Api;
 using Lykke.Service.LiquidityEngine.Client.Models.Trades;
+using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lykke.Service.LiquidityEngine.Controllers
@@ -11,44 +16,67 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     [Route("/api/[controller]")]
     public class TradesController : Controller, ITradesApi
     {
-        public TradesController()
+        private readonly ITradeService _tradeService;
+
+        public TradesController(ITradeService tradeService)
         {
+            _tradeService = tradeService;
         }
 
         /// <inheritdoc/>
         /// <response code="200">A collection of external trades.</response>
         [HttpGet("external")]
         [ProducesResponseType(typeof(IReadOnlyCollection<ExternalTradeModel>), (int) HttpStatusCode.OK)]
-        public Task<IReadOnlyCollection<ExternalTradeModel>> GetExternalTradesAsync(DateTime startDate, DateTime endDate, int limit)
+        public async Task<IReadOnlyCollection<ExternalTradeModel>> GetExternalTradesAsync(DateTime startDate, DateTime endDate, int limit)
         {
-            throw new NotImplementedException();
+            IReadOnlyCollection<ExternalTrade> externalTrades =
+                await _tradeService.GetExternalTradesAsync(startDate, endDate, limit);
+
+            return Mapper.Map<ExternalTradeModel[]>(externalTrades);
         }
 
         /// <inheritdoc/>
         /// <response code="200">An external trade.</response>
+        /// <response code="404">External trade does not exist.</response>
         [HttpGet("external/{tradeId}")]
         [ProducesResponseType(typeof(ExternalTradeModel), (int) HttpStatusCode.OK)]
-        public Task<ExternalTradeModel> GetExternalTradeByIdAsync(string tradeId)
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
+        public async Task<ExternalTradeModel> GetExternalTradeByIdAsync(string tradeId)
         {
-            throw new NotImplementedException();
+            ExternalTrade externalTrade = await _tradeService.GetExternalTradeByIdAsync(tradeId);
+
+            if (externalTrade == null)
+                throw new ValidationApiException(HttpStatusCode.NotFound, "External trade does not exist.");
+
+            return Mapper.Map<ExternalTradeModel>(externalTrade);
         }
 
         /// <inheritdoc/>
         /// <response code="200">A collection of internal trades.</response>
         [HttpGet("internal")]
         [ProducesResponseType(typeof(IReadOnlyCollection<InternalTradeModel>), (int) HttpStatusCode.OK)]
-        public Task<IReadOnlyCollection<InternalTradeModel>> GetInternalTradesAsync(DateTime startDate, DateTime endDate, int limit)
+        public async Task<IReadOnlyCollection<InternalTradeModel>> GetInternalTradesAsync(DateTime startDate, DateTime endDate, int limit)
         {
-            throw new NotImplementedException();
+            IReadOnlyCollection<InternalTrade> internalTrades =
+                await _tradeService.GetInternalTradesAsync(startDate, endDate, limit);
+
+            return Mapper.Map<InternalTradeModel[]>(internalTrades);
         }
 
         /// <inheritdoc/>
         /// <response code="200">An internal trade.</response>
+        /// <response code="404">Internal trade does not exist.</response>
         [HttpGet("internal/{tradeId}")]
         [ProducesResponseType(typeof(InternalTradeModel), (int) HttpStatusCode.OK)]
-        public Task<InternalTradeModel> GetInternalTradeByIdAsync(string tradeId)
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
+        public async Task<InternalTradeModel> GetInternalTradeByIdAsync(string tradeId)
         {
-            throw new NotImplementedException();
+            InternalTrade internalTrade = await _tradeService.GetInternalTradeByIdAsync(tradeId);
+
+            if (internalTrade == null)
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Internal trade does not exist.");
+
+            return Mapper.Map<InternalTradeModel>(internalTrade);
         }
     }
 }

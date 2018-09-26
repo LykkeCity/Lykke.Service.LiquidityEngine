@@ -22,6 +22,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         private readonly SubscriberSettings _settings;
         private readonly ISettingsService _settingsService;
         private readonly ITradeService _tradeService;
+        private readonly IPositionService _positionService;
         private readonly ILogFactory _logFactory;
         private readonly ILog _log;
 
@@ -31,11 +32,13 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             SubscriberSettings settings,
             ISettingsService settingsService,
             ITradeService tradeService,
+            IPositionService positionService,
             ILogFactory logFactory)
         {
             _settings = settings;
             _settingsService = settingsService;
             _tradeService = tradeService;
+            _positionService = positionService;
             _logFactory = logFactory;
             _log = logFactory.CreateLog(this);
         }
@@ -86,6 +89,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 IReadOnlyList<InternalTrade> trades = CreateReports(clientLimitOrders);
 
                 await _tradeService.RegisterAsync(trades);
+                await _positionService.OpenPositionAsync(trades);
 
                 _log.InfoWithDetails("Traders were handled", clientLimitOrders);
             }

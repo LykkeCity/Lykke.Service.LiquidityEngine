@@ -3,6 +3,8 @@ using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.Client.Models.Audit;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
+using Lykke.Service.LiquidityEngine.Client.Models.Positions;
+using Lykke.Service.LiquidityEngine.Client.Models.Trades;
 using Lykke.Service.LiquidityEngine.Domain;
 
 namespace Lykke.Service.LiquidityEngine
@@ -24,6 +26,11 @@ namespace Lykke.Service.LiquidityEngine
             
             CreateMap<BalanceOperation, BalanceOperationModel>(MemberList.Source);
             CreateMap<BalanceOperationModel, BalanceOperation>(MemberList.Destination);
+            
+            CreateMap<ExternalTrade, ExternalTradeModel>(MemberList.Source);
+            CreateMap<InternalTrade, InternalTradeModel>(MemberList.Source);
+            
+            CreateMap<Position, PositionModel>(MemberList.Source);
         }
     }
 }

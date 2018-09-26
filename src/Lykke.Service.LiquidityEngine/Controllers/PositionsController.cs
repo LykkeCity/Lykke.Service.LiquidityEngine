@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Lykke.Service.LiquidityEngine.Client.Api;
 using Lykke.Service.LiquidityEngine.Client.Models.Positions;
+using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lykke.Service.LiquidityEngine.Controllers
@@ -11,26 +14,33 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     [Route("/api/[controller]")]
     public class PositionsController : Controller, IPositionsApi
     {
-        public PositionsController()
+        private readonly IPositionService _positionService;
+
+        public PositionsController(IPositionService positionService)
         {
+            _positionService = positionService;
         }
 
         /// <inheritdoc/>
         /// <response code="200">A collection of positions.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
-        public Task<IReadOnlyCollection<PositionModel>> GetAllAsync(DateTime startDate, DateTime endDate, int limit)
+        public async Task<IReadOnlyCollection<PositionModel>> GetAllAsync(DateTime startDate, DateTime endDate, int limit)
         {
-            throw new NotImplementedException();
+            IReadOnlyCollection<Position> positions = await _positionService.GetAllAsync(startDate, endDate, limit);
+
+            return Mapper.Map<PositionModel[]>(positions);
         }
 
         /// <inheritdoc/>
         /// <response code="200">A collection of positions.</response>
         [HttpGet("open")]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
-        public Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync(string assetPairId)
+        public async Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync(string assetPairId)
         {
-            throw new NotImplementedException();
+            IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync(assetPairId);
+
+            return Mapper.Map<PositionModel[]>(positions);
         }
     }
 }

@@ -6,8 +6,10 @@ using Lykke.Service.LiquidityEngine.DomainServices.Audit;
 using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
+using Lykke.Service.LiquidityEngine.DomainServices.Positions;
 using Lykke.Service.LiquidityEngine.DomainServices.Settings;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
+using Lykke.Service.LiquidityEngine.DomainServices.Trades;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
 {
@@ -42,15 +44,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<CreditService>()
                 .As<ICreditService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<SettlementService>()
                 .As<ISettlementService>()
+                .SingleInstance();
+
+            builder.RegisterType<LykkeExchangeService>()
+                .As<ILykkeExchangeService>()
                 .SingleInstance();
 
             builder.RegisterType<InstrumentService>()
                 .As<IInstrumentService>()
                 .SingleInstance();
 
+            builder.RegisterType<PositionService>()
+                .As<IPositionService>()
+                .SingleInstance();
+            
             builder.RegisterType<SettingsService>()
                 .As<ISettingsService>()
                 .WithParameter(new NamedParameter("instanceName", _instanceName))
@@ -64,9 +74,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<BalancesTimer>()
                 .AsSelf()
                 .SingleInstance();
-
-            builder.RegisterType<LykkeExchangeService>()
-                .As<ILykkeExchangeService>()
+            
+            builder.RegisterType<TradeService>()
+                .As<ITradeService>()
                 .SingleInstance();
         }
     }
