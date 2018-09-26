@@ -1,12 +1,9 @@
-using JetBrains.Annotations;
-
-namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
+namespace Lykke.Service.LiquidityEngine.Domain
 {
     /// <summary>
     /// Represents a summary report. 
     /// </summary>
-    [PublicAPI]
-    public class SummaryReportModel
+    public class SummaryReport
     {
         /// <summary>
         /// The identifier of the asset pair.
@@ -27,7 +24,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
         /// The cumulative profit and loss.
         /// </summary>
         public decimal PnL { get; set; }
-        
+
         /// <summary>
         /// The current volume of the base asset.
         /// </summary>

@@ -6,6 +6,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
+using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Trades;
 using Lykke.Service.LiquidityEngine.Domain;
@@ -51,6 +52,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             
             CreateMap<Position, PositionEntity>(MemberList.Source);
             CreateMap<PositionEntity, Position>(MemberList.Destination);
+            
+            CreateMap<SummaryReport, SummaryReportEntity>(MemberList.Source);
+            CreateMap<SummaryReportEntity, SummaryReport>(MemberList.Destination);
         }
     }
 }

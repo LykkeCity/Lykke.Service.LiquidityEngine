@@ -13,8 +13,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
     public class PositionEntity : AzureTableEntity
     {
         private PositionType _type;
-        private DateTime _openDate;
-        private decimal _openPrice;
+        private DateTime _date;
+        private decimal _price;
         private decimal _volume;
         private DateTime _closeDate;
         private decimal _closePrice;
@@ -47,28 +47,28 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
-        public DateTime OpenDate
+        public DateTime Date
         {
-            get => _openDate;
+            get => _date;
             set
             {
-                if (_openDate != value)
+                if (_date != value)
                 {
-                    _openDate = value;
-                    MarkValueTypePropertyAsDirty("OpenDate");
+                    _date = value;
+                    MarkValueTypePropertyAsDirty("Date");
                 }
             }
         }
 
-        public decimal OpenPrice
+        public decimal Price
         {
-            get => _openPrice;
+            get => _price;
             set
             {
-                if (_openPrice != value)
+                if (_price != value)
                 {
-                    _openPrice = value;
-                    MarkValueTypePropertyAsDirty("OpenPrice");
+                    _price = value;
+                    MarkValueTypePropertyAsDirty("Price");
                 }
             }
         }
@@ -126,7 +126,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
         }
 
         [JsonValueSerializer]
-        public IReadOnlyCollection<string> OpenTrades { get; set; }
+        public IReadOnlyCollection<string> Trades { get; set; }
 
         public string CloseTradeId { get; set; }
     }

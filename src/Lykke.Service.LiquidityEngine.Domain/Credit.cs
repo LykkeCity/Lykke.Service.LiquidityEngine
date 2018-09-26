@@ -19,7 +19,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
         public void Add(decimal amount)
         {
-            if (Amount < Math.Abs(amount))
+            if (Amount + amount < 0)
                 throw new InvalidOperationException("Credit amount can not be less than zero");
 
             Amount += amount;

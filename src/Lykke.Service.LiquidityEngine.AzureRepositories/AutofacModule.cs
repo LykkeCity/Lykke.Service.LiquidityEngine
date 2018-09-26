@@ -8,6 +8,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
+using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Trades;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
@@ -85,6 +86,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                     AzureTableStorage<PositionEntity>.Create(_connectionString,
                         "OpenPositions", container.Resolve<ILogFactory>())))
                 .As<IOpenPositionRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new SummaryReportRepository(
+                    AzureTableStorage<SummaryReportEntity>.Create(_connectionString,
+                        "SummaryReports", container.Resolve<ILogFactory>())))
+                .As<ISummaryReportRepository>()
                 .SingleInstance();
         }
     }

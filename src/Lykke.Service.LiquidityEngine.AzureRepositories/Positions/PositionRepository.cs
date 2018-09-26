@@ -57,7 +57,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
 
         public async Task InsertAsync(Position position)
         {
-            var entity = new PositionEntity(GetPartitionKey(position.OpenDate), GetRowKey(position.Id));
+            var entity = new PositionEntity(GetPartitionKey(position.Date), GetRowKey(position.Id));
 
             Mapper.Map(position, entity);
 
