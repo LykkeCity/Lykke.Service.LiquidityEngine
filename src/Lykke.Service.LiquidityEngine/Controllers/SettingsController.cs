@@ -30,7 +30,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         }
 
         /// <response code="204">The settings of service timers successfully saved.</response>
-        [HttpGet("timers")]
+        [HttpPost("timers")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         public async Task SaveTimersSettingsAsync([FromBody] TimersSettingsModel model)
         {
