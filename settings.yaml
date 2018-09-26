@@ -27,6 +27,14 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Queue
 
+BalancesServiceClient:
+  ServiceUrl:
+    settings-key: BalancesServiceUrl
+    
+ExchangeOperationsServiceClient:
+  ServiceUrl:
+    settings-key: ExchangeOperationsServiceUrl
+    
 SlackNotifications:
   AzureQueue:
     ConnectionString:
