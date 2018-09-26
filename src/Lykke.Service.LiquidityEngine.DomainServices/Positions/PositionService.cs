@@ -14,15 +14,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
     {
         private readonly IPositionRepository _positionRepository;
         private readonly IOpenPositionRepository _openPositionRepository;
+        private readonly ISummaryReportService _summaryReportService;
         private readonly ILog _log;
 
         public PositionService(
             IPositionRepository positionRepository,
             IOpenPositionRepository openPositionRepository,
+            ISummaryReportService summaryReportService,
             ILogFactory logFactory)
         {
             _positionRepository = positionRepository;
             _openPositionRepository = openPositionRepository;
+            _summaryReportService = summaryReportService;
             _log = logFactory.CreateLog(this);
         }
         
@@ -47,6 +50,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
             await _positionRepository.InsertAsync(position);
 
+            await _summaryReportService.RegisterOpenPositionAsync(position, internalTrades);
+            
             _log.InfoWithDetails("Position was opened", position);
         }
 
@@ -57,6 +62,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             await _positionRepository.UpdateAsync(position);
 
             await _openPositionRepository.DeleteAsync(position.AssetPairId, position.Id);
+            
+            await _summaryReportService.RegisterClosePositionAsync(position);
             
             _log.InfoWithDetails("Position was closed", position);
         }

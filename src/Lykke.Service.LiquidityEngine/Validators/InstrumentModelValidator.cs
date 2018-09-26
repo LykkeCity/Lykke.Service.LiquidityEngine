@@ -13,6 +13,10 @@ namespace Lykke.Service.LiquidityEngine.Validators
                 .NotEmpty()
                 .WithMessage("Asset pair required");
 
+            RuleFor(o => o.Mode)
+                .Must((instance, value) => value != InstrumentMode.None)
+                .WithMessage("Mode can not be unspecified");
+            
             RuleFor(o => o.Markup)
                 .GreaterThanOrEqualTo(0)
                 .WithMessage("Markup should be greater than or equal to zero");

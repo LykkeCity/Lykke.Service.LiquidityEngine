@@ -7,6 +7,7 @@ using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Positions;
+using Lykke.Service.LiquidityEngine.DomainServices.Reports;
 using Lykke.Service.LiquidityEngine.DomainServices.Settings;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
 using Lykke.Service.LiquidityEngine.DomainServices.Trades;
@@ -59,6 +60,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<PositionService>()
                 .As<IPositionService>()
+                .SingleInstance();
+            
+            builder.RegisterType<SummaryReportService>()
+                .As<ISummaryReportService>()
                 .SingleInstance();
             
             builder.RegisterType<SettingsService>()

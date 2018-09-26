@@ -15,10 +15,10 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public string AssetPairId { get; set; }
 
         /// <summary>
-        /// Indicates this instrument is allowed to create limit orders.  
+        /// The mode of the instrument.  
         /// </summary>
-        public bool Enabled { get; set; }
-
+        public InstrumentMode Mode { get; set; }
+        
         /// <summary>
         /// The risk markup.
         /// </summary>
@@ -31,7 +31,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
         public void Update(Instrument instrument)
         {
-            Enabled = instrument.Enabled;
+            Mode = instrument.Mode;
             Markup = instrument.Markup;
         }
 

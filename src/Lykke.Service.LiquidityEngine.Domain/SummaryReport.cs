@@ -64,5 +64,44 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The number of buy trades.
         /// </summary>
         public int BuyTradesCount { get; set; }
+
+        public void ApplyTrade(InternalTrade internalTrade)
+        {
+            if (internalTrade.Type == TradeType.Sell)
+            {
+                BaseAssetVolume -= internalTrade.Volume;
+                QuoteAssetVolume += internalTrade.OppositeSideVolume;
+                
+                TotalSellBaseAssetVolume += internalTrade.Volume;
+                
+                TotalBuyQuoteAssetVolume += internalTrade.OppositeSideVolume;
+
+                SellTradesCount++;
+            }
+            else
+            {
+                BaseAssetVolume += internalTrade.Volume;
+                QuoteAssetVolume -= internalTrade.OppositeSideVolume;
+                
+                TotalBuyBaseAssetVolume += internalTrade.Volume;
+                
+                TotalSellQuoteAssetVolume += internalTrade.OppositeSideVolume;
+
+                BuyTradesCount++;
+            }
+        }
+
+        public void ApplyOpenPosition()
+        {
+            OpenPositionsCount++;
+        }
+
+        public void ApplyClosePosition(Position position)
+        {
+            OpenPositionsCount--;
+            ClosedPositionsCount++;
+
+            PnL += position.PnL;
+        }
     }
 }

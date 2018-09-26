@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using Lykke.AzureStorage.Tables;
 using Lykke.AzureStorage.Tables.Entity.Annotation;
 using Lykke.AzureStorage.Tables.Entity.ValueTypesMerging;
+using Lykke.Service.LiquidityEngine.Domain;
 
 namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
 {
@@ -9,7 +10,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
     [ValueTypeMergingStrategy(ValueTypeMergingStrategy.UpdateIfDirty)]
     public class InstrumentEntity : AzureTableEntity
     {
-        private bool _enabled;
+        private InstrumentMode _mode;
         private decimal _markup;
 
         public InstrumentEntity()
@@ -24,15 +25,15 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
 
         public string AssetPairId { get; set; }
 
-        public bool Enabled
+        public InstrumentMode Mode
         {
-            get => _enabled;
+            get => _mode;
             set
             {
-                if (_enabled != value)
+                if (_mode != value)
                 {
-                    _enabled = value;
-                    MarkValueTypePropertyAsDirty("Enabled");
+                    _mode = value;
+                    MarkValueTypePropertyAsDirty("Mode");
                 }
             }
         }
