@@ -86,12 +86,15 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                     .Where(o => o.Order?.ClientId == walletId)
                     .Where(o => o.Trades?.Count > 0);
 
-                IReadOnlyList<InternalTrade> trades = CreateReports(clientLimitOrders);
+                IReadOnlyCollection<InternalTrade> trades = CreateReports(clientLimitOrders);
 
-                await _tradeService.RegisterAsync(trades);
-                await _positionService.OpenPositionAsync(trades);
+                if (trades.Any())
+                {
+                    await _tradeService.RegisterAsync(trades);
+                    await _positionService.OpenPositionAsync(trades);
 
-                _log.InfoWithDetails("Traders were handled", clientLimitOrders);
+                    _log.InfoWithDetails("Traders were handled", clientLimitOrders);
+                }
             }
             catch (Exception exception)
             {
@@ -99,7 +102,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             }
         }
 
-        private static IReadOnlyList<InternalTrade> CreateReports(IEnumerable<LimitOrderWithTrades> limitOrders)
+        private static IReadOnlyCollection<InternalTrade> CreateReports(IEnumerable<LimitOrderWithTrades> limitOrders)
         {
             var executionReports = new List<InternalTrade>();
 

@@ -52,6 +52,7 @@ namespace Lykke.Service.LiquidityEngine
         private void RegisterRabbit(ContainerBuilder builder)
         {
             builder.RegisterType<LykkeTradeSubscriber>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers.LykkeTrades))
                 .AsSelf()
                 .SingleInstance();
         }
