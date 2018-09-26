@@ -4,6 +4,7 @@ using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.Client.Models.Audit;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 using Lykke.Service.LiquidityEngine.Client.Models.Positions;
+using Lykke.Service.LiquidityEngine.Client.Models.Reports;
 using Lykke.Service.LiquidityEngine.Client.Models.Trades;
 using Lykke.Service.LiquidityEngine.Domain;
 
@@ -31,6 +32,8 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<InternalTrade, InternalTradeModel>(MemberList.Source);
             
             CreateMap<Position, PositionModel>(MemberList.Source);
+            
+            CreateMap<SummaryReport, SummaryReportModel>(MemberList.Source);
         }
     }
 }

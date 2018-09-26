@@ -140,8 +140,10 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             return executionReports;
         }
 
-        private static IReadOnlyList<InternalTrade> CreateInternalTrades(LimitOrder limitOrder,
-            IReadOnlyList<LimitTradeInfo> trades, bool completed)
+        private static IReadOnlyList<InternalTrade> CreateInternalTrades(
+            MatchingEngine.Connector.Models.RabbitMq.LimitOrder limitOrder,
+            IReadOnlyList<LimitTradeInfo> trades,
+            bool completed)
         {
             var reports = new List<InternalTrade>();
 
