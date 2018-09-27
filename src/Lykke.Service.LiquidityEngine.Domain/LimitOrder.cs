@@ -37,6 +37,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// </summary>
         public string ErrorMessage { get; set; }
 
+        public void UpdateVolume(decimal volume)
+        {
+            Volume = volume;
+        }
+        
         public static LimitOrder CreateSell(decimal price, decimal volume)
             => Create(price, volume, LimitOrderType.Sell);
 

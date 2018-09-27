@@ -3,6 +3,8 @@ LiquidityEngineService:
   
   WalletId:
     settings-key: LiquidityEngineService-WalletId
+
+  AssetsCacheExpirationPeriod: 00:10:00
   
   Db:
     DataConnectionString:
@@ -32,6 +34,10 @@ B2C2Client:
     settings-key: B2C2AdapterUrl
   AuthorizationToken:
     settings-key: LiquidityEngineService-B2C2Client-AuthorizationToken
+    
+AssetsServiceClient:
+  ServiceUrl:
+    settings-key: AssetsServiceUrl
     
 BalancesServiceClient:
   ServiceUrl:
