@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using AzureStorage;
+using Lykke.AzureStorage.Tables;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -22,10 +23,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations
             int limit)
         {
             string filter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition(nameof(BalanceOperationEntity.RowKey), QueryComparisons.GreaterThan,
+                TableQuery.GenerateFilterCondition(nameof(AzureTableEntity.PartitionKey), QueryComparisons.GreaterThan,
                     GetPartitionKey(endDate.Date.AddDays(1))),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(BalanceOperationEntity.RowKey), QueryComparisons.LessThan,
+                TableQuery.GenerateFilterCondition(nameof(AzureTableEntity.PartitionKey), QueryComparisons.LessThan,
                     GetPartitionKey(startDate.Date.AddMilliseconds(-1))));
 
             var query = new TableQuery<BalanceOperationEntity>().Where(filter).Take(limit);

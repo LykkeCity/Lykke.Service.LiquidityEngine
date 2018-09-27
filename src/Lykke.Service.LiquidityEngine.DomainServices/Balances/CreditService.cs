@@ -73,6 +73,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
 
             await _creditRepository.InsertOrReplaceAsync(credit);
 
+            _cache.Set(credit);
+            
             var balanceOperation = new BalanceOperation
             {
                 Time = DateTime.UtcNow,
