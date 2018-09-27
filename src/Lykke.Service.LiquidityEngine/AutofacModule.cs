@@ -1,11 +1,14 @@
-﻿using Autofac;
+﻿using System.Net;
+using Autofac;
 using JetBrains.Annotations;
+using Lykke.B2c2Client;
 using Lykke.Sdk;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.LiquidityEngine.Managers;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings;
+using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.LiquidityEngine
@@ -47,6 +50,17 @@ namespace Lykke.Service.LiquidityEngine
                         .ServiceUrl))
                 .As<IExchangeOperationsServiceClient>()
                 .SingleInstance();
+
+            builder.RegisterB2С2RestClient(_settings.CurrentValue.B2C2Client);
+            
+            MatchingEngineClientSettings matchingEngineClientSettings = _settings.CurrentValue.MatchingEngineClient;
+
+            if (!IPAddress.TryParse(matchingEngineClientSettings.IpEndpoint.Host, out var address))
+                address = Dns.GetHostAddressesAsync(matchingEngineClientSettings.IpEndpoint.Host).Result[0];
+
+            var endPoint = new IPEndPoint(address, matchingEngineClientSettings.IpEndpoint.Port);
+
+            builder.RegisgterMeClient(endPoint);
         }
 
         private void RegisterRabbit(ContainerBuilder builder)

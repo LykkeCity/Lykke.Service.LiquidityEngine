@@ -10,13 +10,16 @@ namespace Lykke.Service.LiquidityEngine.Managers
     public class StartupManager : IStartupManager
     {
         private readonly BalancesTimer _balancesTimer;
+        private readonly MarketMakerTimer _marketMakerTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
 
         public StartupManager(
             BalancesTimer balancesTimer,
+            MarketMakerTimer marketMakerTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber)
         {
             _balancesTimer = balancesTimer;
+            _marketMakerTimer = marketMakerTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
         }
 
@@ -25,6 +28,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _lykkeTradeSubscriber.Start();
 
             _balancesTimer.Start();
+            
+            _marketMakerTimer.Start();
             
             return Task.CompletedTask;
         }

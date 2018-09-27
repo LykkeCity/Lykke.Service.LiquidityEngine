@@ -85,6 +85,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .AsSelf()
                 .SingleInstance();
             
+            builder.RegisterType<MarketMakerTimer>()
+                .AsSelf()
+                .SingleInstance();
+            
             builder.RegisterType<TradeService>()
                 .As<ITradeService>()
                 .SingleInstance();

@@ -27,6 +27,12 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Queue
 
+B2C2Client:
+  Url:
+    settings-key: B2C2AdapterUrl
+  AuthorizationToken:
+    settings-key: LiquidityEngineService-B2C2Client-AuthorizationToken
+    
 BalancesServiceClient:
   ServiceUrl:
     settings-key: BalancesServiceUrl
@@ -34,7 +40,14 @@ BalancesServiceClient:
 ExchangeOperationsServiceClient:
   ServiceUrl:
     settings-key: ExchangeOperationsServiceUrl
-    
+
+MatchingEngineClient:
+  IpEndpoint:
+    Port:
+      settings-key: MatchingEngine-Port
+    Host:
+      settings-key: MatchingEngine-Host
+      
 SlackNotifications:
   AzureQueue:
     ConnectionString:
