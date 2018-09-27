@@ -54,7 +54,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<LykkeExchangeService>()
                 .As<ILykkeExchangeService>()
                 .SingleInstance();
-
+            
+            builder.RegisterType<ExternalExchangeService>()
+                .As<IExternalExchangeService>()
+                .SingleInstance();
+            
             builder.RegisterType<InstrumentService>()
                 .As<IInstrumentService>()
                 .SingleInstance();
@@ -91,6 +95,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             
             builder.RegisterType<TradeService>()
                 .As<ITradeService>()
+                .SingleInstance();
+            
+            builder.RegisterType<MarketMakerService>()
+                .As<IMarketMakerService>()
                 .SingleInstance();
         }
     }

@@ -2,6 +2,7 @@
 using Autofac;
 using JetBrains.Annotations;
 using Lykke.B2c2Client;
+using Lykke.B2c2Client.Settings;
 using Lykke.Sdk;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ExchangeOperations.Client;
@@ -51,7 +52,8 @@ namespace Lykke.Service.LiquidityEngine
                 .As<IExchangeOperationsServiceClient>()
                 .SingleInstance();
 
-            builder.RegisterB2С2RestClient(_settings.CurrentValue.B2C2Client);
+            builder.RegisterB2С2RestClient(new B2C2ClientSettings(_settings.CurrentValue.B2C2Client.Url,
+                _settings.CurrentValue.B2C2Client.AuthorizationToken));
             
             MatchingEngineClientSettings matchingEngineClientSettings = _settings.CurrentValue.MatchingEngineClient;
 

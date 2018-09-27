@@ -64,19 +64,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 decimal buyPrice =
                     await _externalExchangeService.GetBuyPriceAsync(instrument.AssetPairId, buyVolume);
 
+                externalLimitOrders.Add(LimitOrder.CreateSell(sellPrice, sellVolume));
+                externalLimitOrders.Add(LimitOrder.CreateBuy(buyPrice, buyVolume));
+                
                 sellPrice *= 1 + instrument.Markup;
                 buyPrice *= 1 - instrument.Markup;
                 
-                externalLimitOrders.Add(LimitOrder.CreateSell(sellPrice, sellVolume));
-                externalLimitOrders.Add(LimitOrder.CreateBuy(buyPrice, buyVolume));
-
-                internalLimitOrders.Add(LimitOrder.CreateSell(
-                    (sellPrice * sellVolume - sellOppositeVolume) / levelVolume.Volume, levelVolume.Volume));
-                internalLimitOrders.Add(LimitOrder.CreateBuy(
-                    (buyPrice * buyVolume - buyOppositeVolume) / levelVolume.Volume, levelVolume.Volume));
+                decimal sellLimitOrderPrice = (sellPrice * sellVolume - sellOppositeVolume) / levelVolume.Volume;
+                decimal buyLimitOrderPrice = (buyPrice * buyVolume - buyOppositeVolume) / levelVolume.Volume;
                 
-                sellOppositeVolume += sellVolume * sellPrice * (1 + instrument.Markup);
-                buyOppositeVolume += buyVolume * buyPrice * (1 - instrument.Markup);
+                internalLimitOrders.Add(LimitOrder.CreateSell(sellLimitOrderPrice, levelVolume.Volume));
+                internalLimitOrders.Add(LimitOrder.CreateBuy(buyLimitOrderPrice, levelVolume.Volume));
+                
+                sellOppositeVolume += levelVolume.Volume * sellLimitOrderPrice;
+                buyOppositeVolume += levelVolume.Volume * buyLimitOrderPrice;
             }
 
             await _orderBookService.UpdateAsync(new OrderBook
@@ -86,7 +87,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 InternalLimitOrders = internalLimitOrders
             });
 
-            await _lykkeExchangeService.ApplyAsync(instrument.AssetPairId, internalLimitOrders);
+            if (instrument.Mode == InstrumentMode.Active)
+            {
+                // TODO: Validate balance
+                // TODO: Round price and volume
+                await _lykkeExchangeService.ApplyAsync(instrument.AssetPairId, internalLimitOrders);
+            }
+            else
+            {
+                foreach (LimitOrder limitOrder in internalLimitOrders)
+                {
+                    if (limitOrder.Error == LimitOrderError.None)
+                        limitOrder.Error = LimitOrderError.Idle;
+                } 
+            }
         }
     }
 }

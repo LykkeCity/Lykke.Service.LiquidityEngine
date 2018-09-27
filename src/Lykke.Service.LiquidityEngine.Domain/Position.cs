@@ -77,17 +77,17 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public static Position Open(IReadOnlyCollection<InternalTrade> internalTrades)
         {
             string assetPairId = internalTrades.First().AssetPairId;
-            
+
             PositionType positionType = internalTrades.First().Type == TradeType.Sell
                 ? PositionType.Short
                 : PositionType.Long;
-            
+
             decimal avgPrice = internalTrades.Sum(o => o.Price) / internalTrades.Count;
-            
+
             decimal volume = internalTrades.Sum(o => o.Volume);
 
             string[] trades = internalTrades.Select(o => o.Id).ToArray();
-            
+
             return new Position
             {
                 Id = Guid.NewGuid().ToString("D"),
@@ -96,7 +96,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Date = DateTime.UtcNow,
                 Price = avgPrice,
                 Volume = volume,
-                Trades = trades
+                Trades = trades,
+                CloseDate = new DateTime(1900, 1, 1)
             };
         }
     }

@@ -5,6 +5,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
         None,
 
         Unknown,
+        
+        Idle,
 
         Arbitrage,
 
