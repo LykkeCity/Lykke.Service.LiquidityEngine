@@ -29,6 +29,16 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Queue
 
+      B2C2Quotes:
+        ConnectionString:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2Quotes-ConnectionString
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2Quotes-Exchange
+        Queue:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2Quotes-Queue
+
 B2C2Client:
   Url:
     settings-key: B2C2AdapterUrl

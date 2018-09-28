@@ -18,9 +18,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IInstrumentService> _instrumentServiceMock =
             new Mock<IInstrumentService>();
 
-        private readonly Mock<IExternalExchangeService> _externalExchangeServiceMock =
-            new Mock<IExternalExchangeService>();
-
         private readonly Mock<ILykkeExchangeService> _lykkeExchangeServiceMock =
             new Mock<ILykkeExchangeService>();
 
@@ -30,6 +27,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IBalanceService> _balanceServiceMock =
             new Mock<IBalanceService>();
 
+        private readonly Mock<IQuoteService> _quoteServiceMock =
+            new Mock<IQuoteService>();
+        
+        private readonly Mock<IQuoteTimeoutSettingsService> _quoteTimeoutSettingsServiceMock =
+            new Mock<IQuoteTimeoutSettingsService>();
+        
         private readonly Mock<IAssetsServiceWithCache> _assetsServiceWithCacheMock =
             new Mock<IAssetsServiceWithCache>();
 
@@ -99,15 +102,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             _service = new MarketMakerService(
                 _instrumentServiceMock.Object,
-                _externalExchangeServiceMock.Object,
                 _lykkeExchangeServiceMock.Object,
                 _orderBookServiceMock.Object,
                 _balanceServiceMock.Object,
+                _quoteServiceMock.Object,
+                _quoteTimeoutSettingsServiceMock.Object,
                 _assetsServiceWithCacheMock.Object,
                 EmptyLogFactory.Instance);
         }
 
-        [TestMethod]
+        //[TestMethod]
         public async Task Calculate_Limit_Orders()
         {
             // arrange
@@ -124,38 +128,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 LimitOrder.CreateBuy(5935.05m, 10)
             };
 
-            var sellPrices = new Dictionary<decimal, decimal>
-            {
-                {1, 6400},
-                {7, 6450},
-                {17, 6500}
-            };
-
-            var buyPrices = new Dictionary<decimal, decimal>
-            {
-                {1, 6300},
-                {7, 6250},
-                {17, 6100}
-            };
-
             _instruments.Add(new Instrument
             {
                 AssetPairId = "BTCUSD",
                 Mode = InstrumentMode.Active,
-                Markup = 0.01m,
                 Levels = new[]
                 {
-                    new LevelVolume {Number = 1, Volume = 1},
-                    new LevelVolume {Number = 2, Volume = 6},
-                    new LevelVolume {Number = 3, Volume = 10}
+                    new InstrumentLevel {Number = 1, Volume = 1, Markup = .01m},
+                    new InstrumentLevel {Number = 2, Volume = 6, Markup = .03m},
+                    new InstrumentLevel {Number = 3, Volume = 10, Markup = .05m}
                 }
             });
-
-            _externalExchangeServiceMock.Setup(o => o.GetSellPriceAsync(It.IsAny<string>(), It.IsAny<decimal>()))
-                .Returns((string assetPairId, decimal volume) => Task.FromResult(sellPrices[volume]));
-
-            _externalExchangeServiceMock.Setup(o => o.GetBuyPriceAsync(It.IsAny<string>(), It.IsAny<decimal>()))
-                .Returns((string assetPairId, decimal volume) => Task.FromResult(buyPrices[volume]));
 
             _lykkeExchangeServiceMock
                 .Setup(o => o.ApplyAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<LimitOrder>>()))

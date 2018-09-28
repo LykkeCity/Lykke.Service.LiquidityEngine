@@ -11,7 +11,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
     public class InstrumentEntity : AzureTableEntity
     {
         private InstrumentMode _mode;
-        private decimal _markup;
+        private decimal _pnLThreshold;
+        private decimal _inventoryThreshold;
 
         public InstrumentEntity()
         {
@@ -38,20 +39,33 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
             }
         }
 
-        public decimal Markup
+        public decimal PnLThreshold
         {
-            get => _markup;
+            get => _pnLThreshold;
             set
             {
-                if (_markup != value)
+                if (_pnLThreshold != value)
                 {
-                    _markup = value;
-                    MarkValueTypePropertyAsDirty("Markup");
+                    _pnLThreshold = value;
+                    MarkValueTypePropertyAsDirty("PnLThreshold");
+                }
+            }
+        }
+
+        public decimal InventoryThreshold
+        {
+            get => _inventoryThreshold;
+            set
+            {
+                if (_inventoryThreshold != value)
+                {
+                    _inventoryThreshold = value;
+                    MarkValueTypePropertyAsDirty("InventoryThreshold");
                 }
             }
         }
 
         [JsonValueSerializer]
-        public decimal[] Levels { get; set; }
+        public InstrumentLevel[] Levels { get; set; }
     }
 }

@@ -15,9 +15,9 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         
         Task DeleteAsync(string assetPairId);
         
-        Task AddLevelAsync(string assetPairId, LevelVolume levelVolume);
+        Task AddLevelAsync(string assetPairId, InstrumentLevel instrumentLevel);
         
-        Task UpdateLevelAsync(string assetPairId, LevelVolume levelVolume);
+        Task UpdateLevelAsync(string assetPairId, InstrumentLevel instrumentLevel);
         
         Task RemoveLevelAsync(string assetPairId, int levelNumber);
     }

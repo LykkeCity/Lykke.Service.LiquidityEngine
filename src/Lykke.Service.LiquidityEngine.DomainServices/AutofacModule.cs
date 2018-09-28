@@ -75,6 +75,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IOrderBookService>()
                 .SingleInstance();
             
+            builder.RegisterType<QuoteService>()
+                .As<IQuoteService>()
+                .SingleInstance();
+            
             builder.RegisterType<SettingsService>()
                 .As<ISettingsService>()
                 .WithParameter(new NamedParameter("instanceName", _instanceName))
@@ -84,7 +88,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<TimersSettingsService>()
                 .As<ITimersSettingsService>()
                 .SingleInstance();
-
+            
+            builder.RegisterType<QuoteTimeoutSettingsService>()
+                .As<IQuoteTimeoutSettingsService>()
+                .SingleInstance();
+            
             builder.RegisterType<BalancesTimer>()
                 .AsSelf()
                 .SingleInstance();

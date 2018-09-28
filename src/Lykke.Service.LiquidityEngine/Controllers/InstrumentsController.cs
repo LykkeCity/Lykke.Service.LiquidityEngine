@@ -121,13 +121,13 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public async Task AddLevelAsync(string assetPairId, [FromBody] LevelVolumeModel model)
+        public async Task AddLevelAsync(string assetPairId, [FromBody] InstrumentLevelModel model)
         {
             try
             {
-                var levelVolume = Mapper.Map<LevelVolume>(model);
+                var instrumentLevel = Mapper.Map<InstrumentLevel>(model);
 
-                await _instrumentService.AddLevelAsync(assetPairId, levelVolume);
+                await _instrumentService.AddLevelAsync(assetPairId, instrumentLevel);
             }
             catch (EntityNotFoundException)
             {
@@ -147,13 +147,13 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public async Task UpdateLevelAsync(string assetPairId, [FromBody] LevelVolumeModel model)
+        public async Task UpdateLevelAsync(string assetPairId, [FromBody] InstrumentLevelModel model)
         {
             try
             {
-                var levelVolume = Mapper.Map<LevelVolume>(model);
+                var instrumentLevel = Mapper.Map<InstrumentLevel>(model);
 
-                await _instrumentService.UpdateLevelAsync(assetPairId, levelVolume);
+                await _instrumentService.UpdateLevelAsync(assetPairId, instrumentLevel);
             }
             catch (EntityNotFoundException)
             {

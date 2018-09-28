@@ -78,6 +78,12 @@ namespace Lykke.Service.LiquidityEngine
                     .LykkeTrades))
                 .AsSelf()
                 .SingleInstance();
+            
+            builder.RegisterType<B2C2QuoteSubscriber>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
+                    .B2C2Quotes))
+                .AsSelf()
+                .SingleInstance();
         }
     }
 }

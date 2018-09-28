@@ -9,6 +9,7 @@ using Lykke.Common.Log;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
@@ -17,27 +18,30 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
     public class MarketMakerService : IMarketMakerService
     {
         private readonly IInstrumentService _instrumentService;
-        private readonly IExternalExchangeService _externalExchangeService;
         private readonly ILykkeExchangeService _lykkeExchangeService;
         private readonly IOrderBookService _orderBookService;
         private readonly IBalanceService _balanceService;
+        private readonly IQuoteService _quoteService;
+        private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly ILog _log;
 
         public MarketMakerService(
             IInstrumentService instrumentService,
-            IExternalExchangeService externalExchangeService,
             ILykkeExchangeService lykkeExchangeService,
             IOrderBookService orderBookService,
             IBalanceService balanceService,
+            IQuoteService quoteService,
+            IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
             IAssetsServiceWithCache assetsServiceWithCache,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
-            _externalExchangeService = externalExchangeService;
             _lykkeExchangeService = lykkeExchangeService;
             _orderBookService = orderBookService;
             _balanceService = balanceService;
+            _quoteService = quoteService;
+            _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
             _assetsServiceWithCache = assetsServiceWithCache;
             _log = logFactory.CreateLog(this);
         }
@@ -55,57 +59,37 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
+            Quote quote = await _quoteService.GetAsync(instrument.AssetPairId);
+
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(instrument.AssetPairId);
 
             var internalLimitOrders = new List<LimitOrder>();
-            var externalLimitOrders = new List<LimitOrder>();
 
-            decimal sellVolume = 0;
-            decimal sellOppositeVolume = 0;
-            decimal buyVolume = 0;
-            decimal buyOppositeVolume = 0;
-
-            foreach (LevelVolume levelVolume in instrument.Levels.OrderBy(o => o.Number))
+            foreach (InstrumentLevel instrumentLevel in instrument.Levels.OrderBy(o => o.Number))
             {
-                sellVolume += levelVolume.Volume;
-                buyVolume += levelVolume.Volume;
-
-                decimal sellPrice =
-                    await _externalExchangeService.GetSellPriceAsync(instrument.AssetPairId, sellVolume);
-
-                decimal buyPrice =
-                    await _externalExchangeService.GetBuyPriceAsync(instrument.AssetPairId, buyVolume);
-
-                externalLimitOrders.Add(LimitOrder.CreateSell(sellPrice, sellVolume));
-                externalLimitOrders.Add(LimitOrder.CreateBuy(buyPrice, buyVolume));
-
-                sellPrice *= 1 + instrument.Markup;
-                buyPrice *= 1 - instrument.Markup;
-
-                decimal sellLimitOrderPrice = ((sellPrice * sellVolume - sellOppositeVolume) / levelVolume.Volume)
+                decimal sellPrice = (quote.Ask * (1 + instrumentLevel.Markup))
                     .TruncateDecimalPlaces(assetPair.Accuracy, true);
-                decimal buyLimitOrderPrice = ((buyPrice * buyVolume - buyOppositeVolume) / levelVolume.Volume)
+                decimal buyPrice = (quote.Bid * (1 - instrumentLevel.Markup))
                     .TruncateDecimalPlaces(assetPair.Accuracy);
 
-                decimal volume = Math.Round(levelVolume.Volume, assetPair.InvertedAccuracy);
+                decimal volume = Math.Round(instrumentLevel.Volume, assetPair.InvertedAccuracy);
 
-                internalLimitOrders.Add(LimitOrder.CreateSell(sellLimitOrderPrice, volume));
-                internalLimitOrders.Add(LimitOrder.CreateBuy(buyLimitOrderPrice, volume));
-
-                sellOppositeVolume += levelVolume.Volume * sellLimitOrderPrice;
-                buyOppositeVolume += levelVolume.Volume * buyLimitOrderPrice;
+                internalLimitOrders.Add(LimitOrder.CreateSell(sellPrice, volume));
+                internalLimitOrders.Add(LimitOrder.CreateBuy(buyPrice, volume));
             }
 
-            await _orderBookService.UpdateAsync(new OrderBook
-            {
-                AssetPairId = instrument.AssetPairId,
-                ExternalLimitOrders = externalLimitOrders,
-                InternalLimitOrders = internalLimitOrders
-            });
+            await ValidateQuoteAsync(internalLimitOrders, quote);
 
             ValidateMinVolume(internalLimitOrders, (decimal) assetPair.MinVolume);
 
             await ValidateBalance(internalLimitOrders, assetPair);
+
+            await _orderBookService.UpdateAsync(new OrderBook
+            {
+                AssetPairId = instrument.AssetPairId,
+                Time = DateTime.UtcNow,
+                LimitOrders = internalLimitOrders
+            });
 
             if (instrument.Mode == InstrumentMode.Active)
             {
@@ -118,6 +102,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     if (limitOrder.Error == LimitOrderError.None)
                         limitOrder.Error = LimitOrderError.Idle;
                 }
+            }
+        }
+
+        private async Task ValidateQuoteAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
+        {
+            QuoteTimeoutSettings quoteTimeoutSettings = await _quoteTimeoutSettingsService.GetAsync();
+
+            if (quoteTimeoutSettings.Enabled && DateTime.UtcNow - quote.Time > quoteTimeoutSettings.Error)
+            {
+                _log.WarningWithDetails("Quote timeout is expired", new
+                {
+                    quote,
+                    Timeout = quoteTimeoutSettings.Error
+                });
+
+                foreach (LimitOrder limitOrder in limitOrders.Where(o => o.Error == LimitOrderError.None))
+                    limitOrder.Error = LimitOrderError.InvalidQuote;
             }
         }
 

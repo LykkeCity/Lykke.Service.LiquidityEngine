@@ -20,13 +20,18 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
         public InstrumentMode Mode { get; set; }
 
         /// <summary>
-        /// The risk markup.
+        /// The threshold of the instrument realised profit and loss.
         /// </summary>
-        public decimal Markup { get; set; }
+        public decimal PnLThreshold { get; set; }
+
+        /// <summary>
+        /// The threshold of the instrument absolute inventory.
+        /// </summary>
+        public decimal InventoryThreshold { get; set; }
 
         /// <summary>
         /// A collection of order book levels.
         /// </summary>
-        public IReadOnlyCollection<LevelVolumeModel> Levels { get; set; }
+        public IReadOnlyCollection<InstrumentLevelModel> Levels { get; set; }
     }
 }

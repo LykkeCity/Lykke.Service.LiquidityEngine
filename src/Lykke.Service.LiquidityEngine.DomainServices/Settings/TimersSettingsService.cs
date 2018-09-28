@@ -38,7 +38,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
                     };
                 }
 
-                _cache.Set(timersSettings);
+                _cache.Initialize(new[] {timersSettings});
             }
 
             return timersSettings;

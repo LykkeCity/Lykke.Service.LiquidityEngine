@@ -17,9 +17,13 @@ namespace Lykke.Service.LiquidityEngine.Validators
                 .Must((instance, value) => value != InstrumentMode.None)
                 .WithMessage("Mode can not be unspecified");
             
-            RuleFor(o => o.Markup)
+            RuleFor(o => o.PnLThreshold)
                 .GreaterThanOrEqualTo(0)
-                .WithMessage("Markup should be greater than or equal to zero");
+                .WithMessage("Pnl threshold should be greater than or equal to zero");
+            
+            RuleFor(o => o.InventoryThreshold)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Inventory threshold should be greater than or equal to zero");
         }
     }
 }

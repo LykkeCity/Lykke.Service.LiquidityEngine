@@ -54,7 +54,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="assetPairId">The asses pair id.</param>
         /// <param name="model">The model which describes level volume.</param>
         [Post("/api/instruments/{assetPairId}/levels")]
-        Task AddLevelAsync(string assetPairId, [Body] LevelVolumeModel model);
+        Task AddLevelAsync(string assetPairId, [Body] InstrumentLevelModel model);
 
         /// <summary>
         /// Updates volume level for the instrument.
@@ -62,7 +62,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="assetPairId">The asses pair id.</param>
         /// <param name="model">The model which describes level volume.</param>
         [Put("/api/instruments/{assetPairId}/levels")]
-        Task UpdateLevelAsync(string assetPairId, [Body] LevelVolumeModel model);
+        Task UpdateLevelAsync(string assetPairId, [Body] InstrumentLevelModel model);
 
         /// <summary>
         /// Removes the level volume from instrument.

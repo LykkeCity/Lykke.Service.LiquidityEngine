@@ -10,6 +10,8 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.OrderBooks
         Unknown,
         
         Idle,
+        
+        InvalidQuote,
 
         Arbitrage,
 

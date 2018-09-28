@@ -7,6 +7,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
         Unknown,
         
         Idle,
+        
+        InvalidQuote,
 
         Arbitrage,
 

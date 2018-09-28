@@ -58,6 +58,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .As<ITimersSettingsRepository>()
                 .SingleInstance();
 
+            builder.Register(container => new QuoteTimeoutSettingsRepository(
+                    AzureTableStorage<QuoteTimeoutSettingsEntity>.Create(_connectionString,
+                        "Settings", container.Resolve<ILogFactory>())))
+                .As<IQuoteTimeoutSettingsRepository>()
+                .SingleInstance();
+
             builder.Register(container => new InternalTradeRepository(
                     AzureTableStorage<InternalTradeEntity>.Create(_connectionString,
                         "InternalTrades", container.Resolve<ILogFactory>()),

@@ -21,19 +21,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             CreateMap<AssetPairLink, AssetPairLinkEntity>(MemberList.Source);
             CreateMap<AssetPairLinkEntity, AssetPairLink>(MemberList.Destination);
 
-            CreateMap<Instrument, InstrumentEntity>(MemberList.Source)
-                .ForSourceMember(src => src.Levels, opt => opt.Ignore())
-                .ForMember(dest => dest.Levels,
-                    opt => opt.MapFrom(src => (src.Levels ?? new LevelVolume[0]).OrderBy(o => o.Number)
-                        .Select(o => o.Volume)));
-            
-            CreateMap<InstrumentEntity, Instrument>(MemberList.Destination)
-                .ForMember(dest => dest.Levels, opt => opt.MapFrom(src => (src.Levels ?? new decimal[0])
-                    .Select((volume, index) => new LevelVolume
-                    {
-                        Number = index + 1,
-                        Volume = volume
-                    })));
+            CreateMap<Instrument, InstrumentEntity>(MemberList.Source);
+            CreateMap<InstrumentEntity, Instrument>(MemberList.Destination);
             
             CreateMap<TimersSettings, TimersSettingsEntity>(MemberList.Source);
             CreateMap<TimersSettingsEntity, TimersSettings>(MemberList.Destination);
@@ -55,6 +44,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             
             CreateMap<SummaryReport, SummaryReportEntity>(MemberList.Source);
             CreateMap<SummaryReportEntity, SummaryReport>(MemberList.Destination);
+            
+            CreateMap<QuoteTimeoutSettings, QuoteTimeoutSettingsEntity>(MemberList.Source);
+            CreateMap<QuoteTimeoutSettingsEntity, QuoteTimeoutSettings>(MemberList.Destination);
         }
     }
 }

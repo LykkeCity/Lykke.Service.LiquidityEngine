@@ -24,5 +24,19 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="model">The settings of service timers.</param>
         [Post("/api/settings/timers")]
         Task SaveTimersSettingsAsync([Body] TimersSettingsModel model);
+
+        /// <summary>
+        /// Returns settings of quote timeouts.
+        /// </summary>
+        /// <returns>The settings of quote timeouts.</returns>
+        [Get("/api/settings/quotes")]
+        Task<QuoteTimeoutSettingsModel> GetQuoteTimeoutSettingsAsync();
+        
+        /// <summary>
+        /// Saves settings of quote timeouts.
+        /// </summary>
+        /// <param name="model">The settings of quote timeouts.</param>
+        [Post("/api/settings/quotes")]
+        Task SaveQuoteTimeoutSettingsAsync([Body] QuoteTimeoutSettingsModel model);
     }
 }

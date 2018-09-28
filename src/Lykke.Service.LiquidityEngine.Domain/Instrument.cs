@@ -20,38 +20,44 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public InstrumentMode Mode { get; set; }
         
         /// <summary>
-        /// The risk markup.
+        /// The threshold of the instrument realised profit and loss.
         /// </summary>
-        public decimal Markup { get; set; }
+        public decimal PnLThreshold { get; set; }
 
+        /// <summary>
+        /// The threshold of the instrument absolute inventory.
+        /// </summary>
+        public decimal InventoryThreshold { get; set; }
+        
         /// <summary>
         /// A collection of order book levels.
         /// </summary>
-        public IReadOnlyCollection<LevelVolume> Levels { get; set; }
+        public IReadOnlyCollection<InstrumentLevel> Levels { get; set; }
 
         public void Update(Instrument instrument)
         {
             Mode = instrument.Mode;
-            Markup = instrument.Markup;
+            PnLThreshold = instrument.PnLThreshold;
+            InventoryThreshold = instrument.InventoryThreshold;
         }
 
-        public void AddLevel(LevelVolume levelVolume)
+        public void AddLevel(InstrumentLevel instrumentLevel)
         {
-            if (Levels?.Any(o => o.Number == levelVolume.Number) == true)
+            if (Levels?.Any(o => o.Number == instrumentLevel.Number) == true)
                 throw new InvalidOperationException("The level already exists");
 
-            Levels = (Levels ?? new List<LevelVolume>())
-                .Union(new[] {levelVolume})
+            Levels = (Levels ?? new List<InstrumentLevel>())
+                .Union(new[] {instrumentLevel})
                 .OrderBy(o => o.Number)
                 .ToArray();
         }
 
         public void RemoveLevel(int levelNumber)
         {
-            Levels = (Levels ?? new List<LevelVolume>())
+            Levels = (Levels ?? new List<InstrumentLevel>())
                 .Where(o => o.Number != levelNumber)
                 .OrderBy(o => o.Number)
-                .Select((levelVolume, index) => new LevelVolume
+                .Select((levelVolume, index) => new InstrumentLevel
                 {
                     Number = index + 1,
                     Volume = levelVolume.Volume
@@ -59,15 +65,16 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 .ToArray();
         }
 
-        public void UpdateLevel(LevelVolume levelVolume)
+        public void UpdateLevel(InstrumentLevel instrumentLevel)
         {
-            LevelVolume currentLevelVolume = (Levels ?? new List<LevelVolume>())
-                .FirstOrDefault(o => o.Number == levelVolume.Number);
+            InstrumentLevel currentLevelVolume = (Levels ?? new List<InstrumentLevel>())
+                .FirstOrDefault(o => o.Number == instrumentLevel.Number);
             
             if(currentLevelVolume == null)
                 throw new InvalidOperationException("The level does not exists");
 
-            currentLevelVolume.Volume = levelVolume.Volume;
+            currentLevelVolume.Volume = instrumentLevel.Volume;
+            currentLevelVolume.Markup = instrumentLevel.Markup;
         }
     }
 }

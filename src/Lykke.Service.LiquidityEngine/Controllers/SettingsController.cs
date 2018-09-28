@@ -13,10 +13,14 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     public class SettingsController : Controller, ISettingsApi
     {
         private readonly ITimersSettingsService _timersSettingsService;
+        private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
 
-        public SettingsController(ITimersSettingsService timersSettingsService)
+        public SettingsController(
+            ITimersSettingsService timersSettingsService,
+            IQuoteTimeoutSettingsService quoteTimeoutSettingsService)
         {
             _timersSettingsService = timersSettingsService;
+            _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
         }
 
         /// <response code="200">The settings of service timers.</response>
@@ -37,6 +41,26 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             var timersSettings = Mapper.Map<TimersSettings>(model);
 
             await _timersSettingsService.SaveAsync(timersSettings);
+        }
+
+        /// <response code="200">The settings of quotes timeouts.</response>
+        [HttpGet("quotes")]
+        [ProducesResponseType(typeof(QuoteTimeoutSettingsModel), (int) HttpStatusCode.OK)]
+        public async Task<QuoteTimeoutSettingsModel> GetQuoteTimeoutSettingsAsync()
+        {
+            QuoteTimeoutSettings quoteTimeoutSettings = await _quoteTimeoutSettingsService.GetAsync();
+
+            return Mapper.Map<QuoteTimeoutSettingsModel>(quoteTimeoutSettings);
+        }
+
+        /// <response code="204">The settings of quotes timeouts successfully saved.</response>
+        [HttpPost("quotes")]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        public async Task SaveQuoteTimeoutSettingsAsync(QuoteTimeoutSettingsModel model)
+        {
+            var quoteTimeoutSettings = Mapper.Map<QuoteTimeoutSettings>(model);
+
+            await _quoteTimeoutSettingsService.SaveAsync(quoteTimeoutSettings);
         }
     }
 }

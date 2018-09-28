@@ -1,9 +1,12 @@
-namespace Lykke.Service.LiquidityEngine.Domain
+using JetBrains.Annotations;
+
+namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
 {
     /// <summary>
-    /// Represents a level volume of an instrument. 
+    /// Represents a level of an instrument. 
     /// </summary>
-    public class LevelVolume
+    [PublicAPI]
+    public class InstrumentLevelModel
     {
         /// <summary>
         /// The number of the level.
@@ -14,5 +17,10 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The volume of the limit order for this level.
         /// </summary>
         public decimal Volume { get; set; }
+        
+        /// <summary>
+        /// The risk markup.
+        /// </summary>
+        public decimal Markup { get; set; }
     }
 }

@@ -83,11 +83,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             _log.InfoWithDetails("Instrument was deleted", instrument);
         }
 
-        public async Task AddLevelAsync(string assetPairId, LevelVolume levelVolume)
+        public async Task AddLevelAsync(string assetPairId, InstrumentLevel instrumentLevel)
         {
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
 
-            instrument.AddLevel(levelVolume);
+            instrument.AddLevel(instrumentLevel);
             
             await _instrumentRepository.UpdateAsync(instrument);
             
@@ -96,11 +96,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             _log.InfoWithDetails("Level volume was added to the instrument", instrument);
         }
 
-        public async Task UpdateLevelAsync(string assetPairId, LevelVolume levelVolume)
+        public async Task UpdateLevelAsync(string assetPairId, InstrumentLevel instrumentLevel)
         {
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
 
-            instrument.UpdateLevel(levelVolume);
+            instrument.UpdateLevel(instrumentLevel);
                 
             await _instrumentRepository.UpdateAsync(instrument);
             
