@@ -36,7 +36,18 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">A collection of positions.</response>
         [HttpGet("open")]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync(string assetPairId)
+        public async Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync()
+        {
+            IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync();
+
+            return Mapper.Map<PositionModel[]>(positions);
+        }
+        
+        /// <inheritdoc/>
+        /// <response code="200">A collection of positions.</response>
+        [HttpGet("open/{assetPairId}")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
+        public async Task<IReadOnlyCollection<PositionModel>> GetOpenedByAssetPairIdAsync(string assetPairId)
         {
             IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync(assetPairId);
 

@@ -63,7 +63,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
 
             await _storage.InsertAsync(entity);
 
-            AzureIndex index = new AzureIndex(GetIndexPartitionKey(position.Id), GetRowKey(position.Id), entity);
+            AzureIndex index = new AzureIndex(GetIndexPartitionKey(position.Id), GetIndexRowKey(position.Id), entity);
 
             await _indicesStorage.InsertAsync(index);
         }
@@ -76,7 +76,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             if (index == null)
                 throw new EntityNotFoundException();
 
-            await _indicesStorage.MergeAsync(index.PrimaryPartitionKey, index.PrimaryRowKey, entity =>
+            await _storage.MergeAsync(index.PrimaryPartitionKey, index.PrimaryRowKey, entity =>
             {
                 Mapper.Map(position, entity);
                 return entity;

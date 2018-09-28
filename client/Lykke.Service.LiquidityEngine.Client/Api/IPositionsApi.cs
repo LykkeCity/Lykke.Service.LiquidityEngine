@@ -26,9 +26,16 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <summary>
         /// Returns a collection of opened positions.
         /// </summary>
-        /// <param name="assetPairId">The asset pair id.</param>
         /// <returns>A collection of positions.</returns>
         [Get("/api/positions/open")]
-        Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync(string assetPairId);
+        Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync();
+        
+        /// <summary>
+        /// Returns a collection of opened positions for asset pair.
+        /// </summary>
+        /// <param name="assetPairId">The asset pair id.</param>
+        /// <returns>A collection of positions.</returns>
+        [Get("/api/positions/open/{assetPairId}")]
+        Task<IReadOnlyCollection<PositionModel>> GetOpenedByAssetPairIdAsync(string assetPairId);
     }
 }
