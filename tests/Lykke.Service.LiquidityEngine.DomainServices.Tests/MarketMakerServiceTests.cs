@@ -33,6 +33,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IQuoteTimeoutSettingsService> _quoteTimeoutSettingsServiceMock =
             new Mock<IQuoteTimeoutSettingsService>();
         
+        private readonly Mock<ISummaryReportService> _summaryReportServiceMock =
+            new Mock<ISummaryReportService>();
+        
+        private readonly Mock<IPositionService> _positionServiceMock =
+            new Mock<IPositionService>();
+        
         private readonly Mock<IAssetsServiceWithCache> _assetsServiceWithCacheMock =
             new Mock<IAssetsServiceWithCache>();
 
@@ -107,6 +113,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _balanceServiceMock.Object,
                 _quoteServiceMock.Object,
                 _quoteTimeoutSettingsServiceMock.Object,
+                _summaryReportServiceMock.Object,
+                _positionServiceMock.Object,
                 _assetsServiceWithCacheMock.Object,
                 EmptyLogFactory.Instance);
         }

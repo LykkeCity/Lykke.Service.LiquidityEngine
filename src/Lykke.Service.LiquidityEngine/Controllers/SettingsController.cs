@@ -56,7 +56,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="204">The settings of quotes timeouts successfully saved.</response>
         [HttpPost("quotes")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
-        public async Task SaveQuoteTimeoutSettingsAsync(QuoteTimeoutSettingsModel model)
+        public async Task SaveQuoteTimeoutSettingsAsync([FromBody] QuoteTimeoutSettingsModel model)
         {
             var quoteTimeoutSettings = Mapper.Map<QuoteTimeoutSettings>(model);
 

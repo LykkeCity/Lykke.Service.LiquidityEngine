@@ -23,6 +23,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IBalanceService _balanceService;
         private readonly IQuoteService _quoteService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
+        private readonly ISummaryReportService _summaryReportService;
+        private readonly IPositionService _positionService;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly ILog _log;
 
@@ -33,6 +35,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IBalanceService balanceService,
             IQuoteService quoteService,
             IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
+            ISummaryReportService summaryReportService,
+            IPositionService positionService,
             IAssetsServiceWithCache assetsServiceWithCache,
             ILogFactory logFactory)
         {
@@ -42,6 +46,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _balanceService = balanceService;
             _quoteService = quoteService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
+            _summaryReportService = summaryReportService;
+            _positionService = positionService;
             _assetsServiceWithCache = assetsServiceWithCache;
             _log = logFactory.CreateLog(this);
         }
@@ -63,7 +69,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(instrument.AssetPairId);
 
-            var internalLimitOrders = new List<LimitOrder>();
+            var limitOrders = new List<LimitOrder>();
 
             foreach (InstrumentLevel instrumentLevel in instrument.Levels.OrderBy(o => o.Number))
             {
@@ -74,35 +80,31 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 decimal volume = Math.Round(instrumentLevel.Volume, assetPair.InvertedAccuracy);
 
-                internalLimitOrders.Add(LimitOrder.CreateSell(sellPrice, volume));
-                internalLimitOrders.Add(LimitOrder.CreateBuy(buyPrice, volume));
+                limitOrders.Add(LimitOrder.CreateSell(sellPrice, volume));
+                limitOrders.Add(LimitOrder.CreateBuy(buyPrice, volume));
             }
 
-            await ValidateQuoteAsync(internalLimitOrders, quote);
+            await ValidateQuoteAsync(limitOrders, quote);
 
-            ValidateMinVolume(internalLimitOrders, (decimal) assetPair.MinVolume);
+            ValidateMinVolume(limitOrders, (decimal) assetPair.MinVolume);
+            
+            await ValidatePnLThresholdAsync(limitOrders, instrument);
 
-            await ValidateBalance(internalLimitOrders, assetPair);
+            await ValidateInventoryThresholdAsync(limitOrders, instrument);
+
+            await ValidateBalanceAsync(limitOrders, assetPair);
 
             await _orderBookService.UpdateAsync(new OrderBook
             {
                 AssetPairId = instrument.AssetPairId,
                 Time = DateTime.UtcNow,
-                LimitOrders = internalLimitOrders
+                LimitOrders = limitOrders
             });
 
             if (instrument.Mode == InstrumentMode.Active)
-            {
-                await _lykkeExchangeService.ApplyAsync(instrument.AssetPairId, internalLimitOrders);
-            }
+                await _lykkeExchangeService.ApplyAsync(instrument.AssetPairId, limitOrders);
             else
-            {
-                foreach (LimitOrder limitOrder in internalLimitOrders)
-                {
-                    if (limitOrder.Error == LimitOrderError.None)
-                        limitOrder.Error = LimitOrderError.Idle;
-                }
-            }
+                SetError(limitOrders, LimitOrderError.Idle);
         }
 
         private async Task ValidateQuoteAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
@@ -117,9 +119,36 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     Timeout = quoteTimeoutSettings.Error
                 });
 
-                foreach (LimitOrder limitOrder in limitOrders.Where(o => o.Error == LimitOrderError.None))
-                    limitOrder.Error = LimitOrderError.InvalidQuote;
+                SetError(limitOrders, LimitOrderError.InvalidQuote);
             }
+        }
+
+        private async Task ValidatePnLThresholdAsync(IReadOnlyCollection<LimitOrder> limitOrders,
+            Instrument instrument)
+        {
+            if (instrument.PnLThreshold == 0 || limitOrders.All(o => o.Error != LimitOrderError.None))
+                return;
+
+            IReadOnlyCollection<SummaryReport> summaryReports = await _summaryReportService.GetAllAsync();
+
+            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == instrument.AssetPairId);
+
+            if (summaryReport != null && summaryReport.PnL < 0 && instrument.PnLThreshold < Math.Abs(summaryReport.PnL))
+                SetError(limitOrders, LimitOrderError.LowPnL);
+        }
+
+        private async Task ValidateInventoryThresholdAsync(IReadOnlyCollection<LimitOrder> limitOrders,
+            Instrument instrument)
+        {
+            if (instrument.InventoryThreshold == 0 || limitOrders.All(o => o.Error != LimitOrderError.None))
+                return;
+
+            IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync(instrument.AssetPairId);
+
+            decimal volume = positions.Sum(o => Math.Abs(o.Volume));
+
+            if (instrument.InventoryThreshold <= volume)
+                SetError(limitOrders, LimitOrderError.InventoryTooMuch);
         }
 
         private void ValidateMinVolume(IReadOnlyCollection<LimitOrder> limitOrders, decimal minVolume)
@@ -131,7 +160,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }
         }
 
-        private async Task ValidateBalance(IReadOnlyCollection<LimitOrder> limitOrders, AssetPair assetPair)
+        private async Task ValidateBalanceAsync(IReadOnlyCollection<LimitOrder> limitOrders, AssetPair assetPair)
         {
             Asset baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
             Asset quoteAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.QuotingAssetId);
@@ -192,6 +221,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     balance -= amount;
                 }
             }
+        }
+
+        private void SetError(IReadOnlyCollection<LimitOrder> limitOrders, LimitOrderError limitOrderError)
+        {
+            foreach (LimitOrder limitOrder in limitOrders.Where(o => o.Error == LimitOrderError.None))
+                limitOrder.Error = limitOrderError;
         }
     }
 }
