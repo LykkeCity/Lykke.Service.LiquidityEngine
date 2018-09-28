@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -66,6 +66,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
             Quote quote = await _quoteService.GetAsync(instrument.AssetPairId);
+
+            if (quote == null)
+            {
+                _log.WarningWithDetails("No quote for instrument", new { instrument.AssetPairId });
+                return;
+            }
 
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(instrument.AssetPairId);
 
