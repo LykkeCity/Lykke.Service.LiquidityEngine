@@ -8,6 +8,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         
         Task<decimal> GetBuyPriceAsync(string assetPair, decimal volume);
 
-        Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume);
+        Task<ExternalTrade> ExecuteSellLimitOrderAsync(string assetPairId, decimal volume);
+
+        Task<ExternalTrade> ExecuteBuyLimitOrderAsync(string assetPairId, decimal volume);
     }
 }

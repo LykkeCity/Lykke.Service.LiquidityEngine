@@ -11,25 +11,30 @@ namespace Lykke.Service.LiquidityEngine.Managers
     {
         private readonly BalancesTimer _balancesTimer;
         private readonly MarketMakerTimer _marketMakerTimer;
+        private readonly HedgingTimer _hedgingTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
 
         public ShutdownManager(
             BalancesTimer balancesTimer,
             MarketMakerTimer marketMakerTimer,
+            HedgingTimer hedgingTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber)
         {
             _balancesTimer = balancesTimer;
             _marketMakerTimer = marketMakerTimer;
+            _hedgingTimer = hedgingTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
         }
         
         public Task StopAsync()
         {
-            _balancesTimer.Stop();
+            _lykkeTradeSubscriber.Stop();
             
             _marketMakerTimer.Stop();
             
-            _lykkeTradeSubscriber.Stop();
+            _balancesTimer.Stop();
+            
+            _hedgingTimer.Stop();
             
             return Task.CompletedTask;
         }

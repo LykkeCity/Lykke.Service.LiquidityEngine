@@ -8,6 +8,8 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.OrderBooks
         None,
 
         Unknown,
+        
+        Idle,
 
         Arbitrage,
 

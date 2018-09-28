@@ -34,6 +34,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             return _positionRepository.GetAsync(startDate, endDate, limit);
         }
 
+        public Task<IReadOnlyCollection<Position>> GetOpenedAsync()
+        {
+            return _openPositionRepository.GetAllAsync();
+        }
+        
         public Task<IReadOnlyCollection<Position>> GetOpenedAsync(string assetPairId)
         {
             return _openPositionRepository.GetByAssetPairIdAsync(assetPairId);

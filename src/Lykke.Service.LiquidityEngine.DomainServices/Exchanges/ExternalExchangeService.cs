@@ -36,9 +36,53 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
         public Task<decimal> GetBuyPriceAsync(string assetPairId, decimal volume)
             => GetPriceAsync(assetPairId, volume, Side.Buy);
 
-        public Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume)
+        public Task<ExternalTrade> ExecuteSellLimitOrderAsync(string assetPairId, decimal volume)
+            => ExecuteLimitOrderAsync(assetPairId, volume, Side.Sell);
+
+        public Task<ExternalTrade> ExecuteBuyLimitOrderAsync(string assetPairId, decimal volume)
+            => ExecuteLimitOrderAsync(assetPairId, volume, Side.Buy);
+
+        private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, Side side)
         {
-            throw new NotImplementedException();
+            string instrument = await GetInstrumentAsync(assetPairId);
+
+            var request = new RequestForQuoteRequest(instrument, side, volume);
+
+            RequestForQuoteResponse response = null;
+
+            Trade trade;
+
+            try
+            {
+                response = await _client.RequestForQuoteAsync(request);
+
+                var tradeRequest = new TradeRequest(response);
+
+                trade = await _client.TradeAsync(tradeRequest);
+            }
+            catch (Exception exception)
+            {
+                _log.ErrorWithDetails(exception, "An error occurred while getting price",
+                    new
+                    {
+                        request,
+                        response
+                    });
+
+                throw;
+            }
+
+            return new ExternalTrade
+            {
+                Id = trade.TradeId,
+                LimitOrderId = trade.Order,
+                AssetPairId = trade.Instrument,
+                Type = trade.Side == Side.Sell ? TradeType.Sell : TradeType.Buy,
+                Time = trade.Created,
+                Price = trade.Price,
+                Volume = trade.Quantity,
+                RequestId = trade.RfqId
+            };
         }
 
         private async Task<decimal> GetPriceAsync(string assetPairId, decimal volume, Side side)
@@ -48,7 +92,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             var request = new RequestForQuoteRequest(instrument, side, volume);
 
             RequestForQuoteResponse response;
-            
+
             try
             {
                 response = await _client.RequestForQuoteAsync(request);

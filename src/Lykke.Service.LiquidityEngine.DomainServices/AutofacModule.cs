@@ -93,12 +93,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .AsSelf()
                 .SingleInstance();
             
+            builder.RegisterType<HedgingTimer>()
+                .AsSelf()
+                .SingleInstance();
+            
             builder.RegisterType<TradeService>()
                 .As<ITradeService>()
                 .SingleInstance();
             
             builder.RegisterType<MarketMakerService>()
                 .As<IMarketMakerService>()
+                .SingleInstance();
+            
+            builder.RegisterType<HedgeService>()
+                .As<IHedgeService>()
                 .SingleInstance();
         }
     }
