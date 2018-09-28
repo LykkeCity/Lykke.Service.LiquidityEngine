@@ -108,7 +108,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             });
 
             if (instrument.Mode == InstrumentMode.Active)
-                await _lykkeExchangeService.ApplyAsync(instrument.AssetPairId, limitOrders);
+                await _lykkeExchangeService.ApplyAsync(
+                    instrument.AssetPairId,
+                    limitOrders.Where(o => o.Error == LimitOrderError.None).ToArray());
             else
                 SetError(limitOrders, LimitOrderError.Idle);
         }

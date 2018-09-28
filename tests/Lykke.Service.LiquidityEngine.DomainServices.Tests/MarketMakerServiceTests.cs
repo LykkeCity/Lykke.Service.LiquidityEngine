@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -50,6 +51,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly List<AssetPair> _assetPairs = new List<AssetPair>();
 
+        private QuoteTimeoutSettings _quoteTimeoutSettings;
+
         private MarketMakerService _service;
 
         [TestInitialize]
@@ -86,6 +89,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 new Balance("USD", 1000000)
             });
 
+            _quoteTimeoutSettings = new QuoteTimeoutSettings
+            {
+                Enabled = true,
+                Error = TimeSpan.FromSeconds(1)
+            };
+
             _balanceServiceMock.Setup(o => o.GetByAssetIdAsync(It.IsAny<string>()))
                 .Returns((string assetId) => { return Task.FromResult(_balances.Single(o => o.AssetId == assetId)); });
 
@@ -105,6 +114,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             _instrumentServiceMock.Setup(o => o.GetAllAsync())
                 .Returns(() => Task.FromResult<IReadOnlyCollection<Instrument>>(_instruments));
+
+            _quoteTimeoutSettingsServiceMock.Setup(o => o.GetAsync())
+                .Returns(() => Task.FromResult(_quoteTimeoutSettings));
 
             _service = new MarketMakerService(
                 _instrumentServiceMock.Object,
@@ -164,6 +176,56 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             // assert
 
             Assert.IsTrue(AreEqual(expectedLimitOrders, actualLimitOrders));
+        }
+
+        //https://lykkex.atlassian.net/browse/LIQ-745
+        [TestMethod]
+        public async Task InventoryExceeded_OrdersAreNotPlaced()
+        {
+            // arrange
+
+            IReadOnlyCollection<LimitOrder> actualLimitOrders = null;
+
+            _instruments.Add(new Instrument
+            {
+                AssetPairId = "BTCUSD",
+                Mode = InstrumentMode.Active,
+                InventoryThreshold = 1,
+                Levels = new[]
+                {
+                    new InstrumentLevel {Number = 1, Volume = 1, Markup = .01m},
+                    new InstrumentLevel {Number = 2, Volume = 1, Markup = .02m}
+                }
+            });
+
+            _lykkeExchangeServiceMock
+                .Setup(o => o.ApplyAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<LimitOrder>>()))
+                .Returns((string assetPairId, IReadOnlyCollection<LimitOrder> limitOrders) => Task.CompletedTask)
+                .Callback((string assetPairId, IReadOnlyCollection<LimitOrder> limitOrders) =>
+                    actualLimitOrders = limitOrders);
+
+            _orderBookServiceMock.Setup(o => o.UpdateAsync(It.IsAny<OrderBook>()))
+                .Returns((OrderBook orderBook) => Task.CompletedTask);
+
+            _quoteServiceMock
+                .Setup(o => o.GetAsync(It.IsAny<string>()))
+                .Returns((string assetPairId) =>
+                    Task.FromResult(new Quote(assetPairId, DateTime.UtcNow, 6001, 6000, "b2c2")));
+
+            // Make sure inventory is exceeded
+            _positionServiceMock.Setup(o => o.GetOpenedAsync(It.IsAny<string>()))
+                .Returns((string assetPairId) => Task.FromResult<IReadOnlyCollection<Position>>(new[]
+                {
+                    new Position { AssetPairId = assetPairId, Volume = 10}
+                }));
+
+            // act
+
+            await _service.UpdateOrderBooksAsync();
+
+            // assert
+
+            Assert.IsFalse(actualLimitOrders.Any());
         }
 
         private bool AreEqual(IReadOnlyCollection<LimitOrder> a, IReadOnlyCollection<LimitOrder> b)
