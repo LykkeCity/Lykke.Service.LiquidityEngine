@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 
@@ -19,7 +19,8 @@ namespace Lykke.Service.LiquidityEngine.Validators
             
             RuleFor(o => o.Markup)
                 .GreaterThanOrEqualTo(0)
-                .WithMessage("Markup should be greater than or equal to zero");
+                .LessThan(1)
+                .WithMessage("Markup should be between zero and one");
         }
     }
 }
