@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -69,7 +69,9 @@ namespace Lykke.Service.LiquidityEngine.Domain
             CloseDate = DateTime.UtcNow;
             ClosePrice = externalTrade.Price;
 
-            PnL = (ClosePrice - Price) * Volume;
+            int volumeSign = Type == PositionType.Long ? 1 : -1;
+
+            PnL = (ClosePrice - Price) * Volume * volumeSign;
 
             CloseTradeId = externalTrade.Id;
         }
