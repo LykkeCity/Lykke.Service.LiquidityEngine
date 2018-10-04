@@ -81,7 +81,7 @@ namespace Lykke.Service.LiquidityEngine
             
             builder.RegisterType<B2C2QuoteSubscriber>()
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
-                    .B2C2Quotes))
+                    .RawPriceRabbitMq))
                 .AsSelf()
                 .SingleInstance();
         }

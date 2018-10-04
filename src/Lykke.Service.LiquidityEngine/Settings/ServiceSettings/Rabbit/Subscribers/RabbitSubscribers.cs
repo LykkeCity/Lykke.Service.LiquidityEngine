@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers
 {
@@ -7,6 +7,6 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscrib
     {
         public SubscriberSettings LykkeTrades { get; set; }
         
-        public SubscriberSettings B2C2Quotes { get; set; }
+        public SubscriberSettings RawPriceRabbitMq { get; set; }
     }
 }
