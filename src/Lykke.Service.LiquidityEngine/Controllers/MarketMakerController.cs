@@ -8,7 +8,6 @@ using Lykke.Service.LiquidityEngine.Client.Models.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
-//using MarketMakerStatus = Lykke.Service.LiquidityEngine.Domain.MarketMaker.MarketMakerStatus;
 
 namespace Lykke.Service.LiquidityEngine.Controllers
 {
