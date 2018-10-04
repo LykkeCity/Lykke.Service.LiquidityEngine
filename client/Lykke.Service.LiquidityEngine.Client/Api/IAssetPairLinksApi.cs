@@ -27,10 +27,10 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         Task AddAsync([Body] AssetPairLinkModel model);
         
         /// <summary>
-        /// Removes a new mapping between asset pairs.
+        /// Deletes a mapping between asset pairs.
         /// </summary>
         /// <param name="assetPairId">The internal asset pair id for which mapping should be removed.</param>
         [Delete("/api/assetpairlinks/{assetPairId}")]
-        Task RemoveAsync(string assetPairId);
+        Task DeleteAsync(string assetPairId);
     }
 }

@@ -50,6 +50,6 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Trades
         /// <summary>
         /// The identifier of the request for quote.
         /// </summary>
-        public string RequestForQuoteId { get; set; }
+        public string RequestId { get; set; }
     }
 }

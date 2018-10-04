@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 
@@ -15,13 +16,13 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.OrderBooks
         public string AssetPairId { get; set; }
 
         /// <summary>
-        /// The collection of limit orders from external exchange.
+        /// The date and time of creation.
         /// </summary>
-        public IReadOnlyCollection<LimitOrderModel> ExternalLimitOrders { get; set; }
-
+        public DateTime Time { get; set; }
+        
         /// <summary>
-        /// The collection of limit orders from internal exchange.
+        /// The collection of limit orders.
         /// </summary>
-        public IReadOnlyCollection<LimitOrderModel> InternalLimitOrders { get; set; }
+        public IReadOnlyCollection<LimitOrderModel> LimitOrders { get; set; }
     }
 }

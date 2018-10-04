@@ -3,10 +3,10 @@ using JetBrains.Annotations;
 namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
 {
     /// <summary>
-    /// Represents a level volume of an instrument. 
+    /// Represents a level of an instrument. 
     /// </summary>
     [PublicAPI]
-    public class LevelVolumeModel
+    public class InstrumentLevelModel
     {
         /// <summary>
         /// The number of the level.
@@ -17,5 +17,10 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
         /// The volume of the limit order for this level.
         /// </summary>
         public decimal Volume { get; set; }
+        
+        /// <summary>
+        /// The risk markup.
+        /// </summary>
+        public decimal Markup { get; set; }
     }
 }

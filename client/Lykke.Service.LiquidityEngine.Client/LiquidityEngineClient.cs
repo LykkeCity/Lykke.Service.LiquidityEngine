@@ -23,6 +23,7 @@ namespace Lykke.Service.LiquidityEngine.Client
             Reports = httpClientGenerator.Generate<IReportsApi>();
             Settlements = httpClientGenerator.Generate<ISettlementsApi>();
             Trades = httpClientGenerator.Generate<ITradesApi>();
+            Settings = httpClientGenerator.Generate<ISettingsApi>();
         }
 
         /// <inheritdoc/>
@@ -54,5 +55,8 @@ namespace Lykke.Service.LiquidityEngine.Client
 
         /// <inheritdoc/>
         public ITradesApi Trades { get; }
+
+        /// <inheritdoc/>
+        public ISettingsApi Settings { get; }
     }
 }

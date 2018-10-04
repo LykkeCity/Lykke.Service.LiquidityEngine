@@ -30,5 +30,16 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.OrderBooks
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public LimitOrderType Type { get; set; }
+        
+        /// <summary>
+        /// The code of the error which occurred while processing on ME.
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public LimitOrderError Error { get; set; }
+
+        /// <summary>
+        /// The error details.
+        /// </summary>
+        public string ErrorMessage { get; set; }
     }
 }

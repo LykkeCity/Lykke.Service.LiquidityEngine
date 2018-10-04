@@ -1,4 +1,11 @@
 LiquidityEngineService:
+  Name: Default
+  
+  WalletId:
+    settings-key: LiquidityEngineService-WalletId
+
+  AssetsCacheExpirationPeriod: 00:10:00
+  
   Db:
     DataConnectionString:
       settings-key: LiquidityEngineService-DataConnectionString
@@ -9,6 +16,53 @@ LiquidityEngineService:
       settings-key: LiquidityEngineService-LogsConnectionString
       types:
       - AzureTableStorage
+  
+  Rabbit:
+    Subscribers:
+      LykkeTrades:
+        ConnectionString:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-ConnectionString
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Exchange
+        Queue:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Queue
+
+      B2C2Quotes:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2Quotes-Exchange
+        Queue:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2Quotes-Queue
+
+B2C2Client:
+  Url:
+    settings-key: B2C2AdapterUrl
+  AuthorizationToken:
+    settings-key: LiquidityEngineService-B2C2Client-AuthorizationToken
+    
+AssetsServiceClient:
+  ServiceUrl:
+    settings-key: AssetsServiceUrl
+    
+BalancesServiceClient:
+  ServiceUrl:
+    settings-key: BalancesServiceUrl
+    
+ExchangeOperationsServiceClient:
+  ServiceUrl:
+    settings-key: ExchangeOperationsServiceUrl
+
+MatchingEngineClient:
+  IpEndpoint:
+    Port:
+      settings-key: MatchingEngine-Port
+    Host:
+      settings-key: MatchingEngine-Host
       
 SlackNotifications:
   AzureQueue:
@@ -18,7 +72,7 @@ SlackNotifications:
       - AzureTableStorage
     QueueName:
       settings-key: SlackQueueName
-      
+
 MonitoringServiceClient:
   MonitoringServiceUrl:
     settings-key: MonitoringServiceUrl

@@ -16,6 +16,6 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// </summary>
         /// <param name="model">The model which describes settlement.</param>
         [Post("/api/settlements")]
-        Task SettlementAsync([Body] SettlementModel model);
+        Task SettlementAsync([Body] SettlementOperationModel model);
     }
 }

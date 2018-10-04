@@ -29,14 +29,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Positions
         public PositionType Type { get; set; }
 
         /// <summary>
-        /// The date of the trade that opened the position
+        /// The date when position was opened.
         /// </summary>
-        public DateTime OpenDate { get; set; }
+        public DateTime Date { get; set; }
 
         /// <summary>
         /// The price of the trade that opened the position.
         /// </summary>
-        public decimal OpenPrice { get; set; }
+        public decimal Price { get; set; }
 
         /// <summary>
         /// The volume of the trade that opened the position.
@@ -61,7 +61,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Positions
         /// <summary>
         /// A collection of identifiers of the trades that opened position.
         /// </summary>
-        public IReadOnlyCollection<string> OpenTrades { get; set; }
+        public IReadOnlyCollection<string> Trades { get; set; }
 
         /// <summary>
         /// The identifier of the trade that closed position.

@@ -1,13 +1,13 @@
-using FluentValidation;
+﻿using FluentValidation;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 
 namespace Lykke.Service.LiquidityEngine.Validators
 {
     [UsedImplicitly]
-    public class LevelVolumeModelValidator : AbstractValidator<LevelVolumeModel>
+    public class InstrumentLevelModelValidator : AbstractValidator<InstrumentLevelModel>
     {
-        public LevelVolumeModelValidator()
+        public InstrumentLevelModelValidator()
         {
             RuleFor(o => o.Number)
                 .GreaterThan(0)
@@ -16,6 +16,11 @@ namespace Lykke.Service.LiquidityEngine.Validators
             RuleFor(o => o.Volume)
                 .GreaterThan(0)
                 .WithMessage("Volume should be greater than zero");
+            
+            RuleFor(o => o.Markup)
+                .GreaterThanOrEqualTo(0)
+                .LessThan(1)
+                .WithMessage("Markup should be between zero and one");
         }
     }
 }
