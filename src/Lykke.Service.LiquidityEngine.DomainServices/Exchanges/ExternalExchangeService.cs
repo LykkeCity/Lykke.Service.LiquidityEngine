@@ -58,11 +58,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             Trade trade = await WrapAsync(async () =>
                 {
+                    _log.InfoWithDetails("Request for quote", request);
+
                     response = await _client.RequestForQuoteAsync(request);
+
+                    _log.InfoWithDetails("Response on quote", response);
 
                     var tradeRequest = new TradeRequest(response);
 
-                    return await _client.TradeAsync(tradeRequest);
+                    _log.InfoWithDetails("Request trade", tradeRequest);
+
+                    Trade tradeResponse = await _client.TradeAsync(tradeRequest);
+
+                    _log.InfoWithDetails("Response on trade", tradeResponse);
+
+                    return tradeResponse;
                 },
                 new
                 {
@@ -91,7 +101,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             return await WrapAsync(async () =>
             {
-               RequestForQuoteResponse response = await _client.RequestForQuoteAsync(request);
+                _log.InfoWithDetails("Request for quote", request);
+
+                RequestForQuoteResponse response = await _client.RequestForQuoteAsync(request);
+
+                _log.InfoWithDetails("Response on quote request", response);
 
                 return response.Price;
             });
@@ -127,21 +141,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             catch (B2c2RestException exception)
             {
                 _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
-
-                Error error = exception.ErrorResponse.Errors
-                    .FirstOrDefault(e => e.Code == ErrorCode.MaxRiskExposureReached
-                                         || e.Code == ErrorCode.MaxCreditExposureReached);
-
-                if (error?.Code == ErrorCode.MaxRiskExposureReached)
-                {
-                    throw new MaxRiskExposureReachedException(error.Message, exception);
-                }
-
-                if (error?.Code == ErrorCode.MaxCreditExposureReached)
-                {
-                    throw new MaxCreditExposureReachedException(error.Message, exception);
-
-                }
 
                 Error first = exception.ErrorResponse.Errors.FirstOrDefault();
 

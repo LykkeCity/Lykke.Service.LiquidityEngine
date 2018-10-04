@@ -62,22 +62,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     else
                         externalTrade = await _externalExchangeService.ExecuteBuyLimitOrderAsync(group.Key, volume);
                 }
-                catch (MaxRiskExposureReachedException exception)
+                catch (ExternalExchangeException exception)
                 {
                     _log.WarningWithDetails(
-                        "Can not close positions because risk exposure reached. Setting market maker state to error",
+                        "Can not close positions because of integration error. Setting market maker state to error",
                         exception, new { assetPairId = group.Key, volume });
 
-                    await SetError(MarketMakerError.MaxRiskExposure, exception.Message);
-                    break;
-                }
-                catch (MaxCreditExposureReachedException exception)
-                {
-                    _log.WarningWithDetails(
-                        "Can not close positions because credit exposure reached. Setting market maker state to error",
-                        exception, new { assetPairId = group.Key, volume });
-
-                    await SetError(MarketMakerError.MaxCreditExposure, exception.Message);
+                    await SetError(MarketMakerError.IntegrationError,
+                        $"An error occurred during position closing ({group.Key}): {exception.Message}");
                     break;
                 }
                 catch (Exception exception)

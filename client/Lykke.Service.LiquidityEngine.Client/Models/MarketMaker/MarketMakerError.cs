@@ -11,13 +11,8 @@
         None = 0,
 
         /// <summary>
-        /// Max risk exposure reached
+        /// An error during request happened
         /// </summary>
-        MaxRiskExposure = 1,
-
-        /// <summary>
-        /// Max credit exposure reached
-        /// </summary>
-        MaxCreditExposure = 2
+        IntegrationError = 1
     }
 }
