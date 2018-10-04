@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -9,12 +9,12 @@ using Lykke.Service.LiquidityEngine.Domain.Services;
 namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
 {
     [UsedImplicitly]
-    public class BalancesTimer : Timer
+    public class LykkeBalancesTimer : Timer
     {
         private readonly IBalanceService _balanceService;
         private readonly ITimersSettingsService _timersSettingsService;
 
-        public BalancesTimer(
+        public LykkeBalancesTimer(
             IBalanceService balanceService,
             ITimersSettingsService timersSettingsService,
             ILogFactory logFactory)
@@ -28,12 +28,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
         {
             TimersSettings timersSettings = await _timersSettingsService.GetAsync();
 
-            return timersSettings.Balances;
+            return timersSettings.LykkeBalances;
         }
 
         protected override Task OnExecuteAsync(CancellationToken cancellation)
         {
-            return _balanceService.UpdateAsync();
+            return _balanceService.UpdateLykkeBalancesAsync();
         }
     }
 }

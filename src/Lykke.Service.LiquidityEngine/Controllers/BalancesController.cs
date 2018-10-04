@@ -1,10 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.LiquidityEngine.Client.Api;
 using Lykke.Service.LiquidityEngine.Client.Models.Balances;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,11 +25,11 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
         /// <inheritdoc/>
         /// <response code="200">A collection of balances.</response>
-        [HttpGet]
+        [HttpGet("lykke")]
         [ProducesResponseType(typeof(IReadOnlyCollection<AssetBalanceModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<AssetBalanceModel>> GetAllAsync()
+        public async Task<IReadOnlyCollection<AssetBalanceModel>> GetLykkeAsync()
         {
-            IReadOnlyCollection<Balance> balances = await _balanceService.GetAllAsync();
+            IReadOnlyCollection<Balance> balances = await _balanceService.GetAsync(ExchangeNames.Lykke);
             IReadOnlyCollection<Credit> credits = await _creditService.GetAllAsync();
 
             string[] assets = balances.Select(o => o.AssetId)
@@ -59,11 +60,11 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
         /// <inheritdoc/>
         /// <response code="200">The balance of asset.</response>
-        [HttpGet("{assetId}")]
+        [HttpGet("lykke/{assetId}")]
         [ProducesResponseType(typeof(AssetBalanceModel), (int) HttpStatusCode.OK)]
-        public async Task<AssetBalanceModel> GetByAssetIdAsync(string assetId)
+        public async Task<AssetBalanceModel> GetLykkeBalanceByAssetIdAsync(string assetId)
         {
-            Balance balance = await _balanceService.GetByAssetIdAsync(assetId);
+            Balance balance = await _balanceService.GetByAssetIdAsync(ExchangeNames.Lykke, assetId);
             Credit credit = await _creditService.GetByAssetIdAsync(assetId);
 
             decimal balanceAmount = balance?.Amount ?? decimal.Zero;
@@ -76,6 +77,23 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                 CreditAmount = creditAmount,
                 Disbalance = balanceAmount - creditAmount
             };
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">A collection of balances.</response>
+        [HttpGet("external")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<AssetBalanceModel>), (int)HttpStatusCode.OK)]
+        public async Task<IReadOnlyCollection<AssetBalanceModel>> GetExternalAsync()
+        {
+            IReadOnlyCollection<Balance> balances = await _balanceService.GetAsync(ExchangeNames.External);
+
+            return balances
+                .Select(o => new AssetBalanceModel
+                {
+                    AssetId = o.AssetId,
+                    Amount = o.Amount
+                })
+                .ToArray();
         }
     }
 }

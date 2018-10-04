@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using JetBrains.Annotations;
 
 namespace Lykke.Service.LiquidityEngine.Client.Models.Settings
@@ -15,8 +15,13 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Settings
         public TimeSpan MarketMaker { get; set; }
         
         /// <summary>
-        /// The timer interval of balances.
+        /// The timer interval of Lykke exchange balances.
         /// </summary>
-        public TimeSpan Balances { get; set; }
+        public TimeSpan LykkeBalances { get; set; }
+
+        /// <summary>
+        /// The timer interval of external exchange balances.
+        /// </summary>
+        public TimeSpan ExternalBalances { get; set; }
     }
 }

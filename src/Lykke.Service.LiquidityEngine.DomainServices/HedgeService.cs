@@ -1,11 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
+using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
@@ -14,20 +16,30 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
     {
         private readonly IPositionService _positionService;
         private readonly IExternalExchangeService _externalExchangeService;
+        private readonly IMarketMakerStateService _marketMakerStateService;
         private readonly ILog _log;
 
         public HedgeService(
             IPositionService positionService,
             IExternalExchangeService externalExchangeService,
+            IMarketMakerStateService marketMakerStateService,
             ILogFactory logFactory)
         {
             _positionService = positionService;
             _externalExchangeService = externalExchangeService;
+            _marketMakerStateService = marketMakerStateService;
             _log = logFactory.CreateLog(this);
         }
 
         public async Task ExecuteAsync()
         {
+            MarketMakerState state = await _marketMakerStateService.GetStateAsync();
+
+            if (state.Status != MarketMakerStatus.Active)
+            {
+                return;
+            }
+
             IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync();
 
             await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Long), PositionType.Long);
@@ -41,7 +53,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             {
                 decimal volume = group.Sum(o => o.Volume);
 
-                ExternalTrade externalTrade;
+                ExternalTrade externalTrade = null;
 
                 try
                 {
@@ -50,12 +62,28 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     else
                         externalTrade = await _externalExchangeService.ExecuteBuyLimitOrderAsync(group.Key, volume);
                 }
+                catch (MaxRiskExposureReachedException exception)
+                {
+                    _log.WarningWithDetails(
+                        "Can not close positions because risk exposure reached. Setting market maker state to error",
+                        exception, new { assetPairId = group.Key, volume });
+
+                    await SetError(MarketMakerError.MaxRiskExposure, exception.Message);
+                    break;
+                }
+                catch (MaxCreditExposureReachedException exception)
+                {
+                    _log.WarningWithDetails(
+                        "Can not close positions because credit exposure reached. Setting market maker state to error",
+                        exception, new { assetPairId = group.Key, volume });
+
+                    await SetError(MarketMakerError.MaxCreditExposure, exception.Message);
+                    break;
+                }
                 catch (Exception exception)
                 {
                     _log.WarningWithDetails("Can not close positions", exception,
-                        new {assetPairId = group.Key, volume});
-
-                    externalTrade = null;
+                        new { assetPairId = group.Key, volume });
                 }
 
                 if (externalTrade != null)
@@ -64,6 +92,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                         await _positionService.ClosePositionAsync(position, externalTrade);
                 }
             }
+        }
+
+        private Task SetError(MarketMakerError error, string message)
+        {
+            return _marketMakerStateService.SetStateAsync(
+                new MarketMakerState
+                {
+                    Status = MarketMakerStatus.Error,
+                    Error = error,
+                    ErrorMessage = message,
+                    Time = DateTime.UtcNow
+                },
+                $"Reason: exception on executing limit order {message}");
         }
     }
 }

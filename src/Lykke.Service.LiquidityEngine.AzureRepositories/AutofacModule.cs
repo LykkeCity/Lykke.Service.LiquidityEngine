@@ -1,4 +1,4 @@
-using Autofac;
+﻿using Autofac;
 using AzureStorage.Tables;
 using AzureStorage.Tables.Templates.Index;
 using JetBrains.Annotations;
@@ -7,6 +7,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
+using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
@@ -98,6 +99,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                     AzureTableStorage<SummaryReportEntity>.Create(_connectionString,
                         "SummaryReports", container.Resolve<ILogFactory>())))
                 .As<ISummaryReportRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new MarketMakerStateRepository(
+                    AzureTableStorage<MarketMakerStateEntity>.Create(_connectionString,
+                        "MarketMakerState", container.Resolve<ILogFactory>())))
+                .As<IMarketMakerStateRepository>()
                 .SingleInstance();
         }
     }

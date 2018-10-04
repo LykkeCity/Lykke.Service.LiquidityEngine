@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using JetBrains.Annotations;
 using Lykke.AzureStorage.Tables;
 using Lykke.AzureStorage.Tables.Entity.Annotation;
@@ -11,7 +11,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
     public class TimersSettingsEntity : AzureTableEntity
     {
         private TimeSpan _marketMaker;
-        private TimeSpan _balances;
+        private TimeSpan _lykkeBalances;
+        private TimeSpan _externalBalances;
 
         public TimersSettingsEntity()
         {
@@ -36,15 +37,28 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
             }
         }
 
-        public TimeSpan Balances
+        public TimeSpan LykkeBalances
         {
-            get => _balances;
+            get => _lykkeBalances;
             set
             {
-                if (_balances != value)
+                if (_lykkeBalances != value)
                 {
-                    _balances = value;
-                    MarkValueTypePropertyAsDirty("Balances");
+                    _lykkeBalances = value;
+                    MarkValueTypePropertyAsDirty("LykkeBalances");
+                }
+            }
+        }
+
+        public TimeSpan ExternalBalances
+        {
+            get => _externalBalances;
+            set
+            {
+                if (_externalBalances != value)
+                {
+                    _externalBalances = value;
+                    MarkValueTypePropertyAsDirty("ExternalBalances");
                 }
             }
         }

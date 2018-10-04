@@ -1,14 +1,16 @@
-using AutoMapper;
+﻿using AutoMapper;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.Client.Models.Audit;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
+using Lykke.Service.LiquidityEngine.Client.Models.MarketMaker;
 using Lykke.Service.LiquidityEngine.Client.Models.OrderBooks;
 using Lykke.Service.LiquidityEngine.Client.Models.Positions;
 using Lykke.Service.LiquidityEngine.Client.Models.Reports;
 using Lykke.Service.LiquidityEngine.Client.Models.Settings;
 using Lykke.Service.LiquidityEngine.Client.Models.Trades;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 
 namespace Lykke.Service.LiquidityEngine
 {
@@ -45,6 +47,8 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<TimersSettings, TimersSettingsModel>(MemberList.Source);
             CreateMap<TimersSettingsModel, TimersSettings>(MemberList.Destination);
+
+            CreateMap<MarketMakerState, MarketMakerStateModel>(MemberList.Source);
         }
     }
 }

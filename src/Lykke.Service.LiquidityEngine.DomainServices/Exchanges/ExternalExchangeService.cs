@@ -1,13 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.B2c2Client;
+using Lykke.B2c2Client.Exceptions;
 using Lykke.B2c2Client.Models.Rest;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Consts;
+using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
@@ -30,6 +33,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             _log = logFactory.CreateLog(this);
         }
 
+        public Task<IReadOnlyCollection<Balance>> GetBalancesAsync()
+            => ExecuteGetBalancesAsync();
+
         public Task<decimal> GetSellPriceAsync(string assetPairId, decimal volume)
             => GetPriceAsync(assetPairId, volume, Side.Sell);
 
@@ -50,27 +56,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             RequestForQuoteResponse response = null;
 
-            Trade trade;
+            Trade trade = await WrapAsync(async () =>
+                {
+                    response = await _client.RequestForQuoteAsync(request);
 
-            try
-            {
-                response = await _client.RequestForQuoteAsync(request);
+                    var tradeRequest = new TradeRequest(response);
 
-                var tradeRequest = new TradeRequest(response);
-
-                trade = await _client.TradeAsync(tradeRequest);
-            }
-            catch (Exception exception)
-            {
-                _log.ErrorWithDetails(exception, "An error occurred while getting price",
-                    new
-                    {
-                        request,
-                        response
-                    });
-
-                throw;
-            }
+                    return await _client.TradeAsync(tradeRequest);
+                },
+                new
+                {
+                    request,
+                    response
+                });
 
             return new ExternalTrade
             {
@@ -91,19 +89,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             var request = new RequestForQuoteRequest(instrument, side, volume);
 
-            RequestForQuoteResponse response;
-
-            try
+            return await WrapAsync(async () =>
             {
-                response = await _client.RequestForQuoteAsync(request);
-            }
-            catch (Exception exception)
-            {
-                _log.ErrorWithDetails(exception, "An error occurred while getting price", request);
-                throw;
-            }
+               RequestForQuoteResponse response = await _client.RequestForQuoteAsync(request);
 
-            return response.Price;
+                return response.Price;
+            });
         }
 
         private async Task<string> GetInstrumentAsync(string assetPairId)
@@ -113,6 +104,54 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             AssetPairLink assetPairLink = assetPairLinks.SingleOrDefault(o => o.AssetPairId == assetPairId);
 
             return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
+        }
+
+        private Task<IReadOnlyCollection<Balance>> ExecuteGetBalancesAsync()
+        {
+            return WrapAsync<IReadOnlyCollection<Balance>>(async () =>
+            {
+                IReadOnlyDictionary<string, decimal> balances = await _client.BalanceAsync();
+
+                return balances
+                    .Select(o => new Balance(ExchangeNames.External, o.Key, o.Value))
+                    .ToArray();
+            });
+        }
+
+        private async Task<T> WrapAsync<T>(Func<Task<T>> action, object context = null)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (B2c2RestException exception)
+            {
+                _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
+
+                Error error = exception.ErrorResponse.Errors
+                    .FirstOrDefault(e => e.Code == ErrorCode.MaxRiskExposureReached
+                                         || e.Code == ErrorCode.MaxCreditExposureReached);
+
+                if (error?.Code == ErrorCode.MaxRiskExposureReached)
+                {
+                    throw new MaxRiskExposureReachedException(error.Message, exception);
+                }
+
+                if (error?.Code == ErrorCode.MaxCreditExposureReached)
+                {
+                    throw new MaxCreditExposureReachedException(error.Message, exception);
+
+                }
+
+                Error first = exception.ErrorResponse.Errors.FirstOrDefault();
+
+                throw new ExternalExchangeException(first?.Message ?? exception.Message, exception);
+            }
+            catch (Exception exception)
+            {
+                _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
+                throw;
+            }
         }
     }
 }

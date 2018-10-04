@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Lykke.Service.LiquidityEngine.Domain
 {
@@ -13,8 +13,13 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public TimeSpan MarketMaker { get; set; }
         
         /// <summary>
-        /// The timer interval of balances.
+        /// The timer interval of lykke excahnge balances.
         /// </summary>
-        public TimeSpan Balances { get; set; }
+        public TimeSpan LykkeBalances { get; set; }
+
+        /// <summary>
+        /// The timer interval of external exchange balances.
+        /// </summary>
+        public TimeSpan ExternalBalances { get; set; }
     }
 }

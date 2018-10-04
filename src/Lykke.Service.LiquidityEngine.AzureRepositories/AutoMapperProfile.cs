@@ -1,15 +1,17 @@
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
+using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Trades;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 
 namespace Lykke.Service.LiquidityEngine.AzureRepositories
 {
@@ -47,6 +49,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             
             CreateMap<QuoteTimeoutSettings, QuoteTimeoutSettingsEntity>(MemberList.Source);
             CreateMap<QuoteTimeoutSettingsEntity, QuoteTimeoutSettings>(MemberList.Destination);
+
+            CreateMap<MarketMakerState, MarketMakerStateEntity>(MemberList.Source);
+            CreateMap<MarketMakerStateEntity, MarketMakerState>(MemberList.Destination);
         }
     }
 }

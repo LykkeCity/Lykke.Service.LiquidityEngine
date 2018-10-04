@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Sdk;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
@@ -9,20 +9,23 @@ namespace Lykke.Service.LiquidityEngine.Managers
     [UsedImplicitly]
     public class StartupManager : IStartupManager
     {
-        private readonly BalancesTimer _balancesTimer;
+        private readonly LykkeBalancesTimer _lykkeBalancesTimer;
+        private readonly ExternalBalancesTimer _externalBalancesTimer;
         private readonly MarketMakerTimer _marketMakerTimer;
         private readonly HedgingTimer _hedgingTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
 
         public StartupManager(
-            BalancesTimer balancesTimer,
+            LykkeBalancesTimer lykkeBalancesTimer,
+            ExternalBalancesTimer externalBalancesTimer,
             MarketMakerTimer marketMakerTimer,
             HedgingTimer hedgingTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
             B2C2QuoteSubscriber b2C2QuoteSubscriber)
         {
-            _balancesTimer = balancesTimer;
+            _lykkeBalancesTimer = lykkeBalancesTimer;
+            _externalBalancesTimer = externalBalancesTimer;
             _marketMakerTimer = marketMakerTimer;
             _hedgingTimer = hedgingTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
@@ -35,8 +38,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
             
             _lykkeTradeSubscriber.Start();
 
-            _balancesTimer.Start();
-            
+            _lykkeBalancesTimer.Start();
+
+            _externalBalancesTimer.Start();
+
             _marketMakerTimer.Start();
             
             _hedgingTimer.Start();
