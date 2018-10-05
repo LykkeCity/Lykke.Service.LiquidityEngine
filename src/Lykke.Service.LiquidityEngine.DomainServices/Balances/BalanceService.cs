@@ -79,7 +79,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
             }
             catch (ExternalExchangeThrottlingException exception)
             {
-                _log.WarningWithDetails("Balance request was throttled", exception);
+                _log.WarningWithDetails("Balance request was throttled", exception, new { });
             }
             catch (Exception exception)
             {
