@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Common.Log;
 using JetBrains.Annotations;
@@ -140,11 +141,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             }
             catch (B2c2RestException exception)
             {
-                _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
+                if (exception.ErrorResponse.Status == HttpStatusCode.TooManyRequests)
+                {
+                    _log.WarningWithDetails("Request was throttled while calling external exchange.", exception,
+                        context);
 
-                Error first = exception.ErrorResponse.Errors.FirstOrDefault();
+                    throw new ExternalExchangeThrottlingException(exception.Message, exception);
+                }
+                else
+                {
+                    _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
+                    
+                    Error first = exception.ErrorResponse.Errors.FirstOrDefault();
 
-                throw new ExternalExchangeException(first?.Message ?? exception.Message, exception);
+                    throw new ExternalExchangeException(first?.Message ?? exception.Message, exception);
+                }
             }
             catch (Exception exception)
             {
