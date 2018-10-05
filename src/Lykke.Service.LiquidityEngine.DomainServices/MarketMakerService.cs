@@ -9,7 +9,9 @@ using Lykke.Common.Log;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
+using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
@@ -21,6 +23,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly ILykkeExchangeService _lykkeExchangeService;
         private readonly IOrderBookService _orderBookService;
         private readonly IBalanceService _balanceService;
+        private readonly IMarketMakerStateService _marketMakerStateService;
         private readonly IQuoteService _quoteService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
         private readonly ISummaryReportService _summaryReportService;
@@ -33,6 +36,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             ILykkeExchangeService lykkeExchangeService,
             IOrderBookService orderBookService,
             IBalanceService balanceService,
+            IMarketMakerStateService marketMakerStateService,
             IQuoteService quoteService,
             IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
             ISummaryReportService summaryReportService,
@@ -44,6 +48,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _lykkeExchangeService = lykkeExchangeService;
             _orderBookService = orderBookService;
             _balanceService = balanceService;
+            _marketMakerStateService = marketMakerStateService;
             _quoteService = quoteService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
             _summaryReportService = summaryReportService;
@@ -100,6 +105,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             await ValidateBalanceAsync(limitOrders, assetPair);
 
+            await ValidateMarketMakerState(limitOrders);
+
             await _orderBookService.UpdateAsync(new OrderBook
             {
                 AssetPairId = instrument.AssetPairId,
@@ -107,12 +114,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 LimitOrders = limitOrders
             });
 
-            if (instrument.Mode == InstrumentMode.Active)
-                await _lykkeExchangeService.ApplyAsync(
-                    instrument.AssetPairId,
-                    limitOrders.Where(o => o.Error == LimitOrderError.None).ToArray());
-            else
+            if (instrument.Mode != InstrumentMode.Active)
                 SetError(limitOrders, LimitOrderError.Idle);
+
+            await _lykkeExchangeService.ApplyAsync(
+                instrument.AssetPairId,
+                limitOrders.Where(o => o.Error == LimitOrderError.None).ToArray());
         }
 
         private async Task ValidateQuoteAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
@@ -187,7 +194,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             if (sellLimitOrders.Any())
             {
-                decimal balance = (await _balanceService.GetByAssetIdAsync(baseAsset.Id)).Amount;
+                decimal balance = (await _balanceService.GetByAssetIdAsync(ExchangeNames.Lykke, baseAsset.Id)).Amount;
 
                 foreach (LimitOrder limitOrder in sellLimitOrders)
                 {
@@ -209,7 +216,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             if (buyLimitOrders.Any())
             {
-                decimal balance = (await _balanceService.GetByAssetIdAsync(quoteAsset.Id)).Amount;
+                decimal balance = (await _balanceService.GetByAssetIdAsync(ExchangeNames.Lykke, quoteAsset.Id)).Amount;
 
                 foreach (LimitOrder limitOrder in buyLimitOrders)
                 {
@@ -228,6 +235,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     balance -= amount;
                 }
+            }
+        }
+
+        private async Task ValidateMarketMakerState(IReadOnlyCollection<LimitOrder> limitOrders)
+        {
+            MarketMakerState state = await _marketMakerStateService.GetStateAsync();
+
+            if (state.Status == MarketMakerStatus.Error)
+            {
+                SetError(limitOrders, LimitOrderError.MarketMakerError);
+            }
+            else if (state.Status == MarketMakerStatus.Disabled)
+            {
+                SetError(limitOrders, LimitOrderError.Idle);
             }
         }
 

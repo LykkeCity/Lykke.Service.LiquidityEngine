@@ -18,6 +18,7 @@ namespace Lykke.Service.LiquidityEngine.Client
             Balances = httpClientGenerator.Generate<IBalancesApi>();
             Credits = httpClientGenerator.Generate<ICreditsApi>();
             Instruments = httpClientGenerator.Generate<IInstrumentsApi>();
+            MarketMaker = httpClientGenerator.Generate<IMarketMakerApi>();
             OrderBooks = httpClientGenerator.Generate<IOrderBooksApi>();
             Positions = httpClientGenerator.Generate<IPositionsApi>();
             Reports = httpClientGenerator.Generate<IReportsApi>();
@@ -40,6 +41,9 @@ namespace Lykke.Service.LiquidityEngine.Client
 
         /// <inheritdoc/>
         public IInstrumentsApi Instruments { get; }
+
+        /// <inheritdoc/>
+        public IMarketMakerApi MarketMaker { get; }
 
         /// <inheritdoc/>
         public IOrderBooksApi OrderBooks { get; }

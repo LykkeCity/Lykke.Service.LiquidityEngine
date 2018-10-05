@@ -1,11 +1,13 @@
-using Autofac;
+﻿using Autofac;
 using JetBrains.Annotations;
+using Lykke.Service.LiquidityEngine.Domain.Cache;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.DomainServices.Audit;
 using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
+using Lykke.Service.LiquidityEngine.DomainServices.MarketMaker;
 using Lykke.Service.LiquidityEngine.DomainServices.OrderBooks;
 using Lykke.Service.LiquidityEngine.DomainServices.Positions;
 using Lykke.Service.LiquidityEngine.DomainServices.Reports;
@@ -63,6 +65,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IInstrumentService>()
                 .SingleInstance();
 
+            builder.RegisterType<MarketMakerStateService>()
+                .As<IMarketMakerStateService>()
+                .SingleInstance();
+
             builder.RegisterType<PositionService>()
                 .As<IPositionService>()
                 .SingleInstance();
@@ -93,18 +99,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IQuoteTimeoutSettingsService>()
                 .SingleInstance();
             
-            builder.RegisterType<BalancesTimer>()
-                .AsSelf()
-                .SingleInstance();
-            
-            builder.RegisterType<MarketMakerTimer>()
-                .AsSelf()
-                .SingleInstance();
-            
-            builder.RegisterType<HedgingTimer>()
-                .AsSelf()
-                .SingleInstance();
-            
             builder.RegisterType<TradeService>()
                 .As<ITradeService>()
                 .SingleInstance();
@@ -115,6 +109,36 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             
             builder.RegisterType<HedgeService>()
                 .As<IHedgeService>()
+                .SingleInstance();
+
+            RegisterCache(builder);
+
+            RegisterTimers(builder);
+        }
+
+        private void RegisterCache(ContainerBuilder builder)
+        {
+            builder.RegisterType<BalanceCache>()
+                .As<IBalanceCache>()
+                .SingleInstance();
+        }
+
+        private void RegisterTimers(ContainerBuilder builder)
+        {
+            builder.RegisterType<LykkeBalancesTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<ExternalBalancesTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<MarketMakerTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<HedgingTimer>()
+                .AsSelf()
                 .SingleInstance();
         }
     }

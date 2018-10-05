@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.Balances;
@@ -13,18 +13,25 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
     public interface IBalancesApi
     {
         /// <summary>
-        /// Returns a collection of non zero balances.
+        /// Returns a collection of non zero balances for Lykke exchange
         /// </summary>
         /// <returns>A collection of balances.</returns>
-        [Get("/api/balances")]
-        Task<IReadOnlyCollection<AssetBalanceModel>> GetAllAsync();
+        [Get("/api/balances/lykke")]
+        Task<IReadOnlyCollection<AssetBalanceModel>> GetLykkeAsync();
 
         /// <summary>
-        /// Returns a balance by asset.
+        /// Returns a balance for Lykke exchange by asset.
         /// </summary>
         /// <param name="assetId">The identifier of an asset.</param>
         /// <returns>The balance of asset.</returns>
-        [Get("/api/balances/{assetId}")]
-        Task<AssetBalanceModel> GetByAssetIdAsync(string assetId);
+        [Get("/api/balances/lykke/{assetId}")]
+        Task<AssetBalanceModel> GetLykkeBalanceByAssetIdAsync(string assetId);
+
+        /// <summary>
+        /// Returns a collection of non zero balances for External exchange
+        /// </summary>
+        /// <returns>A collection of balances.</returns>
+        [Get("/api/balances/external")]
+        Task<IReadOnlyCollection<AssetBalanceModel>> GetExternalAsync();
     }
 }

@@ -1,4 +1,4 @@
-namespace Lykke.Service.LiquidityEngine.Domain
+﻿namespace Lykke.Service.LiquidityEngine.Domain
 {
     /// <summary>
     /// Specifies limit order error.
@@ -73,6 +73,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// Indicates that the limit order price is invalid (less than zero or etc.).
         /// </summary>
-        InvalidPrice
+        InvalidPrice,
+
+        /// <summary>
+        /// Indicates that an instrument is not allowed to create limit orders becase of market maker state.
+        /// </summary>
+        MarketMakerError
     }
 }

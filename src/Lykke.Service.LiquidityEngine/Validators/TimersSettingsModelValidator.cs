@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using FluentValidation;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.Settings;
@@ -10,9 +10,13 @@ namespace Lykke.Service.LiquidityEngine.Validators
     {
         public TimersSettingsModelValidator()
         {
-            RuleFor(o => o.Balances)
+            RuleFor(o => o.LykkeBalances)
                 .GreaterThanOrEqualTo(TimeSpan.FromSeconds(1))
-                .WithMessage("Balances timer interval should be greater than or equal to one second.");
+                .WithMessage("Lykke balances timer interval should be greater than or equal to one second.");
+
+            RuleFor(o => o.ExternalBalances)
+                .GreaterThanOrEqualTo(TimeSpan.FromSeconds(1))
+                .WithMessage("External balances timer interval should be greater than or equal to one second.");
 
             RuleFor(o => o.MarketMaker)
                 .GreaterThanOrEqualTo(TimeSpan.FromSeconds(1))

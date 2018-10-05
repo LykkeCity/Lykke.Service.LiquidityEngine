@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Domain;
@@ -34,7 +34,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
                     timersSettings = new TimersSettings
                     {
                         MarketMaker = TimeSpan.FromSeconds(5),
-                        Balances = TimeSpan.FromSeconds(1)
+                        LykkeBalances = TimeSpan.FromSeconds(1),
+                        ExternalBalances = TimeSpan.FromSeconds(1)
                     };
                 }
 

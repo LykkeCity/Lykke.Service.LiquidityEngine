@@ -7,6 +7,8 @@ using Lykke.Logs;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Consts;
+using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -27,6 +29,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly Mock<IBalanceService> _balanceServiceMock =
             new Mock<IBalanceService>();
+
+        private readonly Mock<IMarketMakerStateService> _marketMakerStateServiceMock =
+            new Mock<IMarketMakerStateService>();
 
         private readonly Mock<IQuoteService> _quoteServiceMock =
             new Mock<IQuoteService>();
@@ -85,8 +90,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             _balances.AddRange(new[]
             {
-                new Balance("BTC", 1000000),
-                new Balance("USD", 1000000)
+                new Balance(ExchangeNames.Lykke, "BTC", 1000000),
+                new Balance(ExchangeNames.Lykke, "USD", 1000000)
             });
 
             _quoteTimeoutSettings = new QuoteTimeoutSettings
@@ -95,8 +100,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 Error = TimeSpan.FromSeconds(1)
             };
 
-            _balanceServiceMock.Setup(o => o.GetByAssetIdAsync(It.IsAny<string>()))
-                .Returns((string assetId) => { return Task.FromResult(_balances.Single(o => o.AssetId == assetId)); });
+            _balanceServiceMock.Setup(o => o.GetByAssetIdAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string exchange, string assetId) =>
+                {
+                    return Task.FromResult(_balances.Single(o => o.Exchange == exchange && o.AssetId == assetId));
+                });
 
             _assetsServiceWithCacheMock
                 .Setup(o => o.TryGetAssetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -123,6 +131,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _lykkeExchangeServiceMock.Object,
                 _orderBookServiceMock.Object,
                 _balanceServiceMock.Object,
+                _marketMakerStateServiceMock.Object,
                 _quoteServiceMock.Object,
                 _quoteTimeoutSettingsServiceMock.Object,
                 _summaryReportServiceMock.Object,
@@ -197,6 +206,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                     new InstrumentLevel {Number = 2, Volume = 1, Markup = .02m}
                 }
             });
+
+            _marketMakerStateServiceMock
+                .Setup(o => o.GetStateAsync())
+                .Returns(() =>
+                    Task.FromResult(new MarketMakerState{ Status = MarketMakerStatus.Active }));
 
             _lykkeExchangeServiceMock
                 .Setup(o => o.ApplyAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<LimitOrder>>()))
