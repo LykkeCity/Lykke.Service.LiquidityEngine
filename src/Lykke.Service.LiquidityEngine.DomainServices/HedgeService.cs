@@ -62,6 +62,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     else
                         externalTrade = await _externalExchangeService.ExecuteBuyLimitOrderAsync(group.Key, volume);
                 }
+                catch (ExternalExchangeThrottlingException exception)
+                {
+                    _log.WarningWithDetails("Can not close positions because of throttling", exception,
+                        new { assetPairId = group.Key, volume });
+                }
                 catch (ExternalExchangeException exception)
                 {
                     _log.WarningWithDetails(
