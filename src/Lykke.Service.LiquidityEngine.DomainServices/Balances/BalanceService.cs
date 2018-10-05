@@ -10,6 +10,7 @@ using Lykke.Service.Balances.Client;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Cache;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
+using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
@@ -75,6 +76,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
                 IReadOnlyCollection<Balance> balances = await _externalExchangeService.GetBalancesAsync();
 
                 _cache.Set(balances);
+            }
+            catch (ExternalExchangeThrottlingException exception)
+            {
+                _log.WarningWithDetails("Balance request was throttled", exception);
             }
             catch (Exception exception)
             {
