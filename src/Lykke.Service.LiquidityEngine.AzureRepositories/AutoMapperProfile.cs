@@ -50,6 +50,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             CreateMap<QuoteTimeoutSettings, QuoteTimeoutSettingsEntity>(MemberList.Source);
             CreateMap<QuoteTimeoutSettingsEntity, QuoteTimeoutSettings>(MemberList.Destination);
 
+            CreateMap<QuoteThresholdSettings, QuoteThresholdSettingsEntity>(MemberList.Source);
+            CreateMap<QuoteThresholdSettingsEntity, QuoteThresholdSettings>(MemberList.Destination);
+            
             CreateMap<MarketMakerState, MarketMakerStateEntity>(MemberList.Source);
             CreateMap<MarketMakerStateEntity, MarketMakerState>(MemberList.Destination);
         }

@@ -74,7 +74,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             if (quote == null)
             {
-                _log.WarningWithDetails("No quote for instrument", new { instrument.AssetPairId });
+                _log.WarningWithDetails("No quote for instrument", new {instrument.AssetPairId});
                 return;
             }
 
@@ -95,17 +95,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 limitOrders.Add(LimitOrder.CreateBuy(buyPrice, volume));
             }
 
-            await ValidateQuoteAsync(limitOrders, quote);
+            await ValidateQuoteTimeoutAsync(limitOrders, quote);
 
             ValidateMinVolume(limitOrders, (decimal) assetPair.MinVolume);
-            
+
             await ValidatePnLThresholdAsync(limitOrders, instrument);
 
             await ValidateInventoryThresholdAsync(limitOrders, instrument);
 
             await ValidateBalanceAsync(limitOrders, assetPair);
 
-            await ValidateMarketMakerState(limitOrders);
+            await ValidateMarketMakerStateAsync(limitOrders);
 
             await _orderBookService.UpdateAsync(new OrderBook
             {
@@ -122,7 +122,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 limitOrders.Where(o => o.Error == LimitOrderError.None).ToArray());
         }
 
-        private async Task ValidateQuoteAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
+        private async Task ValidateQuoteTimeoutAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
         {
             QuoteTimeoutSettings quoteTimeoutSettings = await _quoteTimeoutSettingsService.GetAsync();
 
@@ -238,18 +238,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }
         }
 
-        private async Task ValidateMarketMakerState(IReadOnlyCollection<LimitOrder> limitOrders)
+        private async Task ValidateMarketMakerStateAsync(IReadOnlyCollection<LimitOrder> limitOrders)
         {
             MarketMakerState state = await _marketMakerStateService.GetStateAsync();
 
             if (state.Status == MarketMakerStatus.Error)
-            {
                 SetError(limitOrders, LimitOrderError.MarketMakerError);
-            }
-            else if (state.Status == MarketMakerStatus.Disabled)
-            {
+
+            if (state.Status == MarketMakerStatus.Disabled)
                 SetError(limitOrders, LimitOrderError.Idle);
-            }
         }
 
         private void SetError(IReadOnlyCollection<LimitOrder> limitOrders, LimitOrderError limitOrderError)

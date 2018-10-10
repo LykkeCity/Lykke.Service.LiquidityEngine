@@ -35,16 +35,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly Mock<IQuoteService> _quoteServiceMock =
             new Mock<IQuoteService>();
-        
+
         private readonly Mock<IQuoteTimeoutSettingsService> _quoteTimeoutSettingsServiceMock =
             new Mock<IQuoteTimeoutSettingsService>();
-        
+
         private readonly Mock<ISummaryReportService> _summaryReportServiceMock =
             new Mock<ISummaryReportService>();
-        
+
         private readonly Mock<IPositionService> _positionServiceMock =
             new Mock<IPositionService>();
-        
+
         private readonly Mock<IAssetsServiceWithCache> _assetsServiceWithCacheMock =
             new Mock<IAssetsServiceWithCache>();
 
@@ -112,7 +112,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 {
                     return Task.FromResult(_assets.Single(o => o.Id == assetId));
                 });
-            
+
             _assetsServiceWithCacheMock
                 .Setup(o => o.TryGetAssetPairAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns((string assetPairId, CancellationToken token) =>
@@ -210,7 +210,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             _marketMakerStateServiceMock
                 .Setup(o => o.GetStateAsync())
                 .Returns(() =>
-                    Task.FromResult(new MarketMakerState{ Status = MarketMakerStatus.Active }));
+                    Task.FromResult(new MarketMakerState {Status = MarketMakerStatus.Active}));
 
             _lykkeExchangeServiceMock
                 .Setup(o => o.ApplyAsync(It.IsAny<string>(), It.IsAny<IReadOnlyCollection<LimitOrder>>()))
@@ -230,7 +230,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             _positionServiceMock.Setup(o => o.GetOpenedAsync(It.IsAny<string>()))
                 .Returns((string assetPairId) => Task.FromResult<IReadOnlyCollection<Position>>(new[]
                 {
-                    new Position { AssetPairId = assetPairId, Volume = 10}
+                    new Position {AssetPairId = assetPairId, Volume = 10}
                 }));
 
             // act

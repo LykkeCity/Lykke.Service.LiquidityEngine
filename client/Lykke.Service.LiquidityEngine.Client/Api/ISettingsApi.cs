@@ -31,12 +31,25 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <returns>The settings of quote timeouts.</returns>
         [Get("/api/settings/quotes")]
         Task<QuoteTimeoutSettingsModel> GetQuoteTimeoutSettingsAsync();
-        
+
         /// <summary>
         /// Saves settings of quote timeouts.
         /// </summary>
         /// <param name="model">The settings of quote timeouts.</param>
         [Post("/api/settings/quotes")]
         Task SaveQuoteTimeoutSettingsAsync([Body] QuoteTimeoutSettingsModel model);
+
+        /// <summary>
+        /// Returns settings of quote threshold.
+        /// </summary>
+        [Get("/api/settings/quotes/threshold")]
+        Task<QuoteThresholdSettingsModel> GetQuoteThresholdSettingsAsync();
+
+        /// <summary>
+        /// Saves settings of quote threshold.
+        /// </summary>
+        /// <param name="model">The settings of quote threshold.</param>
+        [Post("/api/settings/quotes/threshold")]
+        Task SaveQuoteThresholdSettingsAsync([Body] QuoteThresholdSettingsModel model);
     }
 }
