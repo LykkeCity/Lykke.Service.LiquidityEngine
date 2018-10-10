@@ -14,13 +14,16 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     {
         private readonly ITimersSettingsService _timersSettingsService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
+        private readonly IQuoteThresholdSettingsService _quoteThresholdSettingsService;
 
         public SettingsController(
             ITimersSettingsService timersSettingsService,
-            IQuoteTimeoutSettingsService quoteTimeoutSettingsService)
+            IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
+            IQuoteThresholdSettingsService quoteThresholdSettingsService)
         {
             _timersSettingsService = timersSettingsService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
+            _quoteThresholdSettingsService = quoteThresholdSettingsService;
         }
 
         /// <response code="200">The settings of service timers.</response>
@@ -61,6 +64,26 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             var quoteTimeoutSettings = Mapper.Map<QuoteTimeoutSettings>(model);
 
             await _quoteTimeoutSettingsService.SaveAsync(quoteTimeoutSettings);
+        }
+        
+        /// <response code="200">The settings of quote threshold.</response>
+        [HttpGet("quotes/threshold")]
+        [ProducesResponseType(typeof(QuoteThresholdSettingsModel), (int) HttpStatusCode.OK)]
+        public async Task<QuoteThresholdSettingsModel> GetQuoteThresholdSettingsAsync()
+        {
+            QuoteThresholdSettings quoteThresholdSettings = await _quoteThresholdSettingsService.GetAsync();
+
+            return Mapper.Map<QuoteThresholdSettingsModel>(quoteThresholdSettings);
+        }
+
+        /// <response code="204">The settings of quote threshold successfully saved.</response>
+        [HttpPost("quotes/threshold")]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        public async Task SaveQuoteThresholdSettingsAsync([FromBody] QuoteThresholdSettingsModel model)
+        {
+            var quoteThresholdSettings = Mapper.Map<QuoteThresholdSettings>(model);
+
+            await _quoteThresholdSettingsService.UpdateAsync(quoteThresholdSettings);
         }
     }
 }
