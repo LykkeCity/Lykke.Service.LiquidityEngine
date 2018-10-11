@@ -13,6 +13,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
         private InstrumentMode _mode;
         private decimal _pnLThreshold;
         private decimal _inventoryThreshold;
+        private int _volumeAccuracy;
 
         public InstrumentEntity()
         {
@@ -48,6 +49,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 {
                     _pnLThreshold = value;
                     MarkValueTypePropertyAsDirty("PnLThreshold");
+                }
+            }
+        }
+
+        public int VolumeAccuracy
+        {
+            get => _volumeAccuracy;
+            set
+            {
+                if (_volumeAccuracy != value)
+                {
+                    _volumeAccuracy = value;
+                    MarkValueTypePropertyAsDirty("VolumeAccuracy");
                 }
             }
         }

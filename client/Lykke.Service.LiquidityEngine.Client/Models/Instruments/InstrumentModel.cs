@@ -30,6 +30,11 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
         public decimal InventoryThreshold { get; set; }
 
         /// <summary>
+        /// The accuracy of the hedge limit order volume that will be created on external exchange.
+        /// </summary>
+        public int VolumeAccuracy { get; set; }
+        
+        /// <summary>
         /// A collection of order book levels.
         /// </summary>
         public IReadOnlyCollection<InstrumentLevelModel> Levels { get; set; }

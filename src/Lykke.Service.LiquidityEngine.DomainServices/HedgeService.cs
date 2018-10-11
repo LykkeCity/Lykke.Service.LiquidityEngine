@@ -15,17 +15,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
     public class HedgeService : IHedgeService
     {
         private readonly IPositionService _positionService;
+        private readonly IInstrumentService _instrumentService;
         private readonly IExternalExchangeService _externalExchangeService;
         private readonly IMarketMakerStateService _marketMakerStateService;
         private readonly ILog _log;
 
         public HedgeService(
             IPositionService positionService,
+            IInstrumentService instrumentService,
             IExternalExchangeService externalExchangeService,
             IMarketMakerStateService marketMakerStateService,
             ILogFactory logFactory)
         {
             _positionService = positionService;
+            _instrumentService = instrumentService;
             _externalExchangeService = externalExchangeService;
             _marketMakerStateService = marketMakerStateService;
             _log = logFactory.CreateLog(this);
@@ -51,7 +54,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         {
             foreach (IGrouping<string, Position> group in positions.GroupBy(o => o.AssetPairId))
             {
-                decimal volume = group.Sum(o => o.Volume);
+                Instrument instrument = await _instrumentService.GetByAssetPairIdAsync(group.Key);
+                
+                decimal volume = Math.Round(group.Sum(o => o.Volume), instrument.VolumeAccuracy);
 
                 ExternalTrade externalTrade = null;
 
