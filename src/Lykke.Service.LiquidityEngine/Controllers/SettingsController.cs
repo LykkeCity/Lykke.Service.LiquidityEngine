@@ -12,20 +12,33 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     [Route("/api/[controller]")]
     public class SettingsController : Controller, ISettingsApi
     {
+        private readonly ISettingsService _settingsService;
         private readonly ITimersSettingsService _timersSettingsService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
         private readonly IQuoteThresholdSettingsService _quoteThresholdSettingsService;
 
         public SettingsController(
+            ISettingsService settingsService,
             ITimersSettingsService timersSettingsService,
             IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
             IQuoteThresholdSettingsService quoteThresholdSettingsService)
         {
+            _settingsService = settingsService;
             _timersSettingsService = timersSettingsService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
             _quoteThresholdSettingsService = quoteThresholdSettingsService;
         }
 
+        /// <response code="200">The settings of service account.</response>
+        [HttpGet("account")]
+        [ProducesResponseType(typeof(AccountSettingsModel), (int) HttpStatusCode.OK)]
+        public async Task<AccountSettingsModel> GetAccountSettingsAsync()
+        {
+            string walletId = await _settingsService.GetWalletIdAsync();
+
+            return new AccountSettingsModel {WalletId = walletId};
+        }
+        
         /// <response code="200">The settings of service timers.</response>
         [HttpGet("timers")]
         [ProducesResponseType(typeof(TimersSettingsModel), (int) HttpStatusCode.OK)]

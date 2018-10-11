@@ -12,6 +12,13 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
     public interface ISettingsApi
     {
         /// <summary>
+        /// Returns an account settings that used by service.
+        /// </summary>
+        /// <returns>The account settings.</returns>
+        [Get("/api/settings/account")]
+        Task<AccountSettingsModel> GetAccountSettingsAsync();
+
+        /// <summary>
         /// Returns settings of service timers.
         /// </summary>
         /// <returns>The settings of service timers.</returns>
