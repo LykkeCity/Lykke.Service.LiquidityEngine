@@ -11,7 +11,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.MarketMaker
 {
     public class MarketMakerStateService : IMarketMakerStateService
     {
-        private const string CacheKey = "MarketMakerState";
+        private const string CacheKey = "key";
 
         private readonly IMarketMakerStateRepository _marketMakerStateRepository;
         private readonly InMemoryCache<MarketMakerState> _cache;
@@ -41,22 +41,38 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.MarketMaker
                     };
                 }
 
-                _cache.Initialize(new[] { state });
+                _cache.Initialize(new[] {state});
             }
 
             return state;
         }
 
-        public async Task SetStateAsync(MarketMakerState state, string comment, string userId = null)
+        public Task SetStateAsync(MarketMakerStatus status, string comment, string userId)
+            => SetStateAsync(status, MarketMakerError.None, null, comment, userId);
+
+        public Task SetStateAsync(MarketMakerError marketMakerError, string errorMessages, string comment)
+            => SetStateAsync(MarketMakerStatus.Error, marketMakerError, errorMessages, comment, null);
+
+        private async Task SetStateAsync(MarketMakerStatus status, MarketMakerError marketMakerError,
+            string errorMessages, string comment, string userId)
         {
-            MarketMakerState currentState = await GetStateAsync();
+            var marketMakerState = new MarketMakerState
+            {
+                Time = DateTime.UtcNow,
+                Status = status,
+                Error = marketMakerError,
+                ErrorMessage = errorMessages
+            };
 
-            await _marketMakerStateRepository.InsertOrReplaceAsync(state);
+            MarketMakerState currentMarketMakerState = await GetStateAsync();
 
-            _cache.Set(state);
+            await _marketMakerStateRepository.InsertOrReplaceAsync(marketMakerState);
 
-            _log.InfoWithDetails("Market maker state is changed.", 
-                new StateOperationContext(currentState.Status, state.Status, comment, userId, state.Error, state.ErrorMessage));
+            _cache.Set(marketMakerState);
+
+            _log.InfoWithDetails("Market maker state is changed.",
+                new StateOperationContext(currentMarketMakerState.Status, marketMakerState.Status, comment, userId,
+                    marketMakerState.Error, marketMakerState.ErrorMessage));
         }
     }
 }

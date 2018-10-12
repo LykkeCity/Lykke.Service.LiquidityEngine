@@ -55,31 +55,26 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             var request = new RequestForQuoteRequest(instrument, side, volume);
 
-            RequestForQuoteResponse response = null;
+            RequestForQuoteResponse response;
 
             Trade trade = await WrapAsync(async () =>
-                {
-                    _log.InfoWithDetails("Request for quote", request);
+            {
+                _log.InfoWithDetails("Get quote request", request);
 
-                    response = await _client.RequestForQuoteAsync(request);
+                response = await _client.RequestForQuoteAsync(request);
 
-                    _log.InfoWithDetails("Response on quote", response);
+                _log.InfoWithDetails("Get quote response", response);
 
-                    var tradeRequest = new TradeRequest(response);
+                var tradeRequest = new TradeRequest(response);
 
-                    _log.InfoWithDetails("Request trade", tradeRequest);
+                _log.InfoWithDetails("Execute trade request", tradeRequest);
 
-                    Trade tradeResponse = await _client.TradeAsync(tradeRequest);
+                Trade tradeResponse = await _client.TradeAsync(tradeRequest);
 
-                    _log.InfoWithDetails("Response on trade", tradeResponse);
+                _log.InfoWithDetails("Execute trade response", tradeResponse);
 
-                    return tradeResponse;
-                },
-                new
-                {
-                    request,
-                    response
-                });
+                return tradeResponse;
+            });
 
             return new ExternalTrade
             {
@@ -102,23 +97,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             return await WrapAsync(async () =>
             {
-                _log.InfoWithDetails("Request for quote", request);
+                _log.InfoWithDetails("Get quote request", request);
 
                 RequestForQuoteResponse response = await _client.RequestForQuoteAsync(request);
 
-                _log.InfoWithDetails("Response on quote request", response);
+                _log.InfoWithDetails("Get quote response", response);
 
                 return response.Price;
             });
-        }
-
-        private async Task<string> GetInstrumentAsync(string assetPairId)
-        {
-            IReadOnlyCollection<AssetPairLink> assetPairLinks = await _assetPairLinkService.GetAllAsync();
-
-            AssetPairLink assetPairLink = assetPairLinks.SingleOrDefault(o => o.AssetPairId == assetPairId);
-
-            return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
         }
 
         private Task<IReadOnlyCollection<Balance>> ExecuteGetBalancesAsync()
@@ -133,34 +119,30 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             });
         }
 
-        private async Task<T> WrapAsync<T>(Func<Task<T>> action, object context = null)
+        private async Task<string> GetInstrumentAsync(string assetPairId)
+        {
+            IReadOnlyCollection<AssetPairLink> assetPairLinks = await _assetPairLinkService.GetAllAsync();
+
+            AssetPairLink assetPairLink = assetPairLinks.SingleOrDefault(o => o.AssetPairId == assetPairId);
+
+            return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
+        }
+
+        private async Task<T> WrapAsync<T>(Func<Task<T>> action)
         {
             try
             {
                 return await action();
             }
+            catch (B2c2RestException exception) when (exception.ErrorResponse.Status == HttpStatusCode.TooManyRequests)
+            {
+                throw new ExternalExchangeThrottlingException(exception.Message, exception);
+            }
             catch (B2c2RestException exception)
             {
-                if (exception.ErrorResponse.Status == HttpStatusCode.TooManyRequests)
-                {
-                    _log.WarningWithDetails("Request was throttled while calling external exchange.", exception,
-                        context);
+                Error error = exception.ErrorResponse.Errors.FirstOrDefault();
 
-                    throw new ExternalExchangeThrottlingException(exception.Message, exception);
-                }
-                else
-                {
-                    _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
-                    
-                    Error first = exception.ErrorResponse.Errors.FirstOrDefault();
-
-                    throw new ExternalExchangeException(first?.Message ?? exception.Message, exception);
-                }
-            }
-            catch (Exception exception)
-            {
-                _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
-                throw;
+                throw new ExternalExchangeException(error?.Message ?? exception.Message, exception);
             }
         }
     }

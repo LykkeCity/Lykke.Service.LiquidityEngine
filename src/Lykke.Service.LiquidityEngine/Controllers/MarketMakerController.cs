@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
 using Lykke.Common.ApiLibrary.Exceptions;
@@ -32,30 +31,26 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         }
 
         /// <response code="204">The market maker state successfully saved.</response>
+        /// <response code="400">Comment required to change error status.</response>
         [HttpPost("state")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task SetStateAsync([FromBody] MarketMakerStateUpdateModel model)
         {
-            var targetStatus = Mapper.Map<Domain.MarketMaker.MarketMakerStatus>(model.Status);
+            var status = Mapper.Map<Domain.MarketMaker.MarketMakerStatus>(model.Status);
 
             MarketMakerState currentState = await _marketMakerStateService.GetStateAsync();
 
-            if (targetStatus == currentState.Status)
-            {
-                throw new ValidationApiException($"Cannot change market maker state from '{currentState.Status}' to '{targetStatus}'.");
-            }
+            if (status == currentState.Status)
+                return;
 
-            if (currentState.Status == Domain.MarketMaker.MarketMakerStatus.Error && string.IsNullOrEmpty(model.Comment))
+            if (currentState.Status == Domain.MarketMaker.MarketMakerStatus.Error &&
+                string.IsNullOrEmpty(model.Comment))
             {
                 throw new ValidationApiException("Comment required.");
             }
 
-            await _marketMakerStateService.SetStateAsync(new MarketMakerState
-            {
-                Status = targetStatus,
-                Time = DateTime.UtcNow
-            }, model.Comment, model.UserId);
+            await _marketMakerStateService.SetStateAsync(status, model.Comment, model.UserId);
         }
     }
 }

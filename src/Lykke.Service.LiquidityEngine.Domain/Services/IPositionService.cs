@@ -8,12 +8,14 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<IReadOnlyCollection<Position>> GetAllAsync(DateTime startDate, DateTime endDate, int limit);
 
-        Task<IReadOnlyCollection<Position>> GetOpenedAsync();
-        
-        Task<IReadOnlyCollection<Position>> GetOpenedAsync(string assetPairId);
-        
-        Task OpenPositionAsync(IReadOnlyCollection<InternalTrade> internalTrades);
+        Task<IReadOnlyCollection<Position>> GetOpenAllAsync();
 
-        Task ClosePositionAsync(Position position, ExternalTrade externalTrade);
+        Task<IReadOnlyCollection<Position>> GetOpenByAssetPairIdAsync(string assetPairId);
+
+        Task OpenAsync(IReadOnlyCollection<InternalTrade> internalTrades);
+
+        Task CloseAsync(Position position, ExternalTrade externalTrade);
+
+        Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade);
     }
 }

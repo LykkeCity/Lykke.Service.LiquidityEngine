@@ -28,14 +28,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// </summary>
         /// <returns>A collection of positions.</returns>
         [Get("/api/positions/open")]
-        Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync();
-        
+        Task<IReadOnlyCollection<PositionModel>> GetOpenAllAsync();
+
         /// <summary>
         /// Returns a collection of opened positions for asset pair.
         /// </summary>
         /// <param name="assetPairId">The asset pair id.</param>
         /// <returns>A collection of positions.</returns>
         [Get("/api/positions/open/{assetPairId}")]
-        Task<IReadOnlyCollection<PositionModel>> GetOpenedByAssetPairIdAsync(string assetPairId);
+        Task<IReadOnlyCollection<PositionModel>> GetOpenByAssetPairIdAsync(string assetPairId);
     }
 }

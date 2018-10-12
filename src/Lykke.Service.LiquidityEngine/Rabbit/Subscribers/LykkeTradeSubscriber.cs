@@ -91,7 +91,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 if (trades.Any())
                 {
                     await _tradeService.RegisterAsync(trades);
-                    await _positionService.OpenPositionAsync(trades);
+                    await _positionService.OpenAsync(trades);
 
                     _log.InfoWithDetails("Traders were handled", clientLimitOrders);
                 }

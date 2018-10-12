@@ -107,6 +107,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .As<ISummaryReportRepository>()
                 .SingleInstance();
 
+            builder.Register(container => new RemainingVolumeRepository(
+                    AzureTableStorage<RemainingVolumeEntity>.Create(_connectionString,
+                        "RemainingVolumes", container.Resolve<ILogFactory>())))
+                .As<IRemainingVolumeRepository>()
+                .SingleInstance();
+
             builder.Register(container => new MarketMakerStateRepository(
                     AzureTableStorage<MarketMakerStateEntity>.Create(_connectionString,
                         "MarketMakerState", container.Resolve<ILogFactory>())))

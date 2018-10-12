@@ -18,7 +18,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The mode of the instrument.  
         /// </summary>
         public InstrumentMode Mode { get; set; }
-        
+
         /// <summary>
         /// The threshold of the instrument realised profit and loss.
         /// </summary>
@@ -28,12 +28,17 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The threshold of the instrument absolute inventory.
         /// </summary>
         public decimal InventoryThreshold { get; set; }
-        
+
+        /// <summary>
+        /// The min volume that can be used to create external limit order.
+        /// </summary>
+        public int MinVolume { get; set; }
+
         /// <summary>
         /// The accuracy of the hedge limit order volume that will be created on external exchange.
         /// </summary>
         public int VolumeAccuracy { get; set; }
-        
+
         /// <summary>
         /// A collection of order book levels.
         /// </summary>
@@ -44,6 +49,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
             Mode = instrument.Mode;
             PnLThreshold = instrument.PnLThreshold;
             InventoryThreshold = instrument.InventoryThreshold;
+            MinVolume = instrument.MinVolume;
+            VolumeAccuracy = instrument.VolumeAccuracy;
         }
 
         public void AddLevel(InstrumentLevel instrumentLevel)
@@ -74,8 +81,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
         {
             InstrumentLevel currentLevelVolume = (Levels ?? new List<InstrumentLevel>())
                 .FirstOrDefault(o => o.Number == instrumentLevel.Number);
-            
-            if(currentLevelVolume == null)
+
+            if (currentLevelVolume == null)
                 throw new InvalidOperationException("The level does not exists");
 
             currentLevelVolume.Volume = instrumentLevel.Volume;
