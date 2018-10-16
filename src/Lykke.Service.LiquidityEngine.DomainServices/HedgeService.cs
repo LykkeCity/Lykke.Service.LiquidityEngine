@@ -39,11 +39,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         public async Task ExecuteAsync()
         {
-            MarketMakerState state = await _marketMakerStateService.GetStateAsync();
-
-            if (state.Status != MarketMakerStatus.Active)
-                return;
-
             IReadOnlyCollection<Position> positions = await _positionService.GetOpenAllAsync();
 
             await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Long), PositionType.Long);
@@ -75,7 +70,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     foreach (Position position in group)
                         await _positionService.CloseAsync(position, externalTrade);
 
-                    await _remainingVolumeService.RegisterVolumeAsync(group.Key, originalVolume - volume);
+                    await _remainingVolumeService.RegisterVolumeAsync(group.Key,
+                        (originalVolume - volume) * GetSign(positionType));
                 }
             }
         }
@@ -110,7 +106,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 if (externalTrade != null)
                 {
                     await _remainingVolumeService.RegisterVolumeAsync(instrument.AssetPairId,
-                        remainingVolume.Volume - volume);
+                        (remainingVolume.Volume - volume) * GetSign(positionType));
                 }
             }
         }
@@ -149,5 +145,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             return externalTrade;
         }
+
+        private static int GetSign(PositionType positionType)
+            => positionType == PositionType.Long ? 1 : -1;
     }
 }

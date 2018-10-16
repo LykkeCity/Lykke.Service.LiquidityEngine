@@ -32,7 +32,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// The min volume that can be used to create external limit order.
         /// </summary>
-        public int MinVolume { get; set; }
+        public decimal MinVolume { get; set; }
 
         /// <summary>
         /// The accuracy of the hedge limit order volume that will be created on external exchange.

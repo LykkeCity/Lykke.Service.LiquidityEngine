@@ -37,7 +37,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
         /// <summary>
         /// The min volume that can be used to create external limit order.
         /// </summary>
-        public int MinVolume { get; set; }
+        public decimal MinVolume { get; set; }
 
         /// <summary>
         /// A collection of order book levels.
