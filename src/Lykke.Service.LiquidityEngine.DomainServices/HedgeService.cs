@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
-using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.Services;
@@ -14,6 +13,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 {
     public class HedgeService : IHedgeService
     {
+        private const int MaxIterations = 50;
+        
         private readonly IPositionService _positionService;
         private readonly IInstrumentService _instrumentService;
         private readonly IExternalExchangeService _externalExchangeService;
@@ -21,6 +22,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IRemainingVolumeService _remainingVolumeService;
         private readonly ILog _log;
 
+        private readonly Dictionary<string, Tuple<int, int>> _attempts =
+            new Dictionary<string, Tuple<int, int>>();
+        
         public HedgeService(
             IPositionService positionService,
             IInstrumentService instrumentService,
@@ -101,10 +105,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 ExternalTrade externalTrade =
                     await ExecuteLimitOrderAsync(instrument.AssetPairId, volume, positionType);
 
-                await _positionService.CloseRemainingVolumeAsync(instrument.AssetPairId, externalTrade);
-
                 if (externalTrade != null)
                 {
+                    await _positionService.CloseRemainingVolumeAsync(instrument.AssetPairId, externalTrade);
+                    
                     await _remainingVolumeService.RegisterVolumeAsync(instrument.AssetPairId,
                         (remainingVolume.Volume - volume) * GetSign(positionType));
                 }
@@ -116,31 +120,47 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         {
             ExternalTrade externalTrade = null;
 
+            if (!_attempts.TryGetValue(assetPairId, out Tuple<int, int> attempt))
+                attempt = new Tuple<int, int>(0, 0);
+            
             try
             {
-                if (positionType == PositionType.Long)
-                    externalTrade = await _externalExchangeService.ExecuteSellLimitOrderAsync(assetPairId, volume);
+                if (attempt.Item2 <= 0)
+                {
+                    if (positionType == PositionType.Long)
+                        externalTrade = await _externalExchangeService.ExecuteSellLimitOrderAsync(assetPairId, volume);
+                    else
+                        externalTrade = await _externalExchangeService.ExecuteBuyLimitOrderAsync(assetPairId, volume);
+                    
+                    _attempts.Remove(assetPairId);
+                }
                 else
-                    externalTrade = await _externalExchangeService.ExecuteBuyLimitOrderAsync(assetPairId, volume);
-            }
-            catch (ExternalExchangeThrottlingException exception)
-            {
-                _log.WarningWithDetails("Can not close positions because of throttling", exception,
-                    new {assetPairId, volume});
-            }
-            catch (ExternalExchangeException exception)
-            {
-                _log.WarningWithDetails(
-                    "Can not close positions because of integration error. Setting market maker state to error",
-                    exception, new {assetPairId, volume});
+                {
+                    _attempts[assetPairId] = new Tuple<int, int>(attempt.Item1, attempt.Item2 - 1);
 
-                await _marketMakerStateService.SetStateAsync(MarketMakerError.IntegrationError,
-                    $"An error occurred while position closing ({assetPairId}): {exception.Message}",
-                    "An error occurred while executing limit order");
+                    _log.InfoWithDetails("Execution of hedge limit order is skipped", new
+                    {
+                        assetPairId,
+                        volume,
+                        positionType,
+                        attempt = attempt.Item1,
+                        iteration = attempt.Item2
+                    });
+                }
             }
             catch (Exception exception)
             {
-                _log.WarningWithDetails("Can not close positions", exception, new {assetPairId, volume});
+                _attempts[assetPairId] =
+                    new Tuple<int, int>(attempt.Item1 + 1, Math.Min(attempt.Item1 + 1, MaxIterations));
+
+                _log.WarningWithDetails("Can not close positions.", exception,
+                    new
+                    {
+                        assetPairId,
+                        volume,
+                        positionType,
+                        attempt = attempt.Item1
+                    });
             }
 
             return externalTrade;

@@ -11,15 +11,17 @@ using Lykke.B2c2Client.Models.Rest;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
-using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Polly;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 {
     [UsedImplicitly]
     public class ExternalExchangeService : IExternalExchangeService
     {
+        private const int DefaultRetriesCount = 3;
+
         private readonly IB2С2RestClient _client;
         private readonly IAssetPairLinkService _assetPairLinkService;
         private readonly ILog _log;
@@ -128,22 +130,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
         }
 
-        private async Task<T> WrapAsync<T>(Func<Task<T>> action)
+        private Task<T> WrapAsync<T>(Func<Task<T>> action)
         {
-            try
-            {
-                return await action();
-            }
-            catch (B2c2RestException exception) when (exception.ErrorResponse.Status == HttpStatusCode.TooManyRequests)
-            {
-                throw new ExternalExchangeThrottlingException(exception.Message, exception);
-            }
-            catch (B2c2RestException exception)
-            {
-                Error error = exception.ErrorResponse.Errors.FirstOrDefault();
+            return Policy
+                .Handle<B2c2RestException>(exception =>
+                {
+                    if (exception.ErrorResponse.Status == HttpStatusCode.TooManyRequests)
+                        return true;
 
-                throw new ExternalExchangeException(error?.Message ?? exception.Message, exception);
-            }
+                    Error error = exception.ErrorResponse.Errors.FirstOrDefault();
+
+                    if (error != null && error.Code == ErrorCode.PriceNotValid)
+                        return true;
+
+                    return false;
+                })
+                .WaitAndRetryAsync(DefaultRetriesCount, attempt => TimeSpan.FromMilliseconds(500 * attempt))
+                .ExecuteAsync(async () => await action());
         }
     }
 }
