@@ -13,6 +13,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
         private TimeSpan _marketMaker;
         private TimeSpan _lykkeBalances;
         private TimeSpan _externalBalances;
+        private TimeSpan _hedging;
 
         public TimersSettingsEntity()
         {
@@ -33,6 +34,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 {
                     _marketMaker = value;
                     MarkValueTypePropertyAsDirty("MarketMaker");
+                }
+            }
+        }
+
+        public TimeSpan Hedging
+        {
+            get => _hedging;
+            set
+            {
+                if (_hedging != value)
+                {
+                    _hedging = value;
+                    MarkValueTypePropertyAsDirty("Hedging");
                 }
             }
         }

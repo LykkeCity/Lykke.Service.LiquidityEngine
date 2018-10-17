@@ -37,6 +37,8 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<Position, PositionModel>(MemberList.Source);
 
+            CreateMap<RemainingVolume, RemainingVolumeModel>(MemberList.Source);
+
             CreateMap<SummaryReport, SummaryReportModel>(MemberList.Source);
 
             CreateMap<OrderBook, OrderBookModel>(MemberList.Source);
@@ -44,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<QuoteThresholdSettings, QuoteThresholdSettingsModel>(MemberList.Source);
             CreateMap<QuoteThresholdSettingsModel, QuoteThresholdSettings>(MemberList.Destination);
-            
+
             CreateMap<QuoteTimeoutSettings, QuoteTimeoutSettingsModel>(MemberList.Source);
             CreateMap<QuoteTimeoutSettingsModel, QuoteTimeoutSettings>(MemberList.Destination);
 

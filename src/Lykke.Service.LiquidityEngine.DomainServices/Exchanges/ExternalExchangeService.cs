@@ -11,15 +11,17 @@ using Lykke.B2c2Client.Models.Rest;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
-using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Polly;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 {
     [UsedImplicitly]
     public class ExternalExchangeService : IExternalExchangeService
     {
+        private const int DefaultRetriesCount = 3;
+
         private readonly IB2С2RestClient _client;
         private readonly IAssetPairLinkService _assetPairLinkService;
         private readonly ILog _log;
@@ -55,31 +57,26 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             var request = new RequestForQuoteRequest(instrument, side, volume);
 
-            RequestForQuoteResponse response = null;
+            RequestForQuoteResponse response;
 
             Trade trade = await WrapAsync(async () =>
-                {
-                    _log.InfoWithDetails("Request for quote", request);
+            {
+                _log.InfoWithDetails("Get quote request", request);
 
-                    response = await _client.RequestForQuoteAsync(request);
+                response = await _client.RequestForQuoteAsync(request);
 
-                    _log.InfoWithDetails("Response on quote", response);
+                _log.InfoWithDetails("Get quote response", response);
 
-                    var tradeRequest = new TradeRequest(response);
+                var tradeRequest = new TradeRequest(response);
 
-                    _log.InfoWithDetails("Request trade", tradeRequest);
+                _log.InfoWithDetails("Execute trade request", tradeRequest);
 
-                    Trade tradeResponse = await _client.TradeAsync(tradeRequest);
+                Trade tradeResponse = await _client.TradeAsync(tradeRequest);
 
-                    _log.InfoWithDetails("Response on trade", tradeResponse);
+                _log.InfoWithDetails("Execute trade response", tradeResponse);
 
-                    return tradeResponse;
-                },
-                new
-                {
-                    request,
-                    response
-                });
+                return tradeResponse;
+            });
 
             return new ExternalTrade
             {
@@ -102,23 +99,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             return await WrapAsync(async () =>
             {
-                _log.InfoWithDetails("Request for quote", request);
+                _log.InfoWithDetails("Get quote request", request);
 
                 RequestForQuoteResponse response = await _client.RequestForQuoteAsync(request);
 
-                _log.InfoWithDetails("Response on quote request", response);
+                _log.InfoWithDetails("Get quote response", response);
 
                 return response.Price;
             });
-        }
-
-        private async Task<string> GetInstrumentAsync(string assetPairId)
-        {
-            IReadOnlyCollection<AssetPairLink> assetPairLinks = await _assetPairLinkService.GetAllAsync();
-
-            AssetPairLink assetPairLink = assetPairLinks.SingleOrDefault(o => o.AssetPairId == assetPairId);
-
-            return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
         }
 
         private Task<IReadOnlyCollection<Balance>> ExecuteGetBalancesAsync()
@@ -133,35 +121,32 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             });
         }
 
-        private async Task<T> WrapAsync<T>(Func<Task<T>> action, object context = null)
+        private async Task<string> GetInstrumentAsync(string assetPairId)
         {
-            try
-            {
-                return await action();
-            }
-            catch (B2c2RestException exception)
-            {
-                if (exception.ErrorResponse.Status == HttpStatusCode.TooManyRequests)
-                {
-                    _log.WarningWithDetails("Request was throttled while calling external exchange.", exception,
-                        context);
+            IReadOnlyCollection<AssetPairLink> assetPairLinks = await _assetPairLinkService.GetAllAsync();
 
-                    throw new ExternalExchangeThrottlingException(exception.Message, exception);
-                }
-                else
-                {
-                    _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
-                    
-                    Error first = exception.ErrorResponse.Errors.FirstOrDefault();
+            AssetPairLink assetPairLink = assetPairLinks.SingleOrDefault(o => o.AssetPairId == assetPairId);
 
-                    throw new ExternalExchangeException(first?.Message ?? exception.Message, exception);
-                }
-            }
-            catch (Exception exception)
-            {
-                _log.ErrorWithDetails(exception, "An error occurred while calling external exchange.", context);
-                throw;
-            }
+            return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
+        }
+
+        private Task<T> WrapAsync<T>(Func<Task<T>> action)
+        {
+            return Policy
+                .Handle<B2c2RestException>(exception =>
+                {
+                    if (exception.ErrorResponse.Status == HttpStatusCode.TooManyRequests)
+                        return true;
+
+                    Error error = exception.ErrorResponse.Errors.FirstOrDefault();
+
+                    if (error != null && error.Code == ErrorCode.PriceNotValid)
+                        return true;
+
+                    return false;
+                })
+                .WaitAndRetryAsync(DefaultRetriesCount, attempt => TimeSpan.FromMilliseconds(500 * attempt))
+                .ExecuteAsync(async () => await action());
         }
     }
 }

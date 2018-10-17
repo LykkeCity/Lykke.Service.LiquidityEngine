@@ -11,9 +11,14 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The timer interval of market maker.
         /// </summary>
         public TimeSpan MarketMaker { get; set; }
-        
+
         /// <summary>
-        /// The timer interval of lykke excahnge balances.
+        /// The timer interval of hedge algorithm.
+        /// </summary>
+        public TimeSpan Hedging { get; set; }
+
+        /// <summary>
+        /// The timer interval of lykke exchange balances.
         /// </summary>
         public TimeSpan LykkeBalances { get; set; }
 

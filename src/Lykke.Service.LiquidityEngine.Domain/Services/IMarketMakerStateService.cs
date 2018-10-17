@@ -7,6 +7,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<MarketMakerState> GetStateAsync();
 
-        Task SetStateAsync(MarketMakerState state, string comment, string userId = null);
+        Task SetStateAsync(MarketMakerStatus status, string comment, string userId);
+
+        Task SetStateAsync(MarketMakerError marketMakerError, string errorMessages, string comment);
     }
 }

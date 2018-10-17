@@ -33,7 +33,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
         /// The accuracy of the hedge limit order volume that will be created on external exchange.
         /// </summary>
         public int VolumeAccuracy { get; set; }
-        
+
+        /// <summary>
+        /// The min volume that can be used to create external limit order.
+        /// </summary>
+        public decimal MinVolume { get; set; }
+
         /// <summary>
         /// A collection of order book levels.
         /// </summary>

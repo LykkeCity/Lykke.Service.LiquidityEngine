@@ -25,7 +25,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">A collection of positions.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<PositionModel>> GetAllAsync(DateTime startDate, DateTime endDate, int limit)
+        public async Task<IReadOnlyCollection<PositionModel>> GetAllAsync(DateTime startDate, DateTime endDate,
+            int limit)
         {
             IReadOnlyCollection<Position> positions = await _positionService.GetAllAsync(startDate, endDate, limit);
 
@@ -36,20 +37,20 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">A collection of positions.</response>
         [HttpGet("open")]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<PositionModel>> GetOpenedAsync()
+        public async Task<IReadOnlyCollection<PositionModel>> GetOpenAllAsync()
         {
-            IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync();
+            IReadOnlyCollection<Position> positions = await _positionService.GetOpenAllAsync();
 
             return Mapper.Map<PositionModel[]>(positions);
         }
-        
+
         /// <inheritdoc/>
         /// <response code="200">A collection of positions.</response>
         [HttpGet("open/{assetPairId}")]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<PositionModel>> GetOpenedByAssetPairIdAsync(string assetPairId)
+        public async Task<IReadOnlyCollection<PositionModel>> GetOpenByAssetPairIdAsync(string assetPairId)
         {
-            IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync(assetPairId);
+            IReadOnlyCollection<Position> positions = await _positionService.GetOpenByAssetPairIdAsync(assetPairId);
 
             return Mapper.Map<PositionModel[]>(positions);
         }

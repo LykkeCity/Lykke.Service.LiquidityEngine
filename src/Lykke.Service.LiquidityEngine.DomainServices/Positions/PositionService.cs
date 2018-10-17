@@ -28,23 +28,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             _summaryReportService = summaryReportService;
             _log = logFactory.CreateLog(this);
         }
-        
+
         public Task<IReadOnlyCollection<Position>> GetAllAsync(DateTime startDate, DateTime endDate, int limit)
         {
             return _positionRepository.GetAsync(startDate, endDate, limit);
         }
 
-        public Task<IReadOnlyCollection<Position>> GetOpenedAsync()
+        public Task<IReadOnlyCollection<Position>> GetOpenAllAsync()
         {
             return _openPositionRepository.GetAllAsync();
         }
-        
-        public Task<IReadOnlyCollection<Position>> GetOpenedAsync(string assetPairId)
+
+        public Task<IReadOnlyCollection<Position>> GetOpenByAssetPairIdAsync(string assetPairId)
         {
             return _openPositionRepository.GetByAssetPairIdAsync(assetPairId);
         }
 
-        public async Task OpenPositionAsync(IReadOnlyCollection<InternalTrade> internalTrades)
+        public async Task OpenAsync(IReadOnlyCollection<InternalTrade> internalTrades)
         {
             if (internalTrades.Count == 0)
                 return;
@@ -56,21 +56,30 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             await _positionRepository.InsertAsync(position);
 
             await _summaryReportService.RegisterOpenPositionAsync(position, internalTrades);
-            
+
             _log.InfoWithDetails("Position was opened", position);
         }
 
-        public async Task ClosePositionAsync(Position position, ExternalTrade externalTrade)
+        public async Task CloseAsync(Position position, ExternalTrade externalTrade)
         {
             position.Close(externalTrade);
-            
+
             await _positionRepository.UpdateAsync(position);
 
             await _openPositionRepository.DeleteAsync(position.AssetPairId, position.Id);
-            
+
             await _summaryReportService.RegisterClosePositionAsync(position);
-            
+
             _log.InfoWithDetails("Position was closed", position);
+        }
+
+        public async Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade)
+        {
+            Position position = Position.Create(assetPairId, externalTrade);
+
+            await _positionRepository.InsertAsync(position);
+
+            _log.InfoWithDetails("Position with remaining volume was closed", position);
         }
     }
 }

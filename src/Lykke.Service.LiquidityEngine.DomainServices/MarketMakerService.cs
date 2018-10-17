@@ -158,7 +158,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             if (instrument.InventoryThreshold == 0 || limitOrders.All(o => o.Error != LimitOrderError.None))
                 return;
 
-            IReadOnlyCollection<Position> positions = await _positionService.GetOpenedAsync(instrument.AssetPairId);
+            IReadOnlyCollection<Position> positions =
+                await _positionService.GetOpenByAssetPairIdAsync(instrument.AssetPairId);
 
             decimal volume = positions.Sum(o => Math.Abs(o.Volume));
 

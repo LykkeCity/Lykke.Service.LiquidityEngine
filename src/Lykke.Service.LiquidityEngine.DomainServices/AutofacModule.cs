@@ -57,15 +57,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<LykkeExchangeService>()
                 .As<ILykkeExchangeService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<ExternalExchangeService>()
                 .As<IExternalExchangeService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<InstrumentService>()
                 .As<IInstrumentService>()
                 .SingleInstance();
-            
+
+            builder.RegisterType<RemainingVolumeService>()
+                .As<IRemainingVolumeService>()
+                .SingleInstance();
+
             builder.RegisterType<QuoteThresholdLogService>()
                 .As<IQuoteThresholdLogService>()
                 .SingleInstance();
@@ -77,7 +81,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<PositionService>()
                 .As<IPositionService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<SummaryReportService>()
                 .As<ISummaryReportService>()
                 .SingleInstance();
@@ -85,11 +89,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<OrderBookService>()
                 .As<IOrderBookService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<QuoteService>()
                 .As<IQuoteService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<SettingsService>()
                 .As<ISettingsService>()
                 .WithParameter(new NamedParameter("instanceName", _instanceName))
@@ -99,23 +103,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<TimersSettingsService>()
                 .As<ITimersSettingsService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<QuoteThresholdSettingsService>()
                 .As<IQuoteThresholdSettingsService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<QuoteTimeoutSettingsService>()
                 .As<IQuoteTimeoutSettingsService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<TradeService>()
                 .As<ITradeService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<MarketMakerService>()
                 .As<IMarketMakerService>()
                 .SingleInstance();
-            
+
             builder.RegisterType<HedgeService>()
                 .As<IHedgeService>()
                 .SingleInstance();

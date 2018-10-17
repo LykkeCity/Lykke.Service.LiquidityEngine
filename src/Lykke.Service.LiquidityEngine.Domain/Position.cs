@@ -76,6 +76,28 @@ namespace Lykke.Service.LiquidityEngine.Domain
             CloseTradeId = externalTrade.Id;
         }
 
+        public static Position Create(string assetPairId, ExternalTrade externalTrade)
+        {
+            PositionType positionType = externalTrade.Type == TradeType.Sell
+                ? PositionType.Long
+                : PositionType.Short;
+
+            return new Position
+            {
+                Id = Guid.NewGuid().ToString("D"),
+                AssetPairId = assetPairId,
+                Type = positionType,
+                Date = DateTime.UtcNow,
+                Price = externalTrade.Price,
+                Volume = externalTrade.Volume,
+                Trades = new string[0],
+                CloseDate = DateTime.UtcNow,
+                ClosePrice = externalTrade.Price,
+                PnL = decimal.Zero,
+                CloseTradeId = externalTrade.Id
+            };
+        }
+
         public static Position Open(IReadOnlyCollection<InternalTrade> internalTrades)
         {
             string assetPairId = internalTrades.First().AssetPairId;

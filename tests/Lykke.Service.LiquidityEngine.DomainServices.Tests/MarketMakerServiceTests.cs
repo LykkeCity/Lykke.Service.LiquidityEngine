@@ -227,7 +227,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                     Task.FromResult(new Quote(assetPairId, DateTime.UtcNow, 6001, 6000, "b2c2")));
 
             // Make sure inventory is exceeded
-            _positionServiceMock.Setup(o => o.GetOpenedAsync(It.IsAny<string>()))
+            _positionServiceMock.Setup(o => o.GetOpenByAssetPairIdAsync(It.IsAny<string>()))
                 .Returns((string assetPairId) => Task.FromResult<IReadOnlyCollection<Position>>(new[]
                 {
                     new Position {AssetPairId = assetPairId, Volume = 10}
