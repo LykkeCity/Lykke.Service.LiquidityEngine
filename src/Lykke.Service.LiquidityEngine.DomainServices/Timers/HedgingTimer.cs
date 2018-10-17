@@ -2,6 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Lykke.Common.Log;
+using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
@@ -10,20 +12,28 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
     public class HedgingTimer : Timer
     {
         private readonly IHedgeService _hedgeService;
+        private readonly ITimersSettingsService _timersSettingsService;
 
-        public HedgingTimer(IHedgeService hedgeService)
+        public HedgingTimer(
+            IHedgeService hedgeService,
+            ITimersSettingsService timersSettingsService,
+            ILogFactory logFactory)
         {
             _hedgeService = hedgeService;
+            _timersSettingsService = timersSettingsService;
+            Log = logFactory.CreateLog(this);
         }
-        
+
         protected override Task OnExecuteAsync(CancellationToken cancellation)
         {
             return _hedgeService.ExecuteAsync();
         }
 
-        protected override Task<TimeSpan> GetDelayAsync()
+        protected override async Task<TimeSpan> GetDelayAsync()
         {
-            return Task.FromResult(TimeSpan.FromSeconds(1));
+            TimersSettings timersSettings = await _timersSettingsService.GetAsync();
+
+            return timersSettings.Hedging;
         }
     }
 }

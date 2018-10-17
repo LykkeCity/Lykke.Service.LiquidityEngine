@@ -14,7 +14,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
     public class HedgeService : IHedgeService
     {
         private const int MaxIterations = 50;
-        
+
         private readonly IPositionService _positionService;
         private readonly IInstrumentService _instrumentService;
         private readonly IExternalExchangeService _externalExchangeService;
@@ -24,7 +24,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private readonly Dictionary<string, Tuple<int, int>> _attempts =
             new Dictionary<string, Tuple<int, int>>();
-        
+
         public HedgeService(
             IPositionService positionService,
             IInstrumentService instrumentService,
@@ -67,6 +67,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 decimal volume = Math.Round(originalVolume, instrument.VolumeAccuracy);
 
+                if (volume < instrument.MinVolume)
+                {
+                    _log.InfoWithDetails("The volume of open positions is less than min volume", new
+                    {
+                        instrument.AssetPairId,
+                        positionType,
+                        volume,
+                        instrument.MinVolume
+                    });
+                    continue;
+                }
+                
                 ExternalTrade externalTrade = await ExecuteLimitOrderAsync(group.Key, volume, positionType);
 
                 if (externalTrade != null)
@@ -108,7 +120,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 if (externalTrade != null)
                 {
                     await _positionService.CloseRemainingVolumeAsync(instrument.AssetPairId, externalTrade);
-                    
+
                     await _remainingVolumeService.RegisterVolumeAsync(instrument.AssetPairId,
                         (remainingVolume.Volume - volume) * GetSign(positionType));
                 }
@@ -122,7 +134,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             if (!_attempts.TryGetValue(assetPairId, out Tuple<int, int> attempt))
                 attempt = new Tuple<int, int>(0, 0);
-            
+
             try
             {
                 if (attempt.Item2 <= 0)
@@ -131,7 +143,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                         externalTrade = await _externalExchangeService.ExecuteSellLimitOrderAsync(assetPairId, volume);
                     else
                         externalTrade = await _externalExchangeService.ExecuteBuyLimitOrderAsync(assetPairId, volume);
-                    
+
                     _attempts.Remove(assetPairId);
                 }
                 else

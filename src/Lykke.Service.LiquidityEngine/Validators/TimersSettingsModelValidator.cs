@@ -14,6 +14,10 @@ namespace Lykke.Service.LiquidityEngine.Validators
                 .GreaterThanOrEqualTo(TimeSpan.FromSeconds(1))
                 .WithMessage("Lykke balances timer interval should be greater than or equal to one second.");
 
+            RuleFor(o => o.Hedging)
+                .GreaterThanOrEqualTo(TimeSpan.FromSeconds(1))
+                .WithMessage("Hedging timer interval should be greater than or equal to one second.");
+            
             RuleFor(o => o.ExternalBalances)
                 .GreaterThanOrEqualTo(TimeSpan.FromSeconds(1))
                 .WithMessage("External balances timer interval should be greater than or equal to one second.");
