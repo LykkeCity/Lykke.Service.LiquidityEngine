@@ -122,7 +122,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     await _positionService.CloseRemainingVolumeAsync(instrument.AssetPairId, externalTrade);
 
                     await _remainingVolumeService.RegisterVolumeAsync(instrument.AssetPairId,
-                        (remainingVolume.Volume - volume) * GetSign(positionType));
+                        (Math.Abs(remainingVolume.Volume) - volume) * GetSign(positionType));
                 }
             }
         }
