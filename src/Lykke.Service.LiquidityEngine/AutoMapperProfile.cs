@@ -6,6 +6,7 @@ using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 using Lykke.Service.LiquidityEngine.Client.Models.MarketMaker;
 using Lykke.Service.LiquidityEngine.Client.Models.OrderBooks;
 using Lykke.Service.LiquidityEngine.Client.Models.Positions;
+using Lykke.Service.LiquidityEngine.Client.Models.Quotes;
 using Lykke.Service.LiquidityEngine.Client.Models.Reports;
 using Lykke.Service.LiquidityEngine.Client.Models.Settings;
 using Lykke.Service.LiquidityEngine.Client.Models.Trades;
@@ -54,6 +55,10 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<TimersSettingsModel, TimersSettings>(MemberList.Destination);
 
             CreateMap<MarketMakerState, MarketMakerStateModel>(MemberList.Source);
+
+            CreateMap<Quote, QuoteModel>(MemberList.Destination)
+                .ForSourceMember(src => src.Mid, opt => opt.Ignore())
+                .ForSourceMember(src => src.Spread, opt => opt.Ignore());
         }
     }
 }

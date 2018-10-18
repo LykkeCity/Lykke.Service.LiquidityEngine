@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Domain;
@@ -19,12 +20,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.OrderBooks
         {
             _quoteThresholdSettingsService = quoteThresholdSettingsService;
             _quoteThresholdLogService = quoteThresholdLogService;
-            _cache = new InMemoryCache<Quote>(quote => quote.AssetPair, true);
+            _cache = new InMemoryCache<Quote>(GetKey, true);
+        }
+
+        public Task<IReadOnlyCollection<Quote>> GetAsync()
+        {
+            return Task.FromResult(_cache.GetAll());
+        }
+
+        public Task<Quote> GetAsync(string source, string assetPairId)
+        {
+            return Task.FromResult(_cache.Get($"{source}-{assetPairId}"));
         }
 
         public async Task SetAsync(Quote quote)
         {
-            Quote currentQuote = _cache.Get(quote.AssetPair);
+            Quote currentQuote = _cache.Get(GetKey(quote));
 
             if (currentQuote != null)
             {
@@ -46,9 +57,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.OrderBooks
             }
         }
 
-        public Task<Quote> GetAsync(string assetPairId)
-        {
-            return Task.FromResult(_cache.Get(assetPairId));
-        }
+        private static string GetKey(Quote quote)
+            => GetKey(quote.Source, quote.AssetPair);
+
+        private static string GetKey(string source, string assetPairId)
+            => $"{source}-{assetPairId}";
     }
 }

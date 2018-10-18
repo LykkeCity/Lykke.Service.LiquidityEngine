@@ -70,7 +70,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
-            Quote quote = await _quoteService.GetAsync(instrument.AssetPairId);
+            Quote quote = await _quoteService.GetAsync(ExchangeNames.B2C2, instrument.AssetPairId);
 
             if (quote == null)
             {

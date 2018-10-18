@@ -15,6 +15,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly HedgingTimer _hedgingTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
+        private readonly QuoteSubscriber[] _quoteSubscribers;
 
         public StartupManager(
             LykkeBalancesTimer lykkeBalancesTimer,
@@ -22,7 +23,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             MarketMakerTimer marketMakerTimer,
             HedgingTimer hedgingTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
-            B2C2QuoteSubscriber b2C2QuoteSubscriber)
+            B2C2QuoteSubscriber b2C2QuoteSubscriber,
+            QuoteSubscriber[] quoteSubscribers)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
             _externalBalancesTimer = externalBalancesTimer;
@@ -30,11 +32,15 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _hedgingTimer = hedgingTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
+            _quoteSubscribers = quoteSubscribers;
         }
 
         public Task StartAsync()
         {
             _b2C2QuoteSubscriber.Start();
+            
+            foreach (QuoteSubscriber quoteSubscriber in _quoteSubscribers)
+                quoteSubscriber.Start();
             
             _lykkeTradeSubscriber.Start();
 
