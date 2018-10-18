@@ -43,5 +43,10 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
         /// A collection of order book levels.
         /// </summary>
         public IReadOnlyCollection<InstrumentLevelModel> Levels { get; set; }
+        
+        /// <summary>
+        /// A collection of cross instrument.
+        /// </summary>
+        public IReadOnlyCollection<CrossInstrumentModel> CrossInstruments { get; set; }
     }
 }

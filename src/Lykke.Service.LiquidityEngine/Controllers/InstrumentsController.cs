@@ -191,9 +191,22 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public Task AddCrossInstrumentAsync(string assetPairId, [FromBody] CrossInstrumentModel model)
+        public async Task AddCrossInstrumentAsync(string assetPairId, [FromBody] CrossInstrumentModel model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var crossInstrument = Mapper.Map<CrossInstrument>(model);
+
+                await _instrumentService.AddCrossInstrumentAsync(assetPairId, crossInstrument);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
         }
 
         /// <inheritdoc/>
@@ -204,9 +217,22 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public Task UpdateCrossInstrumentAsync(string assetPairId, [FromBody] CrossInstrumentModel model)
+        public async Task UpdateCrossInstrumentAsync(string assetPairId, [FromBody] CrossInstrumentModel model)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var crossInstrument = Mapper.Map<CrossInstrument>(model);
+
+                await _instrumentService.UpdateCrossInstrumentAsync(assetPairId, crossInstrument);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
         }
 
         /// <inheritdoc/>
@@ -215,9 +241,16 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [HttpDelete("{assetPairId}/cross/{crossAssetPairId}")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public Task RemoveCrossInstrumentAsync(string assetPairId, string crossAssetPairId)
+        public async Task RemoveCrossInstrumentAsync(string assetPairId, string crossAssetPairId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _instrumentService.RemoveCrossInstrumentAsync(assetPairId, crossAssetPairId);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
         }
     }
 }

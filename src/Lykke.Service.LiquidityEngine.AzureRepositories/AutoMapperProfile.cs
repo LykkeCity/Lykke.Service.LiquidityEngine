@@ -22,8 +22,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             CreateMap<AssetPairLink, AssetPairLinkEntity>(MemberList.Source);
             CreateMap<AssetPairLinkEntity, AssetPairLink>(MemberList.Destination);
 
-            CreateMap<Instrument, InstrumentEntity>(MemberList.Source);
-            CreateMap<InstrumentEntity, Instrument>(MemberList.Destination);
+            CreateMap<Instrument, InstrumentEntity>(MemberList.Source)
+                .ForSourceMember(src => src.CrossInstruments, opt => opt.Ignore());
+            CreateMap<InstrumentEntity, Instrument>(MemberList.Destination)
+                .ForMember(src => src.CrossInstruments, opt => opt.Ignore());
 
             CreateMap<TimersSettings, TimersSettingsEntity>(MemberList.Source);
             CreateMap<TimersSettingsEntity, TimersSettings>(MemberList.Destination);
@@ -57,6 +59,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
 
             CreateMap<MarketMakerState, MarketMakerStateEntity>(MemberList.Source);
             CreateMap<MarketMakerStateEntity, MarketMakerState>(MemberList.Destination);
+            
+            CreateMap<CrossInstrument, CrossInstrumentEntity>(MemberList.Source);
+            CreateMap<CrossInstrumentEntity, CrossInstrument>(MemberList.Destination);
         }
     }
 }

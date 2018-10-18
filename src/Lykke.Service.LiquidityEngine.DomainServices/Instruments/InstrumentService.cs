@@ -14,16 +14,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
     public class InstrumentService : IInstrumentService
     {
         private readonly IInstrumentRepository _instrumentRepository;
+        private readonly ICrossInstrumentRepository _crossInstrumentRepository;
         private readonly InMemoryCache<Instrument> _cache;
         private readonly ILog _log;
 
-        public InstrumentService(IInstrumentRepository instrumentRepository, ILogFactory logFactory)
+        public InstrumentService(
+            IInstrumentRepository instrumentRepository,
+            ICrossInstrumentRepository crossInstrumentRepository,
+            ILogFactory logFactory)
         {
             _instrumentRepository = instrumentRepository;
+            _crossInstrumentRepository = crossInstrumentRepository;
             _cache = new InMemoryCache<Instrument>(instrument => instrument.AssetPairId, false);
             _log = logFactory.CreateLog(this);
         }
-        
+
         public async Task<IReadOnlyCollection<Instrument>> GetAllAsync()
         {
             IReadOnlyCollection<Instrument> instruments = _cache.GetAll();
@@ -31,7 +36,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             if (instruments == null)
             {
                 instruments = await _instrumentRepository.GetAllAsync();
-                
+
+                foreach (Instrument instrument in instruments)
+                    instrument.CrossInstruments = await _crossInstrumentRepository.GetAsync(instrument.AssetPairId);
+
                 _cache.Initialize(instruments);
             }
 
@@ -53,7 +61,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
         public async Task AddAsync(Instrument instrument)
         {
             await _instrumentRepository.InsertAsync(instrument);
-            
+
             _cache.Set(instrument);
 
             _log.InfoWithDetails("Instrument was added", instrument);
@@ -62,24 +70,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
         public async Task UpdateAsync(Instrument instrument)
         {
             Instrument currentInstrument = await GetByAssetPairIdAsync(instrument.AssetPairId);
-            
+
             currentInstrument.Update(instrument);
-            
+
             await _instrumentRepository.UpdateAsync(currentInstrument);
-            
+
             _cache.Set(currentInstrument);
-            
+
             _log.InfoWithDetails("Instrument was updated", currentInstrument);
         }
 
         public async Task DeleteAsync(string assetPairId)
         {
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
-            
+
             await _instrumentRepository.DeleteAsync(assetPairId);
-            
+
             _cache.Remove(assetPairId);
-            
+
             _log.InfoWithDetails("Instrument was deleted", instrument);
         }
 
@@ -88,11 +96,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
 
             instrument.AddLevel(instrumentLevel);
-            
+
             await _instrumentRepository.UpdateAsync(instrument);
-            
+
             _cache.Set(instrument);
-            
+
             _log.InfoWithDetails("Level volume was added to the instrument", instrument);
         }
 
@@ -101,25 +109,64 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
 
             instrument.UpdateLevel(instrumentLevel);
-                
+
             await _instrumentRepository.UpdateAsync(instrument);
-            
+
             _cache.Set(instrument);
-            
+
             _log.InfoWithDetails("Level volume was updated of the instrument", instrument);
         }
 
         public async Task RemoveLevelAsync(string assetPairId, int levelNumber)
         {
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
-            
+
             instrument.RemoveLevel(levelNumber);
-            
+
             await _instrumentRepository.UpdateAsync(instrument);
-            
+
             _cache.Set(instrument);
-            
+
             _log.InfoWithDetails("Level volume was removed from the instrument", instrument);
+        }
+
+        public async Task AddCrossInstrumentAsync(string assetPairId, CrossInstrument crossInstrument)
+        {
+            Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
+
+            instrument.AddCrossInstrument(crossInstrument);
+
+            await _crossInstrumentRepository.AddAsync(assetPairId, crossInstrument);
+
+            _cache.Set(instrument);
+
+            _log.InfoWithDetails("Cross instrument was added to the instrument", instrument);
+        }
+
+        public async Task UpdateCrossInstrumentAsync(string assetPairId, CrossInstrument crossInstrument)
+        {
+            Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
+
+            instrument.UpdateCrossInstrument(crossInstrument);
+
+            await _crossInstrumentRepository.UpdateAsync(assetPairId, crossInstrument);
+
+            _cache.Set(instrument);
+
+            _log.InfoWithDetails("Cross instrument was updated of the instrument", instrument);
+        }
+
+        public async Task RemoveCrossInstrumentAsync(string assetPairId, string crossAssetPairId)
+        {
+            Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
+
+            instrument.RemoveCrossInstrument(crossAssetPairId);
+
+            await _crossInstrumentRepository.DeleteAsync(assetPairId, crossAssetPairId);
+
+            _cache.Set(instrument);
+
+            _log.InfoWithDetails("Cross instrument was removed from the instrument", instrument);
         }
     }
 }

@@ -56,7 +56,7 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<MarketMakerState, MarketMakerStateModel>(MemberList.Source);
 
-            CreateMap<Quote, QuoteModel>(MemberList.Destination)
+            CreateMap<Quote, QuoteModel>(MemberList.Source)
                 .ForSourceMember(src => src.Mid, opt => opt.Ignore())
                 .ForSourceMember(src => src.Spread, opt => opt.Ignore());
         }
