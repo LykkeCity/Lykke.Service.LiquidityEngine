@@ -55,6 +55,31 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal PnL { get; set; }
 
         /// <summary>
+        /// The identifier of asset pair that used to convert trade price.
+        /// </summary>
+        public string CrossAssetPairId { get; set; }
+
+        /// <summary>
+        /// The best sell price on trade time.
+        /// </summary>
+        public decimal? CrossAsk { get; set; }
+
+        /// <summary>
+        /// The best buy price on trade time.
+        /// </summary>
+        public decimal? CrossBid { get; set; }
+
+        /// <summary>
+        /// The identifier of asset pair that used by trade.
+        /// </summary>
+        public string TradeAssetPairId { get; set; }
+
+        /// <summary>
+        /// The average price of executed limit orders.
+        /// </summary>
+        public decimal TradeAvgPrice { get; set; }
+
+        /// <summary>
         /// A collection of identifiers of the trades that opened position.
         /// </summary>
         public IReadOnlyCollection<string> Trades { get; set; }
@@ -95,6 +120,58 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 ClosePrice = externalTrade.Price,
                 PnL = decimal.Zero,
                 CloseTradeId = externalTrade.Id
+            };
+        }
+
+        public static Position Open(string assetPairId, decimal price, decimal avgPrice, decimal volume, Quote quote,
+            string tradeAssetPairId, TradeType tradeType, string[] trades)
+        {
+            PositionType positionType = tradeType == TradeType.Sell
+                ? PositionType.Short
+                : PositionType.Long;
+
+            return new Position
+            {
+                Id = Guid.NewGuid().ToString("D"),
+                AssetPairId = assetPairId,
+                Type = positionType,
+                Date = DateTime.UtcNow,
+                Price = price,
+                Volume = volume,
+                Trades = trades,
+                CloseDate = new DateTime(1900, 1, 1),
+                
+                CrossAssetPairId = quote.AssetPair,
+                CrossAsk = quote.Ask,
+                CrossBid = quote.Bid,
+                TradeAssetPairId = tradeAssetPairId,
+                TradeAvgPrice = avgPrice
+            };
+        }
+        
+        public static Position Open(string assetPairId, decimal price, decimal volume, TradeType tradeType,
+            string[] trades)
+        {
+            PositionType positionType = tradeType == TradeType.Sell
+                ? PositionType.Short
+                : PositionType.Long;
+
+            return new Position
+            {
+                Id = Guid.NewGuid().ToString("D"),
+                AssetPairId = assetPairId,
+                Type = positionType,
+                Date = DateTime.UtcNow,
+                Price = price,
+                Volume = volume,
+                Trades = trades,
+                CloseDate = new DateTime(1900, 1, 1),
+                
+                CrossAssetPairId = null,
+                CrossAsk = null,
+                CrossBid = null,
+                TradeAssetPairId = assetPairId,
+                TradeAvgPrice = price
             };
         }
 

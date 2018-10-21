@@ -204,7 +204,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 {
                     new InstrumentLevel {Number = 1, Volume = 1, Markup = .01m},
                     new InstrumentLevel {Number = 2, Volume = 1, Markup = .02m}
-                }
+                },
+                CrossInstruments = new List<CrossInstrument>()
             });
 
             _marketMakerStateServiceMock

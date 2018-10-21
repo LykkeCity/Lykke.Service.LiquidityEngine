@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -132,6 +133,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
 
         public async Task AddCrossInstrumentAsync(string assetPairId, CrossInstrument crossInstrument)
         {
+            IReadOnlyCollection<Instrument> instruments = await GetAllAsync();
+
+            if (instruments.Any(o => o.AssetPairId == crossInstrument.AssetPairId &&
+                                     o.CrossInstruments?.Any(p => p.AssetPairId == crossInstrument.AssetPairId) ==
+                                     true))
+            {
+                throw new InvalidOperationException("The instrument already used");
+            }
+
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
 
             instrument.AddCrossInstrument(crossInstrument);

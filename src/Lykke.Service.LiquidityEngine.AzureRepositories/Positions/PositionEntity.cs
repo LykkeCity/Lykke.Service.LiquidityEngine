@@ -19,6 +19,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
         private DateTime _closeDate;
         private decimal _closePrice;
         private decimal _pnL;
+        private decimal _tradeAvgPrice;
 
         public PositionEntity()
         {
@@ -121,6 +122,27 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 {
                     _pnL = value;
                     MarkValueTypePropertyAsDirty("PnL");
+                }
+            }
+        }
+
+        public string CrossAssetPairId { get; set; }
+
+        public decimal? CrossAsk { get; set; }
+
+        public decimal? CrossBid { get; set; }
+
+        public string TradeAssetPairId { get; set; }
+
+        public decimal TradeAvgPrice
+        {
+            get => _tradeAvgPrice;
+            set
+            {
+                if (_tradeAvgPrice != value)
+                {
+                    _tradeAvgPrice = value;
+                    MarkValueTypePropertyAsDirty("TradeAvgPrice");
                 }
             }
         }

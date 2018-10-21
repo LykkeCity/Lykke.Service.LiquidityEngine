@@ -59,6 +59,31 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Positions
         public decimal PnL { get; set; }
 
         /// <summary>
+        /// The identifier of asset pair that used to convert trade price.
+        /// </summary>
+        public string CrossAssetPairId { get; set; }
+
+        /// <summary>
+        /// The best sell price on trade time.
+        /// </summary>
+        public decimal? CrossAsk { get; set; }
+
+        /// <summary>
+        /// The best buy price on trade time.
+        /// </summary>
+        public decimal? CrossBid { get; set; }
+
+        /// <summary>
+        /// The identifier of asset pair that used by trade.
+        /// </summary>
+        public string TradeAssetPairId { get; set; }
+
+        /// <summary>
+        /// The average price of executed limit orders.
+        /// </summary>
+        public decimal TradeAvgPrice { get; set; }
+
+        /// <summary>
         /// A collection of identifiers of the trades that opened position.
         /// </summary>
         public IReadOnlyCollection<string> Trades { get; set; }
