@@ -30,14 +30,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <summary>
         /// Adds new instrument settings (without levels).
         /// </summary>
-        /// <param name="model">The model which describes instrument.</param>
+        /// <param name="model">The model that describes instrument.</param>
         [Post("/api/instruments")]
         Task AddAsync([Body] InstrumentModel model);
 
         /// <summary>
         /// Updates instrument settings (without levels).
         /// </summary>
-        /// <param name="model">The model which describes instrument.</param>
+        /// <param name="model">The model that describes instrument.</param>
         [Put("/api/instruments")]
         Task UpdateAsync([Body] InstrumentModel model);
 
@@ -51,25 +51,49 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <summary>
         /// Adds volume level for the instrument.
         /// </summary>
-        /// <param name="assetPairId">The asses pair id.</param>
-        /// <param name="model">The model which describes level volume.</param>
+        /// <param name="assetPairId">The identifier of instrument asset pair.</param>
+        /// <param name="model">The model that describes level volume.</param>
         [Post("/api/instruments/{assetPairId}/levels")]
         Task AddLevelAsync(string assetPairId, [Body] InstrumentLevelModel model);
 
         /// <summary>
         /// Updates volume level for the instrument.
         /// </summary>
-        /// <param name="assetPairId">The asses pair id.</param>
-        /// <param name="model">The model which describes level volume.</param>
+        /// <param name="assetPairId">The identifier of instrument asset pair.</param>
+        /// <param name="model">The model that describes level volume.</param>
         [Put("/api/instruments/{assetPairId}/levels")]
         Task UpdateLevelAsync(string assetPairId, [Body] InstrumentLevelModel model);
 
         /// <summary>
         /// Removes the level volume from instrument.
         /// </summary>
-        /// <param name="assetPairId">The asses pair id.</param>
+        /// <param name="assetPairId">The identifier of instrument asset pair.</param>
         /// <param name="levelNumber">The number of the level.</param>
         [Delete("/api/instruments/{assetPairId}/levels/{levelNumber}")]
         Task RemoveLevelAsync(string assetPairId, int levelNumber);
+
+        /// <summary>
+        /// Adds the cross instrument to the main instrument.
+        /// </summary>
+        /// <param name="assetPairId">The identifier of instrument asset pair.</param>
+        /// <param name="model">The model that describes cross instrument.</param>
+        [Post("/api/instruments/{assetPairId}/cross")]
+        Task AddCrossInstrumentAsync(string assetPairId, [Body] CrossInstrumentModel model);
+
+        /// <summary>
+        /// Updates the cross instrument of the main instrument.
+        /// </summary>
+        /// <param name="assetPairId">The identifier of instrument asset pair.</param>
+        /// <param name="model">The model that describes cross instrument.</param>
+        [Put("/api/instruments/{assetPairId}/cross")]
+        Task UpdateCrossInstrumentAsync(string assetPairId, [Body] CrossInstrumentModel model);
+
+        /// <summary>
+        /// Removes the cross instrument from the main instrument.
+        /// </summary>
+        /// <param name="assetPairId">The identifier of instrument asset pair.</param>
+        /// <param name="crossAssetPairId">The number of the level.</param>
+        [Delete("/api/instruments/{assetPairId}/cross/{crossAssetPairId}")]
+        Task RemoveCrossInstrumentAsync(string assetPairId, string crossAssetPairId);
     }
 }

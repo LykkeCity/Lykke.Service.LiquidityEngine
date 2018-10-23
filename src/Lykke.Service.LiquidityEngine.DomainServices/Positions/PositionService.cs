@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
@@ -15,17 +16,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
         private readonly IPositionRepository _positionRepository;
         private readonly IOpenPositionRepository _openPositionRepository;
         private readonly ISummaryReportService _summaryReportService;
+        private readonly IInstrumentService _instrumentService;
+        private readonly IQuoteService _quoteService;
         private readonly ILog _log;
 
         public PositionService(
             IPositionRepository positionRepository,
             IOpenPositionRepository openPositionRepository,
             ISummaryReportService summaryReportService,
+            IInstrumentService instrumentService,
+            IQuoteService quoteService,
             ILogFactory logFactory)
         {
             _positionRepository = positionRepository;
             _openPositionRepository = openPositionRepository;
             _summaryReportService = summaryReportService;
+            _instrumentService = instrumentService;
+            _quoteService = quoteService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -49,7 +56,51 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             if (internalTrades.Count == 0)
                 return;
 
-            Position position = Position.Open(internalTrades);
+            string assetPairId = internalTrades.First().AssetPairId;
+
+            TradeType tradeType = internalTrades.First().Type;
+
+            IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
+
+            Instrument instrument = instruments.FirstOrDefault(o =>
+                o.AssetPairId == assetPairId || o.CrossInstruments.Any(p => p.AssetPairId == assetPairId));
+
+            if (instrument == null)
+            {
+                _log.WarningWithDetails($"Can not open position. Unknown instrument '{assetPairId}'.", internalTrades);
+                return;
+            }
+
+            decimal avgPrice = internalTrades.Sum(o => o.Price) / internalTrades.Count;
+
+            decimal volume = internalTrades.Sum(o => o.Volume);
+
+            Position position;
+
+            if (assetPairId != instrument.AssetPairId)
+            {
+                CrossInstrument crossInstrument = instrument.CrossInstruments.Single(o => o.AssetPairId == assetPairId);
+
+                Quote quote = await _quoteService.GetAsync(crossInstrument.QuoteSource, crossInstrument.AssetPairId);
+
+                if (quote == null)
+                {
+                    _log.WarningWithDetails($"Can not open position. No quote '{assetPairId}'.", internalTrades);
+                    return;
+                }
+
+                decimal price = tradeType == TradeType.Sell
+                    ? Calculator.CalculateDirectSellPrice(avgPrice, quote, crossInstrument.IsInverse)
+                    : Calculator.CalculateDirectBuyPrice(avgPrice, quote, crossInstrument.IsInverse);
+
+                position = Position.Open(instrument.AssetPairId, price, avgPrice, volume, quote, assetPairId, tradeType,
+                    internalTrades.Select(o => o.Id).ToArray());
+            }
+            else
+            {
+                position = Position.Open(instrument.AssetPairId, avgPrice, volume, tradeType,
+                    internalTrades.Select(o => o.Id).ToArray());
+            }
 
             await _openPositionRepository.InsertAsync(position);
 

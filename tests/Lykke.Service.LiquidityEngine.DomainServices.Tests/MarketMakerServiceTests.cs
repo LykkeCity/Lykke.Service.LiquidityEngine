@@ -204,7 +204,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 {
                     new InstrumentLevel {Number = 1, Volume = 1, Markup = .01m},
                     new InstrumentLevel {Number = 2, Volume = 1, Markup = .02m}
-                }
+                },
+                CrossInstruments = new List<CrossInstrument>()
             });
 
             _marketMakerStateServiceMock
@@ -222,8 +223,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 .Returns((OrderBook orderBook) => Task.CompletedTask);
 
             _quoteServiceMock
-                .Setup(o => o.GetAsync(It.IsAny<string>()))
-                .Returns((string assetPairId) =>
+                .Setup(o => o.GetAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns((string source, string assetPairId) =>
                     Task.FromResult(new Quote(assetPairId, DateTime.UtcNow, 6001, 6000, "b2c2")));
 
             // Make sure inventory is exceeded

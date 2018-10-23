@@ -44,6 +44,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// </summary>
         public IReadOnlyCollection<InstrumentLevel> Levels { get; set; }
 
+        /// <summary>
+        /// A collection of cross instrument.
+        /// </summary>
+        public IReadOnlyCollection<CrossInstrument> CrossInstruments { get; set; }
+
         public void Update(Instrument instrument)
         {
             Mode = instrument.Mode;
@@ -58,15 +63,27 @@ namespace Lykke.Service.LiquidityEngine.Domain
             if (Levels?.Any(o => o.Number == instrumentLevel.Number) == true)
                 throw new InvalidOperationException("The level already exists");
 
-            Levels = (Levels ?? new List<InstrumentLevel>())
+            Levels = (Levels ?? new InstrumentLevel[0])
                 .Union(new[] {instrumentLevel})
                 .OrderBy(o => o.Number)
                 .ToArray();
         }
 
+        public void UpdateLevel(InstrumentLevel instrumentLevel)
+        {
+            InstrumentLevel currentLevelVolume = (Levels ?? new InstrumentLevel[0])
+                .FirstOrDefault(o => o.Number == instrumentLevel.Number);
+
+            if (currentLevelVolume == null)
+                throw new InvalidOperationException("The level does not exists");
+
+            currentLevelVolume.Volume = instrumentLevel.Volume;
+            currentLevelVolume.Markup = instrumentLevel.Markup;
+        }
+
         public void RemoveLevel(int levelNumber)
         {
-            Levels = (Levels ?? new List<InstrumentLevel>())
+            Levels = (Levels ?? new InstrumentLevel[0])
                 .Where(o => o.Number != levelNumber)
                 .OrderBy(o => o.Number)
                 .Select((levelVolume, index) => new InstrumentLevel
@@ -77,16 +94,34 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 .ToArray();
         }
 
-        public void UpdateLevel(InstrumentLevel instrumentLevel)
+        public void AddCrossInstrument(CrossInstrument crossInstrument)
         {
-            InstrumentLevel currentLevelVolume = (Levels ?? new List<InstrumentLevel>())
-                .FirstOrDefault(o => o.Number == instrumentLevel.Number);
+            if (CrossInstruments?.Any(o => o.AssetPairId == crossInstrument.AssetPairId) == true)
+                throw new InvalidOperationException("The cross instrument already exists");
 
-            if (currentLevelVolume == null)
-                throw new InvalidOperationException("The level does not exists");
+            CrossInstruments = (CrossInstruments ?? new CrossInstrument[0])
+                .Union(new[] {crossInstrument})
+                .ToArray();
+        }
 
-            currentLevelVolume.Volume = instrumentLevel.Volume;
-            currentLevelVolume.Markup = instrumentLevel.Markup;
+        public void UpdateCrossInstrument(CrossInstrument crossInstrument)
+        {
+            CrossInstrument currentCrossInstrument = (CrossInstruments ?? new CrossInstrument[0])
+                .FirstOrDefault(o => o.AssetPairId == crossInstrument.AssetPairId);
+
+            if (currentCrossInstrument == null)
+                throw new InvalidOperationException("The cross instrument does not exists");
+
+            currentCrossInstrument.IsInverse = crossInstrument.IsInverse;
+            currentCrossInstrument.QuoteSource = crossInstrument.QuoteSource;
+            currentCrossInstrument.ExternalAssetPairId = crossInstrument.ExternalAssetPairId;
+        }
+
+        public void RemoveCrossInstrument(string crossAssetPairId)
+        {
+            CrossInstruments = (CrossInstruments ?? new CrossInstrument[0])
+                .Where(o => o.AssetPairId != crossAssetPairId)
+                .ToArray();
         }
     }
 }

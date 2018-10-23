@@ -52,7 +52,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests.OrderBooks
 
             await _service.SetAsync(invalidQuote);
 
-            Quote actualQuote = await _service.GetAsync(quote.AssetPair);
+            Quote actualQuote = await _service.GetAsync("lykke", quote.AssetPair);
             
             // assert
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Common;
 using Common.Log;
@@ -70,56 +71,119 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
-            Quote quote = await _quoteService.GetAsync(instrument.AssetPairId);
+            IReadOnlyCollection<LimitOrder> limitOrders = await CalculateDirectLimitOrders(instrument);
+
+            if (limitOrders == null)
+                return;
+
+            var orderBooks = new List<OrderBook>
+            {
+                new OrderBook
+                {
+                    AssetPairId = instrument.AssetPairId,
+                    Time = DateTime.UtcNow,
+                    LimitOrders = limitOrders
+                }
+            };
+
+            foreach (CrossInstrument crossInstrument in instrument.CrossInstruments)
+            {
+                IReadOnlyCollection<LimitOrder> crossLimitOrders =
+                    await CalculateCrossLimitOrders(limitOrders, crossInstrument);
+
+                if (crossLimitOrders == null)
+                    continue;
+
+                orderBooks.Add(new OrderBook
+                {
+                    AssetPairId = crossInstrument.AssetPairId,
+                    Time = DateTime.UtcNow,
+                    LimitOrders = crossLimitOrders
+                });
+            }
+
+            await ValidatePnLThresholdAsync(orderBooks, instrument);
+
+            await ValidateInventoryThresholdAsync(orderBooks, instrument);
+
+            await ValidateMarketMakerStateAsync(orderBooks);
+
+            ValidateInstrumentMode(orderBooks, instrument.Mode);
+
+            foreach (OrderBook orderBook in orderBooks)
+                await _orderBookService.UpdateAsync(orderBook);
+
+            foreach (OrderBook orderBook in orderBooks)
+            {
+                LimitOrder[] allowedLimitOrders = orderBook.LimitOrders
+                    .Where(o => o.Error == LimitOrderError.None)
+                    .ToArray();
+
+                await _lykkeExchangeService.ApplyAsync(orderBook.AssetPairId, allowedLimitOrders);
+            }
+        }
+
+        private async Task<IReadOnlyCollection<LimitOrder>> CalculateDirectLimitOrders(Instrument instrument)
+        {
+            Quote quote = await _quoteService.GetAsync(ExchangeNames.B2C2, instrument.AssetPairId);
 
             if (quote == null)
             {
-                _log.WarningWithDetails("No quote for instrument", new {instrument.AssetPairId});
-                return;
+                _log.WarningWithDetails("No quote for instrument", instrument.AssetPairId);
+                return null;
             }
 
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(instrument.AssetPairId);
 
-            var limitOrders = new List<LimitOrder>();
+            Asset baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
 
-            foreach (InstrumentLevel instrumentLevel in instrument.Levels.OrderBy(o => o.Number))
-            {
-                decimal sellPrice = (quote.Ask * (1 + instrumentLevel.Markup))
-                    .TruncateDecimalPlaces(assetPair.Accuracy, true);
-                decimal buyPrice = (quote.Bid * (1 - instrumentLevel.Markup))
-                    .TruncateDecimalPlaces(assetPair.Accuracy);
-
-                decimal volume = Math.Round(instrumentLevel.Volume, assetPair.InvertedAccuracy);
-
-                limitOrders.Add(LimitOrder.CreateSell(sellPrice, volume));
-                limitOrders.Add(LimitOrder.CreateBuy(buyPrice, volume));
-            }
+            IReadOnlyCollection<LimitOrder> limitOrders =
+                Calculator.CalculateLimitOrders(quote, instrument.Levels, assetPair.Accuracy, baseAsset.Accuracy);
 
             await ValidateQuoteTimeoutAsync(limitOrders, quote);
 
             ValidateMinVolume(limitOrders, (decimal) assetPair.MinVolume);
 
-            await ValidatePnLThresholdAsync(limitOrders, instrument);
-
-            await ValidateInventoryThresholdAsync(limitOrders, instrument);
-
             await ValidateBalanceAsync(limitOrders, assetPair);
 
-            await ValidateMarketMakerStateAsync(limitOrders);
+            WriteInfoLog(instrument.AssetPairId, quote, limitOrders, "Direct limit orders calculated");
 
-            await _orderBookService.UpdateAsync(new OrderBook
+            return limitOrders;
+        }
+
+        private async Task<IReadOnlyCollection<LimitOrder>> CalculateCrossLimitOrders(
+            IReadOnlyCollection<LimitOrder> directLimitOrders, CrossInstrument crossInstrument)
+        {
+            Quote quote = await _quoteService
+                .GetAsync(crossInstrument.QuoteSource, crossInstrument.ExternalAssetPairId);
+
+            if (quote == null)
             {
-                AssetPairId = instrument.AssetPairId,
-                Time = DateTime.UtcNow,
-                LimitOrders = limitOrders
-            });
+                _log.WarningWithDetails("No quote for instrument", new
+                {
+                    Source = crossInstrument.QuoteSource,
+                    AssetPair = crossInstrument.AssetPairId
+                });
+                return null;
+            }
 
-            if (instrument.Mode != InstrumentMode.Active)
-                SetError(limitOrders, LimitOrderError.Idle);
+            AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(crossInstrument.AssetPairId);
 
-            await _lykkeExchangeService.ApplyAsync(
-                instrument.AssetPairId,
-                limitOrders.Where(o => o.Error == LimitOrderError.None).ToArray());
+            Asset baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
+
+            IReadOnlyCollection<LimitOrder> crossLimitOrders =
+                Calculator.CalculateCrossLimitOrders(quote, directLimitOrders, crossInstrument.IsInverse,
+                    assetPair.Accuracy, baseAsset.Accuracy);
+
+            await ValidateQuoteTimeoutAsync(crossLimitOrders, quote);
+
+            ValidateMinVolume(crossLimitOrders, (decimal) assetPair.MinVolume);
+
+            await ValidateBalanceAsync(crossLimitOrders, assetPair);
+
+            WriteInfoLog(crossInstrument.AssetPairId, quote, crossLimitOrders, "Cross limit orders calculated");
+
+            return crossLimitOrders;
         }
 
         private async Task ValidateQuoteTimeoutAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
@@ -136,35 +200,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 SetError(limitOrders, LimitOrderError.InvalidQuote);
             }
-        }
-
-        private async Task ValidatePnLThresholdAsync(IReadOnlyCollection<LimitOrder> limitOrders,
-            Instrument instrument)
-        {
-            if (instrument.PnLThreshold == 0 || limitOrders.All(o => o.Error != LimitOrderError.None))
-                return;
-
-            IReadOnlyCollection<SummaryReport> summaryReports = await _summaryReportService.GetAllAsync();
-
-            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == instrument.AssetPairId);
-
-            if (summaryReport != null && summaryReport.PnL < 0 && instrument.PnLThreshold < Math.Abs(summaryReport.PnL))
-                SetError(limitOrders, LimitOrderError.LowPnL);
-        }
-
-        private async Task ValidateInventoryThresholdAsync(IReadOnlyCollection<LimitOrder> limitOrders,
-            Instrument instrument)
-        {
-            if (instrument.InventoryThreshold == 0 || limitOrders.All(o => o.Error != LimitOrderError.None))
-                return;
-
-            IReadOnlyCollection<Position> positions =
-                await _positionService.GetOpenByAssetPairIdAsync(instrument.AssetPairId);
-
-            decimal volume = positions.Sum(o => Math.Abs(o.Volume));
-
-            if (instrument.InventoryThreshold <= volume)
-                SetError(limitOrders, LimitOrderError.InventoryTooMuch);
         }
 
         private void ValidateMinVolume(IReadOnlyCollection<LimitOrder> limitOrders, decimal minVolume)
@@ -239,18 +274,71 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }
         }
 
-        private async Task ValidateMarketMakerStateAsync(IReadOnlyCollection<LimitOrder> limitOrders)
+        private async Task ValidatePnLThresholdAsync(IEnumerable<OrderBook> orderBooks, Instrument instrument)
+        {
+            if (instrument.PnLThreshold == 0)
+                return;
+
+            IReadOnlyCollection<SummaryReport> summaryReports = await _summaryReportService.GetAllAsync();
+
+            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == instrument.AssetPairId);
+
+            if (summaryReport != null && summaryReport.PnL < 0 && instrument.PnLThreshold < Math.Abs(summaryReport.PnL))
+                SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.LowPnL);
+        }
+
+        private async Task ValidateInventoryThresholdAsync(IEnumerable<OrderBook> orderBooks, Instrument instrument)
+        {
+            if (instrument.InventoryThreshold == 0)
+                return;
+
+            IReadOnlyCollection<Position> positions =
+                await _positionService.GetOpenByAssetPairIdAsync(instrument.AssetPairId);
+
+            decimal volume = positions.Sum(o => Math.Abs(o.Volume));
+
+            if (instrument.InventoryThreshold <= volume)
+                SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.InventoryTooMuch);
+        }
+
+        private async Task ValidateMarketMakerStateAsync(IEnumerable<OrderBook> orderBooks)
         {
             MarketMakerState state = await _marketMakerStateService.GetStateAsync();
 
             if (state.Status == MarketMakerStatus.Error)
-                SetError(limitOrders, LimitOrderError.MarketMakerError);
+                SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.MarketMakerError);
 
-            if (state.Status == MarketMakerStatus.Disabled)
-                SetError(limitOrders, LimitOrderError.Idle);
+            else if (state.Status == MarketMakerStatus.Disabled)
+                SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.Idle);
         }
 
-        private void SetError(IReadOnlyCollection<LimitOrder> limitOrders, LimitOrderError limitOrderError)
+        private void WriteInfoLog(string assetPair, Quote quote, IReadOnlyCollection<LimitOrder> limitOrders,
+            string message, [CallerMemberName] string process = nameof(WriteInfoLog))
+        {
+            _log.InfoWithDetails(message, new
+            {
+                AssetPair = assetPair,
+                Quote = new
+                {
+                    quote.Ask,
+                    quote.Bid
+                },
+                LimitOrders = limitOrders.Select(o => new
+                {
+                    Type = o.Type.ToString(),
+                    o.Price,
+                    o.Volume
+                })
+            }, "data", process);
+        }
+
+        private static void ValidateInstrumentMode(IEnumerable<OrderBook> orderBooks, InstrumentMode instrumentMode)
+        {
+            if (instrumentMode != InstrumentMode.Active)
+                SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.Idle);
+        }
+
+        private static void SetError(IEnumerable<LimitOrder> limitOrders, LimitOrderError limitOrderError)
         {
             foreach (LimitOrder limitOrder in limitOrders.Where(o => o.Error == LimitOrderError.None))
                 limitOrder.Error = limitOrderError;

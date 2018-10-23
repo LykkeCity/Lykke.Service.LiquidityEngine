@@ -1,11 +1,14 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Lykke.Service.LiquidityEngine.Domain.Services
 {
     public interface IQuoteService
     {
-        Task SetAsync(Quote quote);
+        Task<IReadOnlyCollection<Quote>> GetAsync();
 
-        Task<Quote> GetAsync(string assetPairId);
+        Task<Quote> GetAsync(string source, string assetPairId);
+
+        Task SetAsync(Quote quote);
     }
 }

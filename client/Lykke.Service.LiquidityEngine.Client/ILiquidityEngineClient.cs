@@ -50,6 +50,11 @@ namespace Lykke.Service.LiquidityEngine.Client
         IPositionsApi Positions { get; }
 
         /// <summary>
+        /// Quotes API.
+        /// </summary>
+        IQuotesApi Quotes { get; }
+
+        /// <summary>
         /// Reports API.
         /// </summary>
         IReportsApi Reports { get; }

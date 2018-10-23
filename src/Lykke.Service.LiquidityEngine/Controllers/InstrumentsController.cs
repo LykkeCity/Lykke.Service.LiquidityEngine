@@ -182,5 +182,75 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                 throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
             }
         }
+
+        /// <inheritdoc/>
+        /// <response code="204">The cross instrument successfully added to instrument.</response>
+        /// <response code="400">The cross instrument already exists.</response>
+        /// <response code="404">Instrument does not exist.</response>
+        [HttpPost("{assetPairId}/cross")]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
+        public async Task AddCrossInstrumentAsync(string assetPairId, [FromBody] CrossInstrumentModel model)
+        {
+            try
+            {
+                var crossInstrument = Mapper.Map<CrossInstrument>(model);
+
+                await _instrumentService.AddCrossInstrumentAsync(assetPairId, crossInstrument);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
+        }
+
+        /// <inheritdoc/>
+        /// <response code="204">The cross instrument successfully updated.</response>
+        /// <response code="400">The cross instrument does not exists.</response>
+        /// <response code="404">Instrument does not exist.</response>
+        [HttpPut("{assetPairId}/cross")]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
+        public async Task UpdateCrossInstrumentAsync(string assetPairId, [FromBody] CrossInstrumentModel model)
+        {
+            try
+            {
+                var crossInstrument = Mapper.Map<CrossInstrument>(model);
+
+                await _instrumentService.UpdateCrossInstrumentAsync(assetPairId, crossInstrument);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
+        }
+
+        /// <inheritdoc/>
+        /// <response code="204">The cross instrument successfully removed from instrument.</response>
+        /// <response code="404">Instrument does not exist.</response>
+        [HttpDelete("{assetPairId}/cross/{crossAssetPairId}")]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
+        public async Task RemoveCrossInstrumentAsync(string assetPairId, string crossAssetPairId)
+        {
+            try
+            {
+                await _instrumentService.RemoveCrossInstrumentAsync(assetPairId, crossAssetPairId);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+        }
     }
 }

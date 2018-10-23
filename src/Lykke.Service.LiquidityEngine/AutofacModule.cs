@@ -12,6 +12,8 @@ using Lykke.Service.LiquidityEngine.Managers;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
+using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers;
+using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers.Quotes;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.LiquidityEngine
@@ -78,12 +80,27 @@ namespace Lykke.Service.LiquidityEngine
                     .LykkeTrades))
                 .AsSelf()
                 .SingleInstance();
-            
+
             builder.RegisterType<B2C2QuoteSubscriber>()
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
                     .B2C2Quotes))
                 .AsSelf()
                 .SingleInstance();
+
+            QuotesSettings quotesSettings = _settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers.Quotes;
+
+            foreach (Exchange exchange in quotesSettings.Exchanges)
+            {
+                builder.RegisterType<QuoteSubscriber>()
+                    .AsSelf()
+                    .WithParameter(TypedParameter.From(new SubscriberSettings
+                    {
+                        Exchange = exchange.Endpoint,
+                        Queue = quotesSettings.Queue,
+                        ConnectionString = quotesSettings.ConnectionString
+                    }))
+                    .SingleInstance();
+            }
         }
     }
 }
