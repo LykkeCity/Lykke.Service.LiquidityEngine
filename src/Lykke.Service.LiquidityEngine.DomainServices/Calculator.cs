@@ -66,7 +66,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="inverse">Indicates that the quote is inverse.</param>
         /// <returns>The price calculated by cross rate.</returns>
         public static decimal CalculateCrossSellPrice(Quote quote, decimal price, bool inverse)
-            => inverse ? price * quote.Bid : price / quote.Bid;
+            => inverse ? price / quote.Bid : price * quote.Ask;
 
         /// <summary>
         /// Calculates a buy price using cross rate.
@@ -76,7 +76,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="inverse">Indicates that the quote is inverse.</param>
         /// <returns>The price calculated by cross rate.</returns>
         public static decimal CalculateCrossBuyPrice(Quote quote, decimal price, bool inverse)
-            => inverse ? price * quote.Ask : price / quote.Ask;
+            => inverse ? price / quote.Ask : price * quote.Bid;
 
         /// <summary>
         /// Calculates sell price of direct limit order using cross instrument.
@@ -86,7 +86,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="inverse">Indicates that the quote is inverse.</param>
         /// <returns>The direct limit order price.</returns>
         public static decimal CalculateDirectSellPrice(decimal price, Quote quote, bool inverse)
-            => inverse ? price / quote.Bid : price * quote.Bid;
+            => inverse ? price * quote.Bid : price / quote.Ask;
 
         /// <summary>
         /// Calculates buy price of direct limit order using cross instrument.
@@ -96,6 +96,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="inverse">Indicates that the quote is inverse.</param>
         /// <returns>The direct limit order price.</returns>
         public static decimal CalculateDirectBuyPrice(decimal price, Quote quote, bool inverse)
-            => inverse ? price / quote.Ask : price * quote.Ask;
+            => inverse ? price * quote.Ask : price / quote.Bid;
     }
 }

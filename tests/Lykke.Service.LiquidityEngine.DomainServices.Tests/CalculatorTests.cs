@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common;
-using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.LiquidityEngine.Domain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -64,9 +63,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             decimal price = 55.57938m;
 
-            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
+            var quote = new Quote("USDCHF", DateTime.UtcNow, .95m, .8m, "none");
 
-            decimal expectedCrossPrice = price / quote.Bid;
+            decimal expectedCrossPrice = price * quote.Ask;
             
             // act
 
@@ -84,9 +83,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             decimal price = 55.57938m;
 
-            var quote = new Quote("USDEUR", DateTime.UtcNow, 0.900901m, 0.869565m, "none");
+            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
 
-            decimal expectedCrossPrice = price * quote.Bid;
+            decimal expectedCrossPrice = price / quote.Bid;
             
             // act
 
@@ -104,9 +103,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             decimal price = 53.99062m;
 
-            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
+            var quote = new Quote("USDCHF", DateTime.UtcNow, .95m, .8m, "none");
 
-            decimal expectedCrossPrice = price / quote.Ask;
+            decimal expectedCrossPrice = price * quote.Bid;
             
             // act
 
@@ -124,9 +123,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             decimal price = 53.99062m;
 
-            var quote = new Quote("USDEUR", DateTime.UtcNow, 0.869565m, 0.900901m, "none");
+            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
 
-            decimal expectedCrossPrice = price * quote.Ask;
+            decimal expectedCrossPrice = price / quote.Ask;
             
             // act
 
@@ -142,11 +141,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
             
-            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
+            var quote = new Quote("USDCHF", DateTime.UtcNow, .95m, .8m, "none");
 
             decimal price = 50.07151m;
 
-            decimal expectedPrice = price * quote.Bid;
+            decimal expectedPrice = price / quote.Ask;
             
             // act
 
@@ -162,11 +161,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
             
-            var quote = new Quote("USDEUR", DateTime.UtcNow, 0.869565m, 0.900901m, "none");
+            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
 
             decimal price = 50.07151m;
 
-            decimal expectedPrice = price / quote.Bid;
+            decimal expectedPrice = price * quote.Bid;
             
             // act
 
@@ -182,11 +181,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
             
-            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
+            var quote = new Quote("USDCHF", DateTime.UtcNow, .95m, .8m, "none");
 
             decimal price = 50.07151m;
 
-            decimal expectedPrice = price * quote.Ask;
+            decimal expectedPrice = price / quote.Bid;
             
             // act
 
@@ -202,11 +201,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
             
-            var quote = new Quote("USDEUR", DateTime.UtcNow, 0.869565m, 0.900901m, "none");
+            var quote = new Quote("EURUSD", DateTime.UtcNow, 1.15m, 1.11m, "none");
 
             decimal price = 50.07151m;
 
-            decimal expectedPrice = price / quote.Ask;
+            decimal expectedPrice = price * quote.Ask;
             
             // act
 
