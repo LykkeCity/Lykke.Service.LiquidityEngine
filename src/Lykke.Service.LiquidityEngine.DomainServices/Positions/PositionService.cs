@@ -81,7 +81,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             {
                 CrossInstrument crossInstrument = instrument.CrossInstruments.Single(o => o.AssetPairId == assetPairId);
 
-                Quote quote = await _quoteService.GetAsync(crossInstrument.QuoteSource, crossInstrument.AssetPairId);
+                Quote quote =
+                    await _quoteService.GetAsync(crossInstrument.QuoteSource, crossInstrument.ExternalAssetPairId);
 
                 if (quote == null)
                 {
@@ -93,8 +94,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     ? Calculator.CalculateDirectSellPrice(avgPrice, quote, crossInstrument.IsInverse)
                     : Calculator.CalculateDirectBuyPrice(avgPrice, quote, crossInstrument.IsInverse);
 
-                position = Position.Open(instrument.AssetPairId, price, avgPrice, volume, quote, assetPairId, tradeType,
-                    internalTrades.Select(o => o.Id).ToArray());
+                position = Position.Open(instrument.AssetPairId, price, avgPrice, volume, quote,
+                    crossInstrument.ExternalAssetPairId, tradeType, internalTrades.Select(o => o.Id).ToArray());
             }
             else
             {
