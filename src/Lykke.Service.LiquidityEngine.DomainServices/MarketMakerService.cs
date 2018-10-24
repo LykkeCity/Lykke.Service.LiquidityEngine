@@ -162,7 +162,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 _log.WarningWithDetails("No quote for instrument", new
                 {
                     Source = crossInstrument.QuoteSource,
-                    AssetPair = crossInstrument.AssetPairId
+                    AssetPair = crossInstrument.ExternalAssetPairId
                 });
                 return null;
             }
