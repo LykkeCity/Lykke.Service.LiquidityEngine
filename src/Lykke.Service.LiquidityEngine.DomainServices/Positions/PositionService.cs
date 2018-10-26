@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
         private readonly ISummaryReportService _summaryReportService;
         private readonly IInstrumentService _instrumentService;
         private readonly IQuoteService _quoteService;
+        private readonly IRateService _rateService;
         private readonly ILog _log;
 
         public PositionService(
@@ -26,6 +27,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             ISummaryReportService summaryReportService,
             IInstrumentService instrumentService,
             IQuoteService quoteService,
+            IRateService rateService,
             ILogFactory logFactory)
         {
             _positionRepository = positionRepository;
@@ -33,6 +35,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             _summaryReportService = summaryReportService;
             _instrumentService = instrumentService;
             _quoteService = quoteService;
+            _rateService = rateService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -103,6 +106,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     internalTrades.Select(o => o.Id).ToArray());
             }
 
+            position.PriceUsd = await GetPriceInUsd(position.AssetPairId, position.Price);
+
             await _openPositionRepository.InsertAsync(position);
 
             await _positionRepository.InsertAsync(position);
@@ -114,7 +119,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseAsync(Position position, ExternalTrade externalTrade)
         {
-            position.Close(externalTrade);
+            decimal priceUsd = await GetPriceInUsd(position.AssetPairId, externalTrade.Price);
+
+            position.Close(externalTrade.Id, externalTrade.Price, priceUsd);
 
             await _positionRepository.UpdateAsync(position);
 
@@ -127,11 +134,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade)
         {
-            Position position = Position.Create(assetPairId, externalTrade);
+            decimal priceUsd = await GetPriceInUsd(assetPairId, externalTrade.Price);
+
+            Position position = Position.Create(assetPairId, externalTrade.Id, externalTrade.Type, externalTrade.Price,
+                priceUsd, externalTrade.Volume);
 
             await _positionRepository.InsertAsync(position);
 
             _log.InfoWithDetails("Position with remaining volume was closed", position);
+        }
+
+        private async Task<decimal> GetPriceInUsd(string assetPairId, decimal price)
+        {
+            decimal rate = await _rateService.GetQuotingToUsdRate(assetPairId);
+
+            return price * rate;
         }
     }
 }

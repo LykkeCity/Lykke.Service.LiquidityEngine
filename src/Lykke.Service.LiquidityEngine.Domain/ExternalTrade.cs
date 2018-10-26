@@ -38,11 +38,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal Price { get; set; }
 
         /// <summary>
-        /// The price of the trade in USD.
-        /// </summary>
-        public decimal PriceUsd { get; set; }
-
-        /// <summary>
         /// The volume of the trade.
         /// </summary>
         public decimal Volume { get; set; }

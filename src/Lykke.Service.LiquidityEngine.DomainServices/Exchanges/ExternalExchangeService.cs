@@ -24,18 +24,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
         private readonly IB2С2RestClient _client;
         private readonly IAssetPairLinkService _assetPairLinkService;
-        private readonly IRateService _rateService;
         private readonly ILog _log;
 
         public ExternalExchangeService(
             IB2С2RestClient client,
             IAssetPairLinkService assetPairLinkService,
-            IRateService rateService,
             ILogFactory logFactory)
         {
             _client = client;
             _assetPairLinkService = assetPairLinkService;
-            _rateService = rateService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -81,8 +78,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 return tradeResponse;
             });
 
-            decimal priceUsdRate = await _rateService.GetQuotingToUsdRate(trade.Instrument);
-
             return new ExternalTrade
             {
                 Id = trade.TradeId,
@@ -91,7 +86,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 Type = trade.Side == Side.Sell ? TradeType.Sell : TradeType.Buy,
                 Time = trade.Created,
                 Price = trade.Price,
-                PriceUsd = trade.Price * priceUsdRate,
                 Volume = trade.Quantity,
                 RequestId = trade.RfqId
             };

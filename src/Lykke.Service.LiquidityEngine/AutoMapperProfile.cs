@@ -33,10 +33,8 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<BalanceOperation, BalanceOperationModel>(MemberList.Source);
             CreateMap<BalanceOperationModel, BalanceOperation>(MemberList.Destination);
 
-            CreateMap<ExternalTrade, ExternalTradeModel>(MemberList.Source)
-                .ForSourceMember(source => source.PriceUsd, opt => opt.Ignore());
-            CreateMap<InternalTrade, InternalTradeModel>(MemberList.Source)
-                .ForSourceMember(source => source.PriceUsd, opt => opt.Ignore());
+            CreateMap<ExternalTrade, ExternalTradeModel>(MemberList.Source);
+            CreateMap<InternalTrade, InternalTradeModel>(MemberList.Source);
 
             CreateMap<Position, PositionModel>(MemberList.Source);
 
