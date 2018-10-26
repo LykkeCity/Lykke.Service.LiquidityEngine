@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using JetBrains.Annotations;
 using Lykke.AzureStorage.Tables;
 using Lykke.AzureStorage.Tables.Entity.Annotation;
@@ -14,6 +14,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
         private TradeType _type;
         private DateTime _time;
         private decimal _price;
+        private decimal _priceUsd;
         private decimal _volume;
         
         public ExternalTradeEntity()
@@ -67,6 +68,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 {
                     _price = value;
                     MarkValueTypePropertyAsDirty("Price");
+                }
+            }
+        }
+
+        public decimal PriceUsd
+        {
+            get => _priceUsd;
+            set
+            {
+                if (_priceUsd != value)
+                {
+                    _priceUsd = value;
+                    MarkValueTypePropertyAsDirty("PriceUsd");
                 }
             }
         }

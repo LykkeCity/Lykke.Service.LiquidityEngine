@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +23,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         private readonly ISettingsService _settingsService;
         private readonly ITradeService _tradeService;
         private readonly IPositionService _positionService;
+        private readonly IRateService _rateService;
         private readonly ILogFactory _logFactory;
         private readonly ILog _log;
 
@@ -33,12 +34,14 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             ISettingsService settingsService,
             ITradeService tradeService,
             IPositionService positionService,
+            IRateService rateService,
             ILogFactory logFactory)
         {
             _settings = settings;
             _settingsService = settingsService;
             _tradeService = tradeService;
             _positionService = positionService;
+            _rateService = rateService;
             _logFactory = logFactory;
             _log = logFactory.CreateLog(this);
         }
@@ -86,7 +89,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                     .Where(o => o.Order?.ClientId == walletId)
                     .Where(o => o.Trades?.Count > 0);
 
-                IReadOnlyCollection<InternalTrade> trades = CreateReports(clientLimitOrders);
+                IReadOnlyCollection<InternalTrade> trades = await CreateReports(clientLimitOrders);
 
                 if (trades.Any())
                 {
@@ -102,17 +105,18 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             }
         }
 
-        private static IReadOnlyCollection<InternalTrade> CreateReports(IEnumerable<LimitOrderWithTrades> limitOrders)
+        private async Task<IReadOnlyCollection<InternalTrade>> CreateReports(IEnumerable<LimitOrderWithTrades> limitOrders)
         {
             var executionReports = new List<InternalTrade>();
 
             foreach (LimitOrderWithTrades limitOrderModel in limitOrders)
             {
+
                 // The limit order fully executed. The remaining volume is zero.
                 if (limitOrderModel.Order.Status == OrderStatus.Matched)
                 {
                     IReadOnlyList<InternalTrade> orderExecutionReports =
-                        CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, true);
+                        await CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, true);
 
                     executionReports.AddRange(orderExecutionReports);
                 }
@@ -121,7 +125,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 if (limitOrderModel.Order.Status == OrderStatus.Processing)
                 {
                     IReadOnlyList<InternalTrade> orderExecutionReports =
-                        CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, false);
+                        await CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, false);
 
                     executionReports.AddRange(orderExecutionReports);
                 }
@@ -131,7 +135,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 if (limitOrderModel.Order.Status == OrderStatus.Cancelled)
                 {
                     IReadOnlyList<InternalTrade> orderExecutionReports =
-                        CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, true);
+                        await CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, true);
 
                     executionReports.AddRange(orderExecutionReports);
                 }
@@ -140,11 +144,13 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             return executionReports;
         }
 
-        private static IReadOnlyList<InternalTrade> CreateInternalTrades(
+        private async Task<IReadOnlyList<InternalTrade>> CreateInternalTrades(
             MatchingEngine.Connector.Models.RabbitMq.LimitOrder limitOrder,
             IReadOnlyList<LimitTradeInfo> trades,
             bool completed)
         {
+            decimal priceUsdRate = await _rateService.GetQuotingToUsdRate(limitOrder.AssetPairId);
+
             var reports = new List<InternalTrade>();
 
             for (int i = 0; i < trades.Count; i++)
@@ -169,6 +175,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                     Type = tradeType,
                     Time = trade.Timestamp,
                     Price = (decimal) trade.Price,
+                    PriceUsd = (decimal) trade.Price * priceUsdRate,
                     Volume = tradeType == TradeType.Buy
                         ? (decimal) trade.OppositeVolume
                         : (decimal) trade.Volume,

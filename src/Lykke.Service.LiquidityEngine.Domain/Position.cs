@@ -35,6 +35,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal Price { get; set; }
 
         /// <summary>
+        /// The price of the trade that opened the position in USD.
+        /// </summary>
+        public decimal PriceUsd { get; set; }
+
+        /// <summary>
         /// The volume of the trade that opened the position.
         /// </summary>
         public decimal Volume { get; set; }
@@ -50,9 +55,19 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal ClosePrice { get; set; }
 
         /// <summary>
+        /// The price of the trade that closed the position in USD.
+        /// </summary>
+        public decimal ClosePriceUsd { get; set; }
+
+        /// <summary>
         /// The realised profit and loss.
         /// </summary>
         public decimal PnL { get; set; }
+
+        /// <summary>
+        /// The realised profit and loss converted into USD.
+        /// </summary>
+        public decimal PnLUsd { get; set; }
 
         /// <summary>
         /// The identifier of asset pair that used to convert trade price.
@@ -93,10 +108,12 @@ namespace Lykke.Service.LiquidityEngine.Domain
         {
             CloseDate = DateTime.UtcNow;
             ClosePrice = externalTrade.Price;
+            ClosePriceUsd = externalTrade.PriceUsd;
 
             int volumeSign = Type == PositionType.Long ? 1 : -1;
 
             PnL = (ClosePrice - Price) * Volume * volumeSign;
+            PnLUsd = (ClosePriceUsd - PriceUsd) * Volume * volumeSign;
 
             CloseTradeId = externalTrade.Id;
         }
@@ -114,10 +131,12 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Type = positionType,
                 Date = DateTime.UtcNow,
                 Price = externalTrade.Price,
+                PriceUsd = externalTrade.PriceUsd,
                 Volume = externalTrade.Volume,
                 Trades = new string[0],
                 CloseDate = DateTime.UtcNow,
                 ClosePrice = externalTrade.Price,
+                ClosePriceUsd = externalTrade.PriceUsd,
                 PnL = decimal.Zero,
                 CloseTradeId = externalTrade.Id
             };
@@ -185,6 +204,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
             decimal avgPrice = internalTrades.Sum(o => o.Price) / internalTrades.Count;
 
+            decimal avgPriceUsd = internalTrades.Sum(o => o.PriceUsd) / internalTrades.Count;
+
             decimal volume = internalTrades.Sum(o => o.Volume);
 
             string[] trades = internalTrades.Select(o => o.Id).ToArray();
@@ -196,6 +217,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Type = positionType,
                 Date = DateTime.UtcNow,
                 Price = avgPrice,
+                PriceUsd = avgPriceUsd,
                 Volume = volume,
                 Trades = trades,
                 CloseDate = new DateTime(1900, 1, 1)

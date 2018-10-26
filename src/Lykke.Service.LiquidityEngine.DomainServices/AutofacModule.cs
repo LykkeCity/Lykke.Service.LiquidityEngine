@@ -11,6 +11,7 @@ using Lykke.Service.LiquidityEngine.DomainServices.Logging;
 using Lykke.Service.LiquidityEngine.DomainServices.MarketMaker;
 using Lykke.Service.LiquidityEngine.DomainServices.OrderBooks;
 using Lykke.Service.LiquidityEngine.DomainServices.Positions;
+using Lykke.Service.LiquidityEngine.DomainServices.Rates;
 using Lykke.Service.LiquidityEngine.DomainServices.Reports;
 using Lykke.Service.LiquidityEngine.DomainServices.Settings;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
@@ -130,6 +131,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<HedgeService>()
                 .As<IHedgeService>()
+                .SingleInstance();
+
+            builder.RegisterType<RateService>()
+                .As<IRateService>()
                 .SingleInstance();
 
             RegisterCache(builder);

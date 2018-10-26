@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Lykke.Service.LiquidityEngine.Domain
 {
@@ -36,6 +36,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The price of the trade.
         /// </summary>
         public decimal Price { get; set; }
+
+        /// <summary>
+        /// The price of the trade in USD.
+        /// </summary>
+        public decimal PriceUsd { get; set; }
 
         /// <summary>
         /// The volume of the trade.

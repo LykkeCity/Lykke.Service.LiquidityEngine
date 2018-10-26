@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using Autofac;
+using Common.Cache;
 using JetBrains.Annotations;
 using Lykke.B2c2Client;
 using Lykke.B2c2Client.Settings;
@@ -14,6 +15,7 @@ using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers.Quotes;
+using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.LiquidityEngine
@@ -35,6 +37,8 @@ namespace Lykke.Service.LiquidityEngine
                 _settings.CurrentValue.LiquidityEngineService.WalletId));
             builder.RegisterModule(new AzureRepositories.AutofacModule(
                 _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
+
+            builder.RegisterInstance<ICacheManager>(new MemoryCacheManager());
 
             builder.RegisterType<StartupManager>()
                 .As<IStartupManager>();
@@ -71,6 +75,8 @@ namespace Lykke.Service.LiquidityEngine
             var endPoint = new IPEndPoint(address, matchingEngineClientSettings.IpEndpoint.Port);
 
             builder.RegisgterMeClient(endPoint);
+
+            builder.RegisterRateCalculatorClient(_settings.CurrentValue.RateCalculatorServiceClient.ServiceUrl);
         }
 
         private void RegisterRabbit(ContainerBuilder builder)

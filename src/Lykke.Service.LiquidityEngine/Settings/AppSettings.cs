@@ -22,5 +22,7 @@ namespace Lykke.Service.LiquidityEngine.Settings
         public MatchingEngineClientSettings MatchingEngineClient { get; set; }
         
         public AssetsServiceClientSettings AssetsServiceClient { get; set; }
+
+        public RateCalculatorServiceClientSettings RateCalculatorServiceClient { get; set; }
     }
 }
