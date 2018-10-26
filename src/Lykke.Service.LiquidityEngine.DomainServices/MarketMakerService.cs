@@ -238,7 +238,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     if (balance - amount < 0)
                     {
-                        decimal volume = balance.TruncateDecimalPlaces(assetPair.InvertedAccuracy);
+                        decimal volume = balance.TruncateDecimalPlaces(baseAsset.Accuracy);
 
                         if (volume < (decimal) assetPair.MinVolume)
                             limitOrder.Error = LimitOrderError.NotEnoughFunds;
@@ -261,7 +261,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     if (balance - amount < 0)
                     {
-                        decimal volume = (balance / limitOrder.Price).TruncateDecimalPlaces(assetPair.InvertedAccuracy);
+                        decimal volume = (balance / limitOrder.Price).TruncateDecimalPlaces(baseAsset.Accuracy);
 
                         if (volume < (decimal) assetPair.MinVolume)
                             limitOrder.Error = LimitOrderError.NotEnoughFunds;
