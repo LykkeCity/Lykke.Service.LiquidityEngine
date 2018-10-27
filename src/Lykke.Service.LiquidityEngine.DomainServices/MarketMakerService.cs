@@ -83,42 +83,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
-            IReadOnlyCollection<LimitOrder> directLimitOrders = await CalculateDirectLimitOrders(instrument);
+            OrderBook directOrderBook = await CalculateDirectOrderBookAsync(instrument);
 
-            if (directLimitOrders == null)
+            if (directOrderBook == null)
                 return;
 
             var orderBooks = new List<OrderBook>
             {
-                new OrderBook
-                {
-                    AssetPairId = instrument.AssetPairId,
-                    Time = DateTime.UtcNow,
-                    LimitOrders = directLimitOrders
-                }
+                directOrderBook
             };
 
-            LimitOrder[] validDirectLimitOrders = directLimitOrders
-                .Where(o => o.Error == LimitOrderError.None)
-                .ToArray();
-
-            if (validDirectLimitOrders.Length > 0)
+            foreach (CrossInstrument crossInstrument in instrument.CrossInstruments)
             {
-                foreach (CrossInstrument crossInstrument in instrument.CrossInstruments)
-                {
-                    IReadOnlyCollection<LimitOrder> crossLimitOrders =
-                        await CalculateCrossLimitOrders(validDirectLimitOrders, crossInstrument);
+                OrderBook crossOrderBook = await CalculateCrossOrderBookAsync(directOrderBook, crossInstrument);
 
-                    if (crossLimitOrders == null)
-                        continue;
+                if (crossOrderBook == null)
+                    continue;
 
-                    orderBooks.Add(new OrderBook
-                    {
-                        AssetPairId = crossInstrument.AssetPairId,
-                        Time = DateTime.UtcNow,
-                        LimitOrders = crossLimitOrders
-                    });
-                }
+                orderBooks.Add(crossOrderBook);
             }
 
             await ValidatePnLThresholdAsync(orderBooks, instrument);
@@ -142,7 +124,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }
         }
 
-        private async Task<IReadOnlyCollection<LimitOrder>> CalculateDirectLimitOrders(Instrument instrument)
+        private async Task<OrderBook> CalculateDirectOrderBookAsync(Instrument instrument)
         {
             Quote[] quotes = _b2C2OrderBookService.GetQuotes(instrument.AssetPairId);
 
@@ -198,11 +180,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             WriteInfoLog(instrument.AssetPairId, quotes, limitOrders, "Direct limit orders calculated");
 
-            return limitOrders;
+            return new OrderBook
+            {
+                AssetPairId = instrument.AssetPairId,
+                Time = DateTime.UtcNow,
+                LimitOrders = limitOrders,
+                IsDirect = true
+            };
         }
 
-        private async Task<IReadOnlyCollection<LimitOrder>> CalculateCrossLimitOrders(
-            IReadOnlyCollection<LimitOrder> directLimitOrders, CrossInstrument crossInstrument)
+        private async Task<OrderBook> CalculateCrossOrderBookAsync(OrderBook directOrderBook,
+            CrossInstrument crossInstrument)
         {
             Quote quote = await _quoteService
                 .GetAsync(crossInstrument.QuoteSource, crossInstrument.ExternalAssetPairId);
@@ -217,12 +205,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 return null;
             }
 
+            LimitOrder[] validDirectLimitOrders = directOrderBook.LimitOrders
+                .Where(o => o.Error == LimitOrderError.None)
+                .ToArray();
+
+            if (validDirectLimitOrders.Length == 0)
+                return null;
+
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(crossInstrument.AssetPairId);
 
             Asset baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
 
             IReadOnlyCollection<LimitOrder> crossLimitOrders = Calculator.CalculateCrossLimitOrders(quote,
-                directLimitOrders, crossInstrument.IsInverse, assetPair.Accuracy, baseAsset.Accuracy);
+                validDirectLimitOrders, crossInstrument.IsInverse, assetPair.Accuracy, baseAsset.Accuracy);
 
             await ValidateQuoteTimeoutAsync(crossLimitOrders, quote);
 
@@ -232,7 +227,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             WriteInfoLog(crossInstrument.AssetPairId, new[] {quote}, crossLimitOrders, "Cross limit orders calculated");
 
-            return crossLimitOrders;
+            return new OrderBook
+            {
+                AssetPairId = crossInstrument.AssetPairId,
+                Time = DateTime.UtcNow,
+                LimitOrders = crossLimitOrders,
+                IsDirect = false,
+                BaseAssetPairId = directOrderBook.AssetPairId,
+                CrossQuote = quote
+            };
         }
 
         private async Task ValidateQuoteTimeoutAsync(IReadOnlyCollection<LimitOrder> limitOrders, Quote quote)
