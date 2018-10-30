@@ -106,8 +106,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     internalTrades.Select(o => o.Id).ToArray());
             }
 
-            position.PriceUsd = await _rateService.CalculatePriceInUsd(position.AssetPairId, position.Price,
-                position.Type == PositionType.Short);
+            position.PriceUsd = await _rateService.CalculatePriceInUsd(position.AssetPairId, position.Price);
 
             await _openPositionRepository.InsertAsync(position);
 
@@ -120,8 +119,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseAsync(Position position, ExternalTrade externalTrade)
         {
-            decimal? priceUsd = await _rateService.CalculatePriceInUsd(position.AssetPairId, externalTrade.Price,
-                position.Type == PositionType.Long);
+            decimal? priceUsd = await _rateService.CalculatePriceInUsd(position.AssetPairId, externalTrade.Price);
 
             position.Close(externalTrade.Id, externalTrade.Price, priceUsd);
 
@@ -136,8 +134,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade)
         {
-            decimal? priceUsd = await _rateService.CalculatePriceInUsd(assetPairId, externalTrade.Price,
-                externalTrade.Type == TradeType.Sell);
+            decimal? priceUsd = await _rateService.CalculatePriceInUsd(assetPairId, externalTrade.Price);
 
             Position position = Position.Create(assetPairId, externalTrade.Id, externalTrade.Type, externalTrade.Price,
                 priceUsd, externalTrade.Volume);

@@ -16,22 +16,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Rates
     {
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly IQuoteService _quoteService;
-        private readonly ICrossRateInstrumentService _crossInstrumentService;
+        private readonly ICrossRateInstrumentService _crossRateInstrumentService;
         private readonly ILog _log;
 
         public RateService(
             IAssetsServiceWithCache assetsServiceWithCache,
             IQuoteService quoteService,
-            ICrossRateInstrumentService crossInstrumentService,
+            ICrossRateInstrumentService crossRateInstrumentService,
             ILogFactory logFactory)
         {
             _assetsServiceWithCache = assetsServiceWithCache;
             _quoteService = quoteService;
-            _crossInstrumentService = crossInstrumentService;
+            _crossRateInstrumentService = crossRateInstrumentService;
             _log = logFactory.CreateLog(this);
         }
 
-        public async Task<decimal?> CalculatePriceInUsd(string assetPairId, decimal price, bool isSell)
+        public async Task<decimal?> CalculatePriceInUsd(string assetPairId, decimal price)
         {
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(assetPairId);
 
@@ -49,7 +49,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Rates
                 return price;
             }
 
-            CrossRateInstrument crossInstrument = await _crossInstrumentService.GetByAssetPairIdAsync(assetPairId);
+            CrossRateInstrument crossInstrument = await _crossRateInstrumentService.GetByAssetPairIdAsync(assetPairId);
 
             if (crossInstrument == null)
             {
@@ -73,9 +73,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Rates
                 return null;
             }
 
-            return isSell
-                ? Calculator.CalculateDirectSellPrice(price, quote, crossInstrument.IsInverse)
-                : Calculator.CalculateDirectBuyPrice(price, quote, crossInstrument.IsInverse);
+            return Calculator.CalculateDirectMidPrice(price, quote, crossInstrument.IsInverse);
         }
     }
 }
