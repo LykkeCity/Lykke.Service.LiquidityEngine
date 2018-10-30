@@ -4,6 +4,6 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 {
     public interface IRateService
     {
-        Task<decimal> GetQuotingToUsdRate(string assetPairId);
+        Task<decimal?> CalculatePriceInUsd(string assetPairId, decimal price, bool isSell);
     }
 }

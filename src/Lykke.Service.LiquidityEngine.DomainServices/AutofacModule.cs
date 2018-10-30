@@ -5,6 +5,7 @@ using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.DomainServices.Audit;
 using Lykke.Service.LiquidityEngine.DomainServices.Balances;
+using Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Logging;
@@ -49,6 +50,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<CreditService>()
                 .As<ICreditService>()
+                .SingleInstance();
+
+            builder.RegisterType<CrossRateInstrumentService>()
+                .As<ICrossRateInstrumentService>()
                 .SingleInstance();
 
             builder.RegisterType<SettlementService>()

@@ -15,13 +15,13 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
         private PositionType _type;
         private DateTime _date;
         private decimal _price;
-        private decimal _priceUsd;
+        private decimal? _priceUsd;
         private decimal _volume;
         private DateTime _closeDate;
         private decimal _closePrice;
-        private decimal _closePriceUsd;
+        private decimal? _closePriceUsd;
         private decimal _pnL;
-        private decimal _pnLUsd;
+        private decimal? _pnLUsd;
         private decimal _tradeAvgPrice;
 
         public PositionEntity()
@@ -77,7 +77,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
-        public decimal PriceUsd
+        public decimal? PriceUsd
         {
             get => _priceUsd;
             set
@@ -129,7 +129,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
-        public decimal ClosePriceUsd
+        public decimal? ClosePriceUsd
         {
             get => _closePriceUsd;
             set
@@ -155,7 +155,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
-        public decimal PnLUsd
+        public decimal? PnLUsd
         {
             get => _pnLUsd;
             set

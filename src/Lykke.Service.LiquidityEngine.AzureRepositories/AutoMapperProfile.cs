@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
+using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
@@ -21,6 +22,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
         {
             CreateMap<AssetPairLink, AssetPairLinkEntity>(MemberList.Source);
             CreateMap<AssetPairLinkEntity, AssetPairLink>(MemberList.Destination);
+
+            CreateMap<CrossRateInstrument, CrossRateInstrumentEntity>(MemberList.Source);
+            CreateMap<CrossRateInstrumentEntity, CrossRateInstrument>(MemberList.Destination);
 
             CreateMap<Instrument, InstrumentEntity>(MemberList.Source)
                 .ForSourceMember(src => src.CrossInstruments, opt => opt.Ignore());

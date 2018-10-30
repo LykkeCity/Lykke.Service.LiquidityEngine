@@ -86,10 +86,6 @@ MatchingEngineClient:
     Host:
       settings-key: MatchingEngine-Host
       
-RateCalculatorServiceClient:
-  ServiceUrl:
-    settings-key: RateCalculatorServiceUrl
-
 SlackNotifications:
   AzureQueue:
     ConnectionString:

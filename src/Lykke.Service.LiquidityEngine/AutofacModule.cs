@@ -15,7 +15,6 @@ using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers.Quotes;
-using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 
 namespace Lykke.Service.LiquidityEngine
@@ -75,8 +74,6 @@ namespace Lykke.Service.LiquidityEngine
             var endPoint = new IPEndPoint(address, matchingEngineClientSettings.IpEndpoint.Port);
 
             builder.RegisgterMeClient(endPoint);
-
-            builder.RegisterRateCalculatorClient(_settings.CurrentValue.RateCalculatorServiceClient.ServiceUrl);
         }
 
         private void RegisterRabbit(ContainerBuilder builder)

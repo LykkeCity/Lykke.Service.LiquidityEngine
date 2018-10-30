@@ -37,7 +37,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// The price of the trade that opened the position in USD.
         /// </summary>
-        public decimal PriceUsd { get; set; }
+        public decimal? PriceUsd { get; set; }
 
         /// <summary>
         /// The volume of the trade that opened the position.
@@ -57,7 +57,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// The price of the trade that closed the position in USD.
         /// </summary>
-        public decimal ClosePriceUsd { get; set; }
+        public decimal? ClosePriceUsd { get; set; }
 
         /// <summary>
         /// The realised profit and loss.
@@ -67,7 +67,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// The realised profit and loss converted into USD.
         /// </summary>
-        public decimal PnLUsd { get; set; }
+        public decimal? PnLUsd { get; set; }
 
         /// <summary>
         /// The identifier of asset pair that used to convert trade price.
@@ -104,7 +104,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// </summary>
         public string CloseTradeId { get; set; }
 
-        public void Close(string externalTradeId, decimal closePrice, decimal closePriceUsd)
+        public void Close(string externalTradeId, decimal closePrice, decimal? closePriceUsd)
         {
             CloseDate = DateTime.UtcNow;
             ClosePrice = closePrice;
@@ -119,7 +119,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         }
 
         public static Position Create(string assetPairId, string externalTradeId, TradeType tradeType, decimal price,
-            decimal priceUsd, decimal volume)
+            decimal? priceUsd, decimal volume)
         {
             PositionType positionType = tradeType == TradeType.Sell
                 ? PositionType.Long

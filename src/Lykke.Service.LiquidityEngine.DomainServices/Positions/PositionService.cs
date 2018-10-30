@@ -106,7 +106,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     internalTrades.Select(o => o.Id).ToArray());
             }
 
-            position.PriceUsd = await GetPriceInUsd(position.AssetPairId, position.Price);
+            position.PriceUsd = await _rateService.CalculatePriceInUsd(position.AssetPairId, position.Price,
+                position.Type == PositionType.Short);
 
             await _openPositionRepository.InsertAsync(position);
 
@@ -119,7 +120,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseAsync(Position position, ExternalTrade externalTrade)
         {
-            decimal priceUsd = await GetPriceInUsd(position.AssetPairId, externalTrade.Price);
+            decimal? priceUsd = await _rateService.CalculatePriceInUsd(position.AssetPairId, externalTrade.Price,
+                position.Type == PositionType.Long);
 
             position.Close(externalTrade.Id, externalTrade.Price, priceUsd);
 
@@ -134,7 +136,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade)
         {
-            decimal priceUsd = await GetPriceInUsd(assetPairId, externalTrade.Price);
+            decimal? priceUsd = await _rateService.CalculatePriceInUsd(assetPairId, externalTrade.Price,
+                externalTrade.Type == TradeType.Sell);
 
             Position position = Position.Create(assetPairId, externalTrade.Id, externalTrade.Type, externalTrade.Price,
                 priceUsd, externalTrade.Volume);
@@ -142,13 +145,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             await _positionRepository.InsertAsync(position);
 
             _log.InfoWithDetails("Position with remaining volume was closed", position);
-        }
-
-        private async Task<decimal> GetPriceInUsd(string assetPairId, decimal price)
-        {
-            decimal rate = await _rateService.GetQuotingToUsdRate(assetPairId);
-
-            return price * rate;
         }
     }
 }

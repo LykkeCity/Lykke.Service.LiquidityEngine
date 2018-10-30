@@ -31,7 +31,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
         /// <summary>
         /// The cumulative profit and loss in USD.
         /// </summary>
-        public decimal PnLUsd { get; set; }
+        public decimal? PnLUsd { get; set; }
 
         /// <summary>
         /// The current volume of the base asset.

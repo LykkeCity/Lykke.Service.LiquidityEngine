@@ -41,7 +41,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Positions
         /// <summary>
         /// The price of the trade that opened the position in USD.
         /// </summary>
-        public decimal PriceUsd { get; set; }
+        public decimal? PriceUsd { get; set; }
 
         /// <summary>
         /// The volume of the trade that opened the position.
@@ -61,7 +61,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Positions
         /// <summary>
         /// The price of the trade that closed the position in USD.
         /// </summary>
-        public decimal ClosePriceUsd { get; set; }
+        public decimal? ClosePriceUsd { get; set; }
 
         /// <summary>
         /// The realised profit and loss.
@@ -96,7 +96,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Positions
         /// <summary>
         /// The realised profit and loss in USD.
         /// </summary>
-        public decimal PnLUsd { get; set; }
+        public decimal? PnLUsd { get; set; }
 
         /// <summary>
         /// A collection of identifiers of the trades that opened position.

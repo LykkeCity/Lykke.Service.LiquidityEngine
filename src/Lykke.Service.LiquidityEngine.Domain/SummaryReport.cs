@@ -28,7 +28,7 @@
         /// <summary>
         /// The cumulative profit and loss converted into USD.
         /// </summary>
-        public decimal PnLUsd { get; set; }
+        public decimal? PnLUsd { get; set; }
 
         /// <summary>
         /// The current volume of the base asset.
@@ -107,7 +107,7 @@
             ClosedPositionsCount++;
 
             PnL += position.PnL;
-            PnLUsd += position.PnLUsd;
+            PnLUsd += position.PnLUsd ?? 0;
         }
     }
 }

@@ -6,6 +6,7 @@ using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
+using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
@@ -47,10 +48,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .As<ICreditRepository>()
                 .SingleInstance();
 
-            builder.Register(container => new CrossInstrumentRepository(
-                    AzureTableStorage<CrossInstrumentEntity>.Create(_connectionString,
-                        "CrossInstruments", container.Resolve<ILogFactory>())))
-                .As<ICrossInstrumentRepository>()
+            builder.Register(container => new CrossRateInstrumentRepository(
+                    AzureTableStorage<CrossRateInstrumentEntity>.Create(_connectionString,
+                        "CrossRateInstruments", container.Resolve<ILogFactory>())))
+                .As<ICrossRateInstrumentRepository>()
                 .SingleInstance();
 
             builder.Register(container => new InstrumentRepository(
