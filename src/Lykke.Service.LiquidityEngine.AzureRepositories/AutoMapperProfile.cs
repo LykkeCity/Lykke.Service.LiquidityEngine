@@ -51,6 +51,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             CreateMap<SummaryReport, SummaryReportEntity>(MemberList.Source);
             CreateMap<SummaryReportEntity, SummaryReport>(MemberList.Destination);
 
+            CreateMap<MarketMakerSettings, MarketMakerSettingsEntity>(MemberList.Source);
+            CreateMap<MarketMakerSettingsEntity, MarketMakerSettings>(MemberList.Destination);
+            
             CreateMap<QuoteTimeoutSettings, QuoteTimeoutSettingsEntity>(MemberList.Source);
             CreateMap<QuoteTimeoutSettingsEntity, QuoteTimeoutSettings>(MemberList.Destination);
 

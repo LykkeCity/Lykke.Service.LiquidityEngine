@@ -81,6 +81,11 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.OrderBooks
         /// <summary>
         /// Indicates that an instrument is not allowed to create limit orders becase of market maker state.
         /// </summary>
-        MarketMakerError
+        MarketMakerError,
+        
+        /// <summary>
+        /// Indicates that the limit order price is greater or less than expected.
+        /// </summary>
+        PriceIsOutOfTheRange
     }
 }
