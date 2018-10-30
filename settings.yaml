@@ -39,6 +39,16 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2Quotes-Queue
 
+      B2C2OrderBooks:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2OrderBooks-Exchange
+        Queue:
+          settings-key: LiquidityEngineService-Rabbit-Subscribers-B2C2OrderBooks-Queue
+
       Quotes:
         ConnectionString:
           settings-key: RawPriceRabbitMq

@@ -9,7 +9,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
     public static class Calculator
     {
         /// <summary>
-        /// Creates limit orders using price levels of instrument.
+        /// Creates limit orders using price levels of an instrument.
         /// </summary>
         /// <param name="quote">Best prices of instrument.</param>
         /// <param name="levels">A collection of price levels.</param>
@@ -32,6 +32,79 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 limitOrders.Add(LimitOrder.CreateSell(sellPrice, volume));
                 limitOrders.Add(LimitOrder.CreateBuy(buyPrice, volume));
+            }
+
+            return limitOrders;
+        }
+
+        /// <summary>
+        /// Creates dynamically distributed limit orders using price levels of an instrument.
+        /// </summary>
+        /// <param name="quote1">Best prices of instrument on first level.</param>
+        /// <param name="quote2">Best prices of instrument on second level.</param>
+        /// <param name="levels">A collection of price levels.</param>
+        /// <param name="priceAccuracy">The accuracy of price.</param>
+        /// <param name="volumeAccuracy">The accuracy of volume.</param>
+        /// <returns>A collection of limit orders.</returns>
+        public static IReadOnlyCollection<LimitOrder> CalculateLimitOrders(Quote quote1, Quote quote2,
+            InstrumentLevel[] levels, int priceAccuracy, int volumeAccuracy)
+        {
+            var limitOrders = new List<LimitOrder>();
+
+            if (levels.Length == 0)
+                return limitOrders;
+
+            decimal sumSideVolume = levels.Sum(o => o.Volume);
+
+            decimal deltaVolume = sumSideVolume - levels[0].Volume;
+
+            decimal sellDeltaPrice = (quote2.Ask - quote1.Ask) / quote1.Ask;
+
+            decimal buyDeltaPrice = (quote1.Bid - quote2.Bid) / quote1.Bid;
+
+            decimal sellMarketPrice = quote1.Ask;
+
+            decimal sellRawPrice = quote1.Ask;
+
+            decimal buyMarketPrice = quote1.Bid;
+
+            decimal buyRawPrice = quote1.Bid;
+
+            decimal sumVolume = levels[0].Volume;
+
+            limitOrders.Add(LimitOrder.CreateSell(
+                (sellRawPrice * (1 + levels[0].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                Math.Round(levels[0].Volume, volumeAccuracy)));
+
+            limitOrders.Add(LimitOrder.CreateBuy(
+                (buyRawPrice * (1 - levels[0].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                Math.Round(levels[0].Volume, volumeAccuracy)));
+
+            for (int i = 1; i < levels.Length; i++)
+            {
+                decimal prevSellMarketPrice = sellMarketPrice;
+
+                decimal prevBuyMarketPrice = buyMarketPrice;
+
+                decimal prevSumVolume = sumVolume;
+
+                sumVolume += levels[i].Volume;
+
+                sellMarketPrice = (1 + (sumVolume - levels[0].Volume) / deltaVolume * sellDeltaPrice) * quote1.Ask;
+
+                buyMarketPrice = (1 - (sumVolume - levels[0].Volume) / deltaVolume * buyDeltaPrice) * quote1.Bid;
+
+                sellRawPrice = (sellMarketPrice * sumVolume - prevSellMarketPrice * prevSumVolume) / levels[i].Volume;
+
+                buyRawPrice = (buyMarketPrice * sumVolume - prevBuyMarketPrice * prevSumVolume) / levels[i].Volume;
+
+                limitOrders.Add(LimitOrder.CreateSell(
+                    (sellRawPrice * (1 + levels[i].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                    Math.Round(levels[i].Volume, volumeAccuracy)));
+
+                limitOrders.Add(LimitOrder.CreateBuy(
+                    (buyRawPrice * (1 - levels[i].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                    Math.Round(levels[i].Volume, volumeAccuracy)));
             }
 
             return limitOrders;

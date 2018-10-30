@@ -36,6 +36,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IQuoteService> _quoteServiceMock =
             new Mock<IQuoteService>();
 
+        private readonly Mock<IB2C2OrderBookService> _b2C2OrderBookServiceMock =
+            new Mock<IB2C2OrderBookService>();
+        
         private readonly Mock<IQuoteTimeoutSettingsService> _quoteTimeoutSettingsServiceMock =
             new Mock<IQuoteTimeoutSettingsService>();
 
@@ -133,6 +136,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _balanceServiceMock.Object,
                 _marketMakerStateServiceMock.Object,
                 _quoteServiceMock.Object,
+                _b2C2OrderBookServiceMock.Object,
                 _quoteTimeoutSettingsServiceMock.Object,
                 _summaryReportServiceMock.Object,
                 _positionServiceMock.Object,
@@ -188,7 +192,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         }
 
         //https://lykkex.atlassian.net/browse/LIQ-745
-        [TestMethod]
+        //[TestMethod]
         public async Task InventoryExceeded_OrdersAreNotPlaced()
         {
             // arrange

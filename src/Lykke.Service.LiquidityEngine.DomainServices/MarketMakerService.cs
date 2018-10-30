@@ -26,6 +26,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IBalanceService _balanceService;
         private readonly IMarketMakerStateService _marketMakerStateService;
         private readonly IQuoteService _quoteService;
+        private readonly IB2C2OrderBookService _b2C2OrderBookService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
         private readonly ISummaryReportService _summaryReportService;
         private readonly IPositionService _positionService;
@@ -39,6 +40,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IBalanceService balanceService,
             IMarketMakerStateService marketMakerStateService,
             IQuoteService quoteService,
+            IB2C2OrderBookService b2C2OrderBookService,
             IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
             ISummaryReportService summaryReportService,
             IPositionService positionService,
@@ -51,6 +53,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _balanceService = balanceService;
             _marketMakerStateService = marketMakerStateService;
             _quoteService = quoteService;
+            _b2C2OrderBookService = b2C2OrderBookService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
             _summaryReportService = summaryReportService;
             _positionService = positionService;
@@ -125,11 +128,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task<IReadOnlyCollection<LimitOrder>> CalculateDirectLimitOrders(Instrument instrument)
         {
-            Quote quote = await _quoteService.GetAsync(ExchangeNames.B2C2, instrument.AssetPairId);
-
-            if (quote == null)
+            Quote[] quotes = _b2C2OrderBookService.GetQuotes(instrument.AssetPairId);
+            
+            if (quotes == null || quotes.Length != 2)
             {
-                _log.WarningWithDetails("No quote for instrument", instrument.AssetPairId);
+                _log.WarningWithDetails("No quotes for instrument", instrument.AssetPairId);
                 return null;
             }
 
@@ -137,16 +140,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             Asset baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
 
-            IReadOnlyCollection<LimitOrder> limitOrders =
-                Calculator.CalculateLimitOrders(quote, instrument.Levels, assetPair.Accuracy, baseAsset.Accuracy);
+            IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(quotes[0], quotes[1],
+                instrument.Levels.ToArray(), assetPair.Accuracy, baseAsset.Accuracy);
 
-            await ValidateQuoteTimeoutAsync(limitOrders, quote);
+            await ValidateQuoteTimeoutAsync(limitOrders, quotes[0]);
+            
+            await ValidateQuoteTimeoutAsync(limitOrders, quotes[1]);
 
             ValidateMinVolume(limitOrders, (decimal) assetPair.MinVolume);
 
             await ValidateBalanceAsync(limitOrders, assetPair);
 
-            WriteInfoLog(instrument.AssetPairId, quote, limitOrders, "Direct limit orders calculated");
+            WriteInfoLog(instrument.AssetPairId, quotes, limitOrders, "Direct limit orders calculated");
 
             return limitOrders;
         }
@@ -181,7 +186,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             await ValidateBalanceAsync(crossLimitOrders, assetPair);
 
-            WriteInfoLog(crossInstrument.AssetPairId, quote, crossLimitOrders, "Cross limit orders calculated");
+            WriteInfoLog(crossInstrument.AssetPairId, new[] {quote}, crossLimitOrders, "Cross limit orders calculated");
 
             return crossLimitOrders;
         }
@@ -312,17 +317,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.Idle);
         }
 
-        private void WriteInfoLog(string assetPair, Quote quote, IReadOnlyCollection<LimitOrder> limitOrders,
+        private void WriteInfoLog(string assetPair, Quote[] quotes, IReadOnlyCollection<LimitOrder> limitOrders,
             string message, [CallerMemberName] string process = nameof(WriteInfoLog))
         {
             _log.InfoWithDetails(message, new
             {
                 AssetPair = assetPair,
-                Quote = new
+                Quotes = quotes.Select(quote => new
                 {
                     quote.Ask,
                     quote.Bid
-                },
+                }),
                 LimitOrders = limitOrders.Select(o => new
                 {
                     Type = o.Type.ToString(),
