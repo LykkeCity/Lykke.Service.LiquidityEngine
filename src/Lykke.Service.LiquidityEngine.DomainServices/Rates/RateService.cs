@@ -46,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Rates
 
             if (assetPair.QuotingAssetId == AssetConsts.UsdAssetId)
             {
-                return 1;
+                return price;
             }
 
             CrossRateInstrument crossInstrument = await _crossInstrumentService.GetByAssetPairIdAsync(assetPairId);
