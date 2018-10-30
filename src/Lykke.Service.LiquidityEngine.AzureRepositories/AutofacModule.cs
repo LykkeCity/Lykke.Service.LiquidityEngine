@@ -59,6 +59,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .As<IInstrumentRepository>()
                 .SingleInstance();
 
+            builder.Register(container => new MarketMakerSettingsRepository(
+                    AzureTableStorage<MarketMakerSettingsEntity>.Create(_connectionString,
+                        "Settings", container.Resolve<ILogFactory>())))
+                .As<IMarketMakerSettingsRepository>()
+                .SingleInstance();
+
             builder.Register(container => new TimersSettingsRepository(
                     AzureTableStorage<TimersSettingsEntity>.Create(_connectionString,
                         "Settings", container.Resolve<ILogFactory>())))

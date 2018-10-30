@@ -16,19 +16,23 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         private readonly ITimersSettingsService _timersSettingsService;
         private readonly IQuoteTimeoutSettingsService _quoteTimeoutSettingsService;
         private readonly IQuoteThresholdSettingsService _quoteThresholdSettingsService;
+        private readonly IMarketMakerSettingsService _marketMakerSettingsService;
 
         public SettingsController(
             ISettingsService settingsService,
             ITimersSettingsService timersSettingsService,
             IQuoteTimeoutSettingsService quoteTimeoutSettingsService,
-            IQuoteThresholdSettingsService quoteThresholdSettingsService)
+            IQuoteThresholdSettingsService quoteThresholdSettingsService,
+            IMarketMakerSettingsService marketMakerSettingsService)
         {
             _settingsService = settingsService;
             _timersSettingsService = timersSettingsService;
             _quoteTimeoutSettingsService = quoteTimeoutSettingsService;
             _quoteThresholdSettingsService = quoteThresholdSettingsService;
+            _marketMakerSettingsService = marketMakerSettingsService;
         }
 
+        /// <inheritdoc />
         /// <response code="200">The settings of service account.</response>
         [HttpGet("account")]
         [ProducesResponseType(typeof(AccountSettingsModel), (int) HttpStatusCode.OK)]
@@ -38,7 +42,30 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
             return new AccountSettingsModel {WalletId = walletId};
         }
-        
+
+        /// <inheritdoc />
+        /// <response code="200">The settings of market maker.</response>
+        [HttpGet("marketmaker")]
+        [ProducesResponseType(typeof(TimersSettingsModel), (int) HttpStatusCode.OK)]
+        public async Task<MarketMakerSettingsModel> GetMarketMakerSettingsAsync()
+        {
+            MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
+
+            return Mapper.Map<MarketMakerSettingsModel>(marketMakerSettings);
+        }
+
+        /// <inheritdoc />
+        /// <response code="204">The settings of market maker successfully saved.</response>
+        [HttpPost("marketmaker")]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        public async Task SaveMarketMakerSettingsAsync([FromBody] MarketMakerSettingsModel model)
+        {
+            var marketMakerSettings = Mapper.Map<MarketMakerSettings>(model);
+
+            await _marketMakerSettingsService.UpdateAsync(marketMakerSettings);
+        }
+
+        /// <inheritdoc />
         /// <response code="200">The settings of service timers.</response>
         [HttpGet("timers")]
         [ProducesResponseType(typeof(TimersSettingsModel), (int) HttpStatusCode.OK)]
@@ -49,6 +76,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return Mapper.Map<TimersSettingsModel>(timersSettings);
         }
 
+        /// <inheritdoc />
         /// <response code="204">The settings of service timers successfully saved.</response>
         [HttpPost("timers")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
@@ -59,6 +87,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             await _timersSettingsService.SaveAsync(timersSettings);
         }
 
+        /// <inheritdoc />
         /// <response code="200">The settings of quotes timeouts.</response>
         [HttpGet("quotes")]
         [ProducesResponseType(typeof(QuoteTimeoutSettingsModel), (int) HttpStatusCode.OK)]
@@ -69,6 +98,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return Mapper.Map<QuoteTimeoutSettingsModel>(quoteTimeoutSettings);
         }
 
+        /// <inheritdoc />
         /// <response code="204">The settings of quotes timeouts successfully saved.</response>
         [HttpPost("quotes")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
@@ -78,7 +108,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
             await _quoteTimeoutSettingsService.SaveAsync(quoteTimeoutSettings);
         }
-        
+
+        /// <inheritdoc />
         /// <response code="200">The settings of quote threshold.</response>
         [HttpGet("quotes/threshold")]
         [ProducesResponseType(typeof(QuoteThresholdSettingsModel), (int) HttpStatusCode.OK)]
@@ -89,6 +120,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return Mapper.Map<QuoteThresholdSettingsModel>(quoteThresholdSettings);
         }
 
+        /// <inheritdoc />
         /// <response code="204">The settings of quote threshold successfully saved.</response>
         [HttpPost("quotes/threshold")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]

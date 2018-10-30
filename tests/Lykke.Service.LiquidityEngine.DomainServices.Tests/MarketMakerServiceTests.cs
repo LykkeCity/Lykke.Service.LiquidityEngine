@@ -38,7 +38,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly Mock<IB2C2OrderBookService> _b2C2OrderBookServiceMock =
             new Mock<IB2C2OrderBookService>();
-        
+
         private readonly Mock<IQuoteTimeoutSettingsService> _quoteTimeoutSettingsServiceMock =
             new Mock<IQuoteTimeoutSettingsService>();
 
@@ -50,6 +50,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly Mock<IAssetsServiceWithCache> _assetsServiceWithCacheMock =
             new Mock<IAssetsServiceWithCache>();
+
+        private readonly Mock<IMarketMakerSettingsService> _marketMakerSettingsServiceMock =
+            new Mock<IMarketMakerSettingsService>();
 
         private readonly List<Instrument> _instruments = new List<Instrument>();
 
@@ -141,6 +144,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _summaryReportServiceMock.Object,
                 _positionServiceMock.Object,
                 _assetsServiceWithCacheMock.Object,
+                _marketMakerSettingsServiceMock.Object,
                 EmptyLogFactory.Instance);
         }
 

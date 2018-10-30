@@ -31,6 +31,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly ISummaryReportService _summaryReportService;
         private readonly IPositionService _positionService;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IMarketMakerSettingsService _marketMakerSettingsService;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -45,6 +46,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             ISummaryReportService summaryReportService,
             IPositionService positionService,
             IAssetsServiceWithCache assetsServiceWithCache,
+            IMarketMakerSettingsService marketMakerSettingsService,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -58,6 +60,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _summaryReportService = summaryReportService;
             _positionService = positionService;
             _assetsServiceWithCache = assetsServiceWithCache;
+            _marketMakerSettingsService = marketMakerSettingsService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -74,9 +77,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
         {
-            IReadOnlyCollection<LimitOrder> limitOrders = await CalculateDirectLimitOrders(instrument);
+            IReadOnlyCollection<LimitOrder> directLimitOrders = await CalculateDirectLimitOrders(instrument);
 
-            if (limitOrders == null)
+            if (directLimitOrders == null)
                 return;
 
             var orderBooks = new List<OrderBook>
@@ -85,24 +88,31 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 {
                     AssetPairId = instrument.AssetPairId,
                     Time = DateTime.UtcNow,
-                    LimitOrders = limitOrders
+                    LimitOrders = directLimitOrders
                 }
             };
 
-            foreach (CrossInstrument crossInstrument in instrument.CrossInstruments)
+            LimitOrder[] validDirectLimitOrders = directLimitOrders
+                .Where(o => o.Error == LimitOrderError.None)
+                .ToArray();
+
+            if (validDirectLimitOrders.Length > 0)
             {
-                IReadOnlyCollection<LimitOrder> crossLimitOrders =
-                    await CalculateCrossLimitOrders(limitOrders, crossInstrument);
-
-                if (crossLimitOrders == null)
-                    continue;
-
-                orderBooks.Add(new OrderBook
+                foreach (CrossInstrument crossInstrument in instrument.CrossInstruments)
                 {
-                    AssetPairId = crossInstrument.AssetPairId,
-                    Time = DateTime.UtcNow,
-                    LimitOrders = crossLimitOrders
-                });
+                    IReadOnlyCollection<LimitOrder> crossLimitOrders =
+                        await CalculateCrossLimitOrders(validDirectLimitOrders, crossInstrument);
+
+                    if (crossLimitOrders == null)
+                        continue;
+
+                    orderBooks.Add(new OrderBook
+                    {
+                        AssetPairId = crossInstrument.AssetPairId,
+                        Time = DateTime.UtcNow,
+                        LimitOrders = crossLimitOrders
+                    });
+                }
             }
 
             await ValidatePnLThresholdAsync(orderBooks, instrument);
@@ -129,7 +139,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private async Task<IReadOnlyCollection<LimitOrder>> CalculateDirectLimitOrders(Instrument instrument)
         {
             Quote[] quotes = _b2C2OrderBookService.GetQuotes(instrument.AssetPairId);
-            
+
             if (quotes == null || quotes.Length != 2)
             {
                 _log.WarningWithDetails("No quotes for instrument", instrument.AssetPairId);
@@ -144,11 +154,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 instrument.Levels.ToArray(), assetPair.Accuracy, baseAsset.Accuracy);
 
             await ValidateQuoteTimeoutAsync(limitOrders, quotes[0]);
-            
+
             await ValidateQuoteTimeoutAsync(limitOrders, quotes[1]);
 
             ValidateMinVolume(limitOrders, (decimal) assetPair.MinVolume);
 
+            await ValidatePriceAsync(limitOrders);
+            
             await ValidateBalanceAsync(limitOrders, assetPair);
 
             WriteInfoLog(instrument.AssetPairId, quotes, limitOrders, "Direct limit orders calculated");
@@ -176,9 +188,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             Asset baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
 
-            IReadOnlyCollection<LimitOrder> crossLimitOrders =
-                Calculator.CalculateCrossLimitOrders(quote, directLimitOrders, crossInstrument.IsInverse,
-                    assetPair.Accuracy, baseAsset.Accuracy);
+            IReadOnlyCollection<LimitOrder> crossLimitOrders = Calculator.CalculateCrossLimitOrders(quote,
+                directLimitOrders, crossInstrument.IsInverse, assetPair.Accuracy, baseAsset.Accuracy);
 
             await ValidateQuoteTimeoutAsync(crossLimitOrders, quote);
 
@@ -213,6 +224,39 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             {
                 if (limitOrder.Volume < minVolume)
                     limitOrder.Error = LimitOrderError.TooSmallVolume;
+            }
+        }
+
+        private async Task ValidatePriceAsync(IReadOnlyCollection<LimitOrder> limitOrders)
+        {
+            MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
+
+            if (marketMakerSettings.LimitOrderPriceMaxDeviation == 0)
+                return;
+
+            LimitOrder[] sellLimitOrders = limitOrders
+                .Where(o => o.Type == LimitOrderType.Sell)
+                .OrderBy(o => o.Price)
+                .ToArray();
+
+            LimitOrder[] buyLimitOrders = limitOrders
+                .Where(o => o.Type == LimitOrderType.Buy)
+                .OrderByDescending(o => o.Price)
+                .ToArray();
+
+            decimal maxSellPrice = sellLimitOrders[0].Price * (1 + marketMakerSettings.LimitOrderPriceMaxDeviation);
+            decimal minBuyPrice = buyLimitOrders[0].Price * (1 - marketMakerSettings.LimitOrderPriceMaxDeviation);
+
+            foreach (LimitOrder limitOrder in sellLimitOrders.Where(o => o.Error == LimitOrderError.None))
+            {
+                if (limitOrder.Price > maxSellPrice)
+                    limitOrder.Error = LimitOrderError.PriceIsOutOfTheRange;
+            }
+
+            foreach (LimitOrder limitOrder in buyLimitOrders.Where(o => o.Error == LimitOrderError.None))
+            {
+                if (limitOrder.Price < minBuyPrice)
+                    limitOrder.Error = LimitOrderError.PriceIsOutOfTheRange;
             }
         }
 
