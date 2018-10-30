@@ -59,13 +59,15 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             var sellLimitOrders = orderBook.Asks.Select(o => new Domain.LimitOrder
             {
                 Price = o.Price,
-                Volume = o.Volume
+                Volume = o.Volume,
+                Type = Domain.LimitOrderType.Sell
             });
             
             var buyLimitOrders = orderBook.Bids.Select(o => new Domain.LimitOrder
             {
                 Price = o.Price,
-                Volume = o.Volume
+                Volume = o.Volume,
+                Type = Domain.LimitOrderType.Buy
             });
 
             return _b2C2OrderBookService.SetAsync(new Domain.OrderBook
