@@ -12,10 +12,14 @@ namespace Lykke.Service.LiquidityEngine.Validators
             RuleFor(o => o.AssetId)
                 .NotEmpty()
                 .WithMessage("Asset id required");
-            
+
             RuleFor(o => o.Comment)
                 .NotEmpty()
                 .WithMessage("Comment required");
+
+            RuleFor(o => o.Amount)
+                .NotEqual(0)
+                .WithMessage("Amount should be less or greater than zero");
 
             RuleFor(o => o.UserId)
                 .NotEmpty()
