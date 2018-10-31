@@ -107,7 +107,7 @@
             ClosedPositionsCount++;
 
             PnL += position.PnL;
-            PnLUsd += position.PnLUsd ?? 0;
+            PnLUsd = (PnLUsd ?? 0) + (position.PnLUsd ?? 0);
         }
     }
 }
