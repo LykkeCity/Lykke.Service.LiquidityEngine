@@ -43,11 +43,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="quote1">Best prices of instrument on first level.</param>
         /// <param name="quote2">Best prices of instrument on second level.</param>
         /// <param name="levels">A collection of price levels.</param>
+        /// <param name="baseAssetBalance">The amount of the base asset on a hedge exchange.</param>
+        /// <param name="quoteAssetBalance">The amount of the quote asset on a hedge exchange.</param>
+        /// <param name="timeSinceLastTrade">The total seconds from last trade in order book.</param>
+        /// <param name="halfLifePeriod">The half life period in seconds.</param>
+        /// <param name="allowSmartMarkup">If <c>true</c> then smart markup for first level will be applied; otherwise default markup.</param>
         /// <param name="priceAccuracy">The accuracy of price.</param>
         /// <param name="volumeAccuracy">The accuracy of volume.</param>
         /// <returns>A collection of limit orders.</returns>
         public static IReadOnlyCollection<LimitOrder> CalculateLimitOrders(Quote quote1, Quote quote2,
-            InstrumentLevel[] levels, int priceAccuracy, int volumeAccuracy)
+            InstrumentLevel[] levels, decimal baseAssetBalance, decimal quoteAssetBalance, int timeSinceLastTrade,
+            int halfLifePeriod, bool allowSmartMarkup, int priceAccuracy, int volumeAccuracy)
         {
             var limitOrders = new List<LimitOrder>();
 
@@ -72,12 +78,31 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             decimal sumVolume = levels[0].Volume;
 
+            decimal sellFirstLevelMarkup = levels[0].Markup;
+
+            decimal buyFirstLevelMarkup = levels[0].Markup;
+
+            if (allowSmartMarkup)
+            {
+                double alpha = Math.Log(2) / halfLifePeriod;
+
+                decimal relativeSpread = (quote1.Ask - quote1.Bid) / quote1.Mid;
+
+                decimal markup = levels[0].Markup - relativeSpread / 2m +
+                                 relativeSpread * (decimal) Math.Exp(-alpha * timeSinceLastTrade);
+
+                if (-baseAssetBalance * quote1.Mid >= quoteAssetBalance)
+                    sellFirstLevelMarkup = markup;
+                else
+                    buyFirstLevelMarkup = markup;
+            }
+
             limitOrders.Add(LimitOrder.CreateSell(
-                (sellRawPrice * (1 + levels[0].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                (sellRawPrice * (1 + sellFirstLevelMarkup)).TruncateDecimalPlaces(priceAccuracy, true),
                 Math.Round(levels[0].Volume, volumeAccuracy)));
 
             limitOrders.Add(LimitOrder.CreateBuy(
-                (buyRawPrice * (1 - levels[0].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                (buyRawPrice * (1 - buyFirstLevelMarkup)).TruncateDecimalPlaces(priceAccuracy, true),
                 Math.Round(levels[0].Volume, volumeAccuracy)));
 
             for (int i = 1; i < levels.Length; i++)

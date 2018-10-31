@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,12 +16,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
         private readonly IInternalTradeRepository _internalTradeRepository;
         private readonly IExternalTradeRepository _externalTradeRepository;
 
+        private readonly ConcurrentDictionary<string, DateTime> _internalLastInternalTradeTime =
+            new ConcurrentDictionary<string, DateTime>();
+
         public TradeService(
             IInternalTradeRepository internalTradeRepository,
             IExternalTradeRepository externalTradeRepository)
         {
             _internalTradeRepository = internalTradeRepository;
             _externalTradeRepository = externalTradeRepository;
+        }
+
+        public DateTime GetLastInternalTradeTime(string assetPairId)
+        {
+            if (!_internalLastInternalTradeTime.TryGetValue(assetPairId, out DateTime time))
+                time = DateTime.MinValue;
+
+            return time;
         }
 
         public Task<IReadOnlyCollection<ExternalTrade>> GetExternalTradesAsync(DateTime startDate, DateTime endDate,
@@ -45,9 +57,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
             return _internalTradeRepository.GetByIdAsync(internalTradeId);
         }
 
-        public Task RegisterAsync(IReadOnlyCollection<InternalTrade> internalTrades)
+        public async Task RegisterAsync(IReadOnlyCollection<InternalTrade> internalTrades)
         {
-            return Task.WhenAll(internalTrades.Select(internalTrade =>
+            foreach (IGrouping<string, InternalTrade> group in internalTrades.GroupBy(o => o.AssetPairId))
+            {
+                DateTime lastTradeTime = group.Max(o => o.Time);
+
+                _internalLastInternalTradeTime.AddOrUpdate(group.Key, lastTradeTime,
+                    (assetPairId, time) => lastTradeTime);
+            }
+
+            await Task.WhenAll(internalTrades.Select(internalTrade =>
                 _internalTradeRepository.InsertAsync(internalTrade)));
         }
 

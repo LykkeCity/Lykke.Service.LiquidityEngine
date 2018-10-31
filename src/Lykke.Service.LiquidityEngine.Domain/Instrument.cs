@@ -49,6 +49,16 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// </summary>
         public IReadOnlyCollection<CrossInstrument> CrossInstruments { get; set; }
 
+        /// <summary>
+        /// Indicates that the smart markup is allowed for instrument.
+        /// </summary>
+        public bool AllowSmartMarkup { get; set; }
+
+        /// <summary>
+        /// The half life period of asset pair in seconds.
+        /// </summary>
+        public int HalfLifePeriod { get; set; }
+
         public void Update(Instrument instrument)
         {
             Mode = instrument.Mode;

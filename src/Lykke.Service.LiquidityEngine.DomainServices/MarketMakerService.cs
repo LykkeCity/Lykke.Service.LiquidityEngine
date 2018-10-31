@@ -32,6 +32,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IPositionService _positionService;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly IMarketMakerSettingsService _marketMakerSettingsService;
+        private readonly ITradeService _tradeService;
+        private readonly IAssetPairLinkService _assetPairLinkService;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -47,6 +49,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IPositionService positionService,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMarketMakerSettingsService marketMakerSettingsService,
+            ITradeService tradeService,
+            IAssetPairLinkService assetPairLinkService,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -61,6 +65,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _positionService = positionService;
             _assetsServiceWithCache = assetsServiceWithCache;
             _marketMakerSettingsService = marketMakerSettingsService;
+            _tradeService = tradeService;
+            _assetPairLinkService = assetPairLinkService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -146,12 +152,39 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 return null;
             }
 
+            Balance baseAssetBalance = null;
+            Balance quoteAssetBalance = null;
+            TimeSpan timeSinceLastTrade = TimeSpan.Zero;
+
+            if (instrument.AllowSmartMarkup)
+            {
+                AssetPairLink assetPairLink =
+                    await _assetPairLinkService.GetByInternalAssetPairIdAsync(instrument.AssetPairId);
+
+                if (assetPairLink != null && !assetPairLink.IsEmpty())
+                {
+                    baseAssetBalance =
+                        await _balanceService.GetByAssetIdAsync(ExchangeNames.B2C2, assetPairLink.ExternalBaseAssetId);
+                    quoteAssetBalance =
+                        await _balanceService.GetByAssetIdAsync(ExchangeNames.B2C2, assetPairLink.ExternalQuoteAssetId);
+                    timeSinceLastTrade =
+                        DateTime.UtcNow - _tradeService.GetLastInternalTradeTime(instrument.AssetPairId);
+                }
+                else
+                {
+                    _log.WarningWithDetails("The asset pair link does not configured", new {instrument.AssetPairId});
+                }
+            }
+
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(instrument.AssetPairId);
 
             Asset baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
 
-            IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(quotes[0], quotes[1],
-                instrument.Levels.ToArray(), assetPair.Accuracy, baseAsset.Accuracy);
+            IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
+                quotes[0], quotes[1], instrument.Levels.ToArray(),
+                baseAssetBalance?.Amount ?? 0, quoteAssetBalance?.Amount ?? 0, (int) timeSinceLastTrade.TotalSeconds,
+                instrument.HalfLifePeriod, instrument.AllowSmartMarkup,
+                assetPair.Accuracy, baseAsset.Accuracy);
 
             await ValidateQuoteTimeoutAsync(limitOrders, quotes[0]);
 
@@ -160,7 +193,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             ValidateMinVolume(limitOrders, (decimal) assetPair.MinVolume);
 
             await ValidatePriceAsync(limitOrders);
-            
+
             await ValidateBalanceAsync(limitOrders, assetPair);
 
             WriteInfoLog(instrument.AssetPairId, quotes, limitOrders, "Direct limit orders calculated");

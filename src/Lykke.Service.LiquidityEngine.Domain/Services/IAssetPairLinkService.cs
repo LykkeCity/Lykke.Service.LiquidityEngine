@@ -7,6 +7,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<IReadOnlyCollection<AssetPairLink>> GetAllAsync();
 
+        Task<AssetPairLink> GetByInternalAssetPairIdAsync(string internalAssetPairId);
+
         Task AddAsync(AssetPairLink assetPairLink);
 
         Task DeleteAsync(string assetPairId);

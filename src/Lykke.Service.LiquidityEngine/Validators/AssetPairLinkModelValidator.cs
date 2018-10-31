@@ -16,6 +16,14 @@ namespace Lykke.Service.LiquidityEngine.Validators
             RuleFor(o => o.ExternalAssetPairId)
                 .NotEmpty()
                 .WithMessage("External asset pair id required");
+
+            RuleFor(o => o.ExternalBaseAssetId)
+                .NotEmpty()
+                .WithMessage("External base asset id required");
+
+            RuleFor(o => o.ExternalQuoteAssetId)
+                .NotEmpty()
+                .WithMessage("External quote asset id required");
         }
     }
 }

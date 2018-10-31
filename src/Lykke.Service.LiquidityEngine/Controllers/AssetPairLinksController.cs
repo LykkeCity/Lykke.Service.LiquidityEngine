@@ -55,6 +55,26 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         }
 
         /// <inheritdoc/>
+        /// <response code="204">The asset pair link successfully updated.</response>
+        /// <response code="404">Asset pair link does not exist.</response>
+        [HttpPut]
+        [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.Conflict)]
+        public async Task UpdateAsync([FromBody] AssetPairLinkModel model)
+        {
+            try
+            {
+                AssetPairLink assetPairLink = Mapper.Map<AssetPairLink>(model);
+                
+                await _assetPairLinkService.AddAsync(assetPairLink);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.Conflict, "Asset pair link already exists.");
+            }
+        }
+        
+        /// <inheritdoc/>
         /// <response code="204">The asset pair link successfully deleted.</response>
         /// <response code="404">Asset pair link does not exist.</response>
         [HttpDelete("{assetPairId}")]

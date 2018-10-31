@@ -39,6 +39,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks
             return assetPairLinks;
         }
 
+        public async Task<AssetPairLink> GetByInternalAssetPairIdAsync(string internalAssetPairId)
+        {
+            IReadOnlyCollection<AssetPairLink> assetPairLinks = await GetAllAsync();
+
+            return assetPairLinks.SingleOrDefault(o => o.AssetPairId == internalAssetPairId);
+        }
+
         public async Task AddAsync(AssetPairLink assetPairLink)
         {
             await _assetPairLinkRepository.AddAsync(assetPairLink);
