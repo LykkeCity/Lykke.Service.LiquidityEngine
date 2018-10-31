@@ -66,6 +66,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
             InventoryThreshold = instrument.InventoryThreshold;
             MinVolume = instrument.MinVolume;
             VolumeAccuracy = instrument.VolumeAccuracy;
+            AllowSmartMarkup = instrument.AllowSmartMarkup;
+            HalfLifePeriod = instrument.HalfLifePeriod;
         }
 
         public void AddLevel(InstrumentLevel instrumentLevel)

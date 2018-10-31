@@ -66,7 +66,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             {
                 AssetPairLink assetPairLink = Mapper.Map<AssetPairLink>(model);
                 
-                await _assetPairLinkService.AddAsync(assetPairLink);
+                await _assetPairLinkService.UpdateAsync(assetPairLink);
             }
             catch (EntityNotFoundException)
             {

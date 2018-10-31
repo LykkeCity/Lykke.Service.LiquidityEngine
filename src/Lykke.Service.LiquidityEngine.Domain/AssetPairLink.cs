@@ -30,5 +30,12 @@ namespace Lykke.Service.LiquidityEngine.Domain
                string.IsNullOrEmpty(ExternalAssetPairId) ||
                string.IsNullOrEmpty(ExternalBaseAssetId) ||
                string.IsNullOrEmpty(ExternalQuoteAssetId);
+
+        public void Update(AssetPairLink assetPairLink)
+        {
+            ExternalAssetPairId = assetPairLink.ExternalAssetPairId;
+            ExternalBaseAssetId = assetPairLink.ExternalBaseAssetId;
+            ExternalQuoteAssetId = assetPairLink.ExternalQuoteAssetId;
+        }
     }
 }

@@ -32,6 +32,10 @@ namespace Lykke.Service.LiquidityEngine.Validators
             RuleFor(o => o.MinVolume)
                 .GreaterThanOrEqualTo(0)
                 .WithMessage("Min volume should be greater than or equal to zero");
+
+            RuleFor(o => o.HalfLifePeriod)
+                .GreaterThan(0)
+                .WithMessage("Half life period should be greater than zero");
         }
     }
 }
