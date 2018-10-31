@@ -174,7 +174,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             _log.InfoWithDetails("Cash out response", result);
 
             if (result.Code != 0)
-                throw new Exception($"Unexpected cash out response status '{result.Code}'");
+                throw new InvalidOperationException($"Unexpected cash out response status '{result.Code}'");
 
             return result.TransactionId;
         }

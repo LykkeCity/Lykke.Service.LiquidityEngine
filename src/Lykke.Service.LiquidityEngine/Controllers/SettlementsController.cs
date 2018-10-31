@@ -1,5 +1,8 @@
+using System;
 using System.Net;
 using System.Threading.Tasks;
+using Lykke.Common.Api.Contract.Responses;
+using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.LiquidityEngine.Client.Api;
 using Lykke.Service.LiquidityEngine.Client.Models.Settlements;
 using Lykke.Service.LiquidityEngine.Domain.Services;
@@ -19,11 +22,21 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
         /// <inheritdoc/>
         /// <response code="204">The settlement successfully executed.</response>
+        /// <response code="404">No enough funds to cash out.</response>
         [HttpPost]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
         public async Task SettlementAsync([FromBody] SettlementOperationModel model)
         {
-            await _settlementService.ExecuteAsync(model.AssetId, model.Amount, model.Comment, model.UserId);
+            try
+            {
+                await _settlementService.ExecuteAsync(model.AssetId, model.Amount, model.Comment,
+                    model.AllowChangeBalance, model.UserId);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
         }
     }
 }

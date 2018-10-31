@@ -19,6 +19,11 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Settlements
         public decimal Amount { get; set; }
 
         /// <summary>
+        /// If <c>true</c> then cash-in/out operation will be executed while settlement, otherwise not.
+        /// </summary>
+        public bool AllowChangeBalance { get; set; }
+
+        /// <summary>
         /// The comment of the settlement operation.
         /// </summary>
         public string Comment { get; set; }
