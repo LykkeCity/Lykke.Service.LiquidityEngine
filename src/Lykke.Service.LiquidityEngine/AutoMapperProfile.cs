@@ -45,6 +45,9 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<OrderBook, OrderBookModel>(MemberList.Source);
             CreateMap<LimitOrder, LimitOrderModel>(MemberList.Source);
 
+            CreateMap<MarketMakerSettings, MarketMakerSettingsModel>(MemberList.Source);
+            CreateMap<MarketMakerSettingsModel, MarketMakerSettings>(MemberList.Destination);
+            
             CreateMap<QuoteThresholdSettings, QuoteThresholdSettingsModel>(MemberList.Source);
             CreateMap<QuoteThresholdSettingsModel, QuoteThresholdSettings>(MemberList.Destination);
 

@@ -40,10 +40,20 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
         public decimal MinVolume { get; set; }
 
         /// <summary>
+        /// Indicates that the smart markup is allowed for instrument.
+        /// </summary>
+        public bool AllowSmartMarkup { get; set; }
+
+        /// <summary>
+        /// The half life period of asset pair in seconds.
+        /// </summary>
+        public int HalfLifePeriod { get; set; }
+
+        /// <summary>
         /// A collection of order book levels.
         /// </summary>
         public IReadOnlyCollection<InstrumentLevelModel> Levels { get; set; }
-        
+
         /// <summary>
         /// A collection of cross instrument.
         /// </summary>

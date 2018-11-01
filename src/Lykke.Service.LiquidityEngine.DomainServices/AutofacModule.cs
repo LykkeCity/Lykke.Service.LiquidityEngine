@@ -86,12 +86,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<ISummaryReportService>()
                 .SingleInstance();
 
+            builder.RegisterType<B2C2OrderBookService>()
+                .As<IB2C2OrderBookService>()
+                .SingleInstance();
+
             builder.RegisterType<OrderBookService>()
                 .As<IOrderBookService>()
                 .SingleInstance();
 
             builder.RegisterType<QuoteService>()
                 .As<IQuoteService>()
+                .SingleInstance();
+
+            builder.RegisterType<MarketMakerSettingsService>()
+                .As<IMarketMakerSettingsService>()
                 .SingleInstance();
 
             builder.RegisterType<SettingsService>()

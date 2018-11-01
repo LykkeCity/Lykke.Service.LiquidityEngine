@@ -24,13 +24,22 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks
             return Mapper.Map<List<AssetPairLink>>(entities);
         }
 
-        public async Task AddAsync(AssetPairLink assetPairLink)
+        public async Task InsertAsync(AssetPairLink assetPairLink)
         {
             var entity = new AssetPairLinkEntity(GetPartitionKey(), GetRowKey(assetPairLink.AssetPairId));
 
             Mapper.Map(assetPairLink, entity);
 
             await _storage.InsertThrowConflictAsync(entity);
+        }
+
+        public async Task UpdateAsync(AssetPairLink assetPairLink)
+        {
+            await _storage.MergeAsync(GetPartitionKey(), GetRowKey(assetPairLink.AssetPairId), entity =>
+            {
+                Mapper.Map(assetPairLink, entity);
+                return entity;
+            });
         }
 
         public Task DeleteAsync(string assetPairId)

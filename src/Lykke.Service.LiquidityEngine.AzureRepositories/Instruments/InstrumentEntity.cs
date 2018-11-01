@@ -15,6 +15,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
         private decimal _inventoryThreshold;
         private int _volumeAccuracy;
         private decimal _minVolume;
+        private int _halfLifePeriod;
 
         public InstrumentEntity()
         {
@@ -89,6 +90,21 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 {
                     _minVolume = value;
                     MarkValueTypePropertyAsDirty("MinVolume");
+                }
+            }
+        }
+
+        public bool AllowSmartMarkup { get; set; }
+
+        public int HalfLifePeriod
+        {
+            get => _halfLifePeriod;
+            set
+            {
+                if (_halfLifePeriod != value)
+                {
+                    _halfLifePeriod = value;
+                    MarkValueTypePropertyAsDirty("HalfLifePeriod");
                 }
             }
         }

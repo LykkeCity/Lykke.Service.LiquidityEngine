@@ -15,6 +15,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly HedgingTimer _hedgingTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
+        private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
 
         public ShutdownManager(
@@ -24,6 +25,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
             HedgingTimer hedgingTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
+            B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
             QuoteSubscriber[] quoteSubscribers)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
@@ -32,6 +34,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _hedgingTimer = hedgingTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
+            _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
             _quoteSubscribers = quoteSubscribers;
         }
 
@@ -39,6 +42,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
         {
             _b2C2QuoteSubscriber.Stop();
 
+            _b2C2OrderBooksSubscriber.Stop();
+            
             foreach (QuoteSubscriber quoteSubscriber in _quoteSubscribers)
                 quoteSubscriber.Stop();
             

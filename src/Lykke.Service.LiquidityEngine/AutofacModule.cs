@@ -86,6 +86,12 @@ namespace Lykke.Service.LiquidityEngine
                     .B2C2Quotes))
                 .AsSelf()
                 .SingleInstance();
+            
+            builder.RegisterType<B2C2OrderBooksSubscriber>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
+                    .B2C2OrderBooks))
+                .AsSelf()
+                .SingleInstance();
 
             QuotesSettings quotesSettings = _settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers.Quotes;
 

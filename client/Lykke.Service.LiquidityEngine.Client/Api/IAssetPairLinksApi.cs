@@ -25,6 +25,13 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="model">The model which describes mapping.</param>
         [Post("/api/assetpairlinks")]
         Task AddAsync([Body] AssetPairLinkModel model);
+
+        /// <summary>
+        /// Updates mapping between asset pairs.
+        /// </summary>
+        /// <param name="model">The model which describes mapping.</param>
+        [Put("/api/assetpairlinks")]
+        Task UpdateAsync([Body] AssetPairLinkModel model);
         
         /// <summary>
         /// Deletes a mapping between asset pairs.

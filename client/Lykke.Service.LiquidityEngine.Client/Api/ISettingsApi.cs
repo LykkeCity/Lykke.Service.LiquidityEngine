@@ -19,6 +19,20 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         Task<AccountSettingsModel> GetAccountSettingsAsync();
 
         /// <summary>
+        /// Returns settings of market maker.
+        /// </summary>
+        /// <returns>The settings of market maker.</returns>
+        [Get("/api/settings/marketmaker")]
+        Task<MarketMakerSettingsModel> GetMarketMakerSettingsAsync();
+
+        /// <summary>
+        /// Saves settings of market maker.
+        /// </summary>
+        /// <param name="model">The settings of market maker.</param>
+        [Post("/api/settings/marketmaker")]
+        Task SaveMarketMakerSettingsAsync([Body] MarketMakerSettingsModel model);
+
+        /// <summary>
         /// Returns settings of service timers.
         /// </summary>
         /// <returns>The settings of service timers.</returns>

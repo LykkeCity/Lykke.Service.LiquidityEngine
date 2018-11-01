@@ -36,6 +36,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IQuoteService> _quoteServiceMock =
             new Mock<IQuoteService>();
 
+        private readonly Mock<IB2C2OrderBookService> _b2C2OrderBookServiceMock =
+            new Mock<IB2C2OrderBookService>();
+
         private readonly Mock<IQuoteTimeoutSettingsService> _quoteTimeoutSettingsServiceMock =
             new Mock<IQuoteTimeoutSettingsService>();
 
@@ -48,6 +51,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IAssetsServiceWithCache> _assetsServiceWithCacheMock =
             new Mock<IAssetsServiceWithCache>();
 
+        private readonly Mock<IMarketMakerSettingsService> _marketMakerSettingsServiceMock =
+            new Mock<IMarketMakerSettingsService>();
+
+        private readonly Mock<ITradeService> _tradeServiceMock = new Mock<ITradeService>();
+        
+        private readonly Mock<IAssetPairLinkService> _assetPairLinkServiceMock = new Mock<IAssetPairLinkService>();
+        
         private readonly List<Instrument> _instruments = new List<Instrument>();
 
         private readonly List<Balance> _balances = new List<Balance>();
@@ -133,10 +143,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _balanceServiceMock.Object,
                 _marketMakerStateServiceMock.Object,
                 _quoteServiceMock.Object,
+                _b2C2OrderBookServiceMock.Object,
                 _quoteTimeoutSettingsServiceMock.Object,
                 _summaryReportServiceMock.Object,
                 _positionServiceMock.Object,
                 _assetsServiceWithCacheMock.Object,
+                _marketMakerSettingsServiceMock.Object,
+                _tradeServiceMock.Object,
+                _assetPairLinkServiceMock.Object,
                 EmptyLogFactory.Instance);
         }
 
@@ -188,7 +202,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         }
 
         //https://lykkex.atlassian.net/browse/LIQ-745
-        [TestMethod]
+        //[TestMethod]
         public async Task InventoryExceeded_OrdersAreNotPlaced()
         {
             // arrange

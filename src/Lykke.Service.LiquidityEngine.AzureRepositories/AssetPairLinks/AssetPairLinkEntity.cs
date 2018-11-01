@@ -18,9 +18,13 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks
             PartitionKey = partitionKey;
             RowKey = rowKey;
         }
-        
+
         public string AssetPairId { get; set; }
-        
+
         public string ExternalAssetPairId { get; set; }
+
+        public string ExternalBaseAssetId { get; set; }
+
+        public string ExternalQuoteAssetId { get; set; }
     }
 }
