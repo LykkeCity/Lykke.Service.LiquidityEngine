@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using Autofac;
+using Common.Cache;
 using JetBrains.Annotations;
 using Lykke.B2c2Client;
 using Lykke.B2c2Client.Settings;

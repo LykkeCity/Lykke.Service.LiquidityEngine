@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.Client.Models.Audit;
+using Lykke.Service.LiquidityEngine.Client.Models.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 using Lykke.Service.LiquidityEngine.Client.Models.MarketMaker;
 using Lykke.Service.LiquidityEngine.Client.Models.OrderBooks;
@@ -62,6 +63,10 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<Quote, QuoteModel>(MemberList.Source)
                 .ForSourceMember(src => src.Mid, opt => opt.Ignore())
                 .ForSourceMember(src => src.Spread, opt => opt.Ignore());
+
+            CreateMap<CrossRateInstrument, CrossRateInstrumentModel>(MemberList.Source);
+            CreateMap<CrossRateInstrumentModel, CrossRateInstrument>(MemberList.Destination);
+
         }
     }
 }

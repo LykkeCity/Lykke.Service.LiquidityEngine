@@ -35,6 +35,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal Price { get; set; }
 
         /// <summary>
+        /// The price of the trade that opened the position in USD.
+        /// </summary>
+        public decimal? PriceUsd { get; set; }
+
+        /// <summary>
         /// The volume of the trade that opened the position.
         /// </summary>
         public decimal Volume { get; set; }
@@ -50,9 +55,19 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal ClosePrice { get; set; }
 
         /// <summary>
+        /// The price of the trade that closed the position in USD.
+        /// </summary>
+        public decimal? ClosePriceUsd { get; set; }
+
+        /// <summary>
         /// The realised profit and loss.
         /// </summary>
         public decimal PnL { get; set; }
+
+        /// <summary>
+        /// The realised profit and loss converted into USD.
+        /// </summary>
+        public decimal? PnLUsd { get; set; }
 
         /// <summary>
         /// The identifier of asset pair that used to convert trade price.
@@ -89,21 +104,24 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// </summary>
         public string CloseTradeId { get; set; }
 
-        public void Close(ExternalTrade externalTrade)
+        public void Close(string externalTradeId, decimal closePrice, decimal? closePriceUsd)
         {
             CloseDate = DateTime.UtcNow;
-            ClosePrice = externalTrade.Price;
+            ClosePrice = closePrice;
+            ClosePriceUsd = closePriceUsd;
 
             int volumeSign = Type == PositionType.Long ? 1 : -1;
 
             PnL = (ClosePrice - Price) * Volume * volumeSign;
+            PnLUsd = (ClosePriceUsd - PriceUsd) * Volume * volumeSign;
 
-            CloseTradeId = externalTrade.Id;
+            CloseTradeId = externalTradeId;
         }
 
-        public static Position Create(string assetPairId, ExternalTrade externalTrade)
+        public static Position Create(string assetPairId, string externalTradeId, TradeType tradeType, decimal price,
+            decimal? priceUsd, decimal volume)
         {
-            PositionType positionType = externalTrade.Type == TradeType.Sell
+            PositionType positionType = tradeType == TradeType.Sell
                 ? PositionType.Long
                 : PositionType.Short;
 
@@ -113,17 +131,19 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 AssetPairId = assetPairId,
                 Type = positionType,
                 Date = DateTime.UtcNow,
-                Price = externalTrade.Price,
-                Volume = externalTrade.Volume,
+                Price = price,
+                PriceUsd = priceUsd,
+                Volume = volume,
                 Trades = new string[0],
                 CloseDate = DateTime.UtcNow,
-                ClosePrice = externalTrade.Price,
+                ClosePrice = price,
+                ClosePriceUsd = priceUsd,
                 PnL = decimal.Zero,
-                CloseTradeId = externalTrade.Id
+                CloseTradeId = externalTradeId
             };
         }
 
-        public static Position Open(string assetPairId, decimal price, decimal avgPrice, decimal volume, Quote quote,
+        public static Position Open(string assetPairId, decimal price, decimal? priceUsd, decimal avgPrice, decimal volume, Quote quote,
             string tradeAssetPairId, TradeType tradeType, string[] trades)
         {
             PositionType positionType = tradeType == TradeType.Sell
@@ -137,6 +157,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Type = positionType,
                 Date = DateTime.UtcNow,
                 Price = price,
+                PriceUsd = priceUsd,
                 Volume = volume,
                 Trades = trades,
                 CloseDate = new DateTime(1900, 1, 1),
@@ -149,7 +170,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
             };
         }
         
-        public static Position Open(string assetPairId, decimal price, decimal volume, TradeType tradeType,
+        public static Position Open(string assetPairId, decimal price, decimal? priceUsd, decimal volume, TradeType tradeType,
             string[] trades)
         {
             PositionType positionType = tradeType == TradeType.Sell
@@ -163,6 +184,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Type = positionType,
                 Date = DateTime.UtcNow,
                 Price = price,
+                PriceUsd = priceUsd,
                 Volume = volume,
                 Trades = trades,
                 CloseDate = new DateTime(1900, 1, 1),

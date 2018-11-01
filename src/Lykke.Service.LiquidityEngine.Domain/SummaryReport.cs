@@ -1,4 +1,4 @@
-namespace Lykke.Service.LiquidityEngine.Domain
+﻿namespace Lykke.Service.LiquidityEngine.Domain
 {
     /// <summary>
     /// Represents a summary report. 
@@ -24,6 +24,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The cumulative profit and loss.
         /// </summary>
         public decimal PnL { get; set; }
+
+        /// <summary>
+        /// The cumulative profit and loss converted into USD.
+        /// </summary>
+        public decimal? PnLUsd { get; set; }
 
         /// <summary>
         /// The current volume of the base asset.
@@ -102,6 +107,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
             ClosedPositionsCount++;
 
             PnL += position.PnL;
+            PnLUsd = (PnLUsd ?? 0) + (position.PnLUsd ?? 0);
         }
     }
 }

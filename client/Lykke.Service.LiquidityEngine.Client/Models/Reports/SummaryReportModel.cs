@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
 {
@@ -27,7 +27,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
         /// The cumulative profit and loss.
         /// </summary>
         public decimal PnL { get; set; }
-        
+
+        /// <summary>
+        /// The cumulative profit and loss in USD.
+        /// </summary>
+        public decimal? PnLUsd { get; set; }
+
         /// <summary>
         /// The current volume of the base asset.
         /// </summary>

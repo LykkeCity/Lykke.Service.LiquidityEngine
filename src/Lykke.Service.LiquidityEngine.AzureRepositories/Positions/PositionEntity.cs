@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Lykke.AzureStorage.Tables;
@@ -15,10 +15,13 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
         private PositionType _type;
         private DateTime _date;
         private decimal _price;
+        private decimal? _priceUsd;
         private decimal _volume;
         private DateTime _closeDate;
         private decimal _closePrice;
+        private decimal? _closePriceUsd;
         private decimal _pnL;
+        private decimal? _pnLUsd;
         private decimal _tradeAvgPrice;
 
         public PositionEntity()
@@ -74,6 +77,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
+        public decimal? PriceUsd
+        {
+            get => _priceUsd;
+            set
+            {
+                if (_priceUsd != value)
+                {
+                    _priceUsd = value;
+                    MarkValueTypePropertyAsDirty("PriceUsd");
+                }
+            }
+        }
+
         public decimal Volume
         {
             get => _volume;
@@ -113,6 +129,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
+        public decimal? ClosePriceUsd
+        {
+            get => _closePriceUsd;
+            set
+            {
+                if (_closePriceUsd != value)
+                {
+                    _closePriceUsd = value;
+                    MarkValueTypePropertyAsDirty("ClosePriceUsd");
+                }
+            }
+        }
+
         public decimal PnL
         {
             get => _pnL;
@@ -122,6 +151,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 {
                     _pnL = value;
                     MarkValueTypePropertyAsDirty("PnL");
+                }
+            }
+        }
+
+        public decimal? PnLUsd
+        {
+            get => _pnLUsd;
+            set
+            {
+                if (_pnLUsd != value)
+                {
+                    _pnLUsd = value;
+                    MarkValueTypePropertyAsDirty("PnLUsd");
                 }
             }
         }

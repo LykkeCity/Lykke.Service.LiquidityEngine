@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common;
@@ -195,5 +195,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <returns>The direct limit order price.</returns>
         public static decimal CalculateDirectBuyPrice(decimal price, Quote quote, bool inverse)
             => inverse ? price * quote.Ask : price / quote.Bid;
+
+        /// <summary>
+        /// Calculates mid price of direct limit order using cross instrument.
+        /// </summary>
+        /// <param name="price">The price of cross limit order.</param>
+        /// <param name="quote">Mid price of cross instrument.</param>
+        /// <param name="inverse">Indicates that the quote is inverse.</param>
+        /// <returns>The direct limit order price.</returns>
+        public static decimal CalculateDirectMidPrice(decimal price, Quote quote, bool inverse)
+            => inverse ? price * quote.Mid : price / quote.Mid;
     }
 }
