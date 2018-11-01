@@ -97,12 +97,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     ? Calculator.CalculateDirectSellPrice(avgPrice, quote, crossInstrument.IsInverse)
                     : Calculator.CalculateDirectBuyPrice(avgPrice, quote, crossInstrument.IsInverse);
 
-                position = Position.Open(instrument.AssetPairId, price, avgPrice, volume, quote,
+                decimal? priceUsd = await _rateService.CalculatePriceInUsd(instrument.AssetPairId, price);
+
+                position = Position.Open(instrument.AssetPairId, price, priceUsd, avgPrice, volume, quote,
                     crossInstrument.AssetPairId, tradeType, internalTrades.Select(o => o.Id).ToArray());
             }
             else
             {
-                position = Position.Open(instrument.AssetPairId, avgPrice, volume, tradeType,
+                decimal? avgPriceUsd = await _rateService.CalculatePriceInUsd(instrument.AssetPairId, avgPrice);
+
+                position = Position.Open(instrument.AssetPairId, avgPrice, avgPriceUsd, volume, tradeType,
                     internalTrades.Select(o => o.Id).ToArray());
             }
 
