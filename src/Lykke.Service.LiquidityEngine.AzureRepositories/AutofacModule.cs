@@ -48,6 +48,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .As<ICreditRepository>()
                 .SingleInstance();
 
+            builder.Register(container => new CrossInstrumentRepository(
+                    AzureTableStorage<CrossInstrumentEntity>.Create(_connectionString,
+                        "CrossInstruments", container.Resolve<ILogFactory>())))
+                .As<ICrossInstrumentRepository>()
+                .SingleInstance();
+
             builder.Register(container => new CrossRateInstrumentRepository(
                     AzureTableStorage<CrossRateInstrumentEntity>.Create(_connectionString,
                         "CrossRateInstruments", container.Resolve<ILogFactory>())))

@@ -13,13 +13,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
 {
     public class CrossRateInstrumentService : ICrossRateInstrumentService
     {
-        private readonly ICrossRateInstrumentRepository _crossInstrumentRepository;
+        private readonly ICrossRateInstrumentRepository _crossRateInstrumentRepository;
         private readonly InMemoryCache<CrossRateInstrument> _cache;
         private readonly ILog _log;
 
-        public CrossRateInstrumentService(ICrossRateInstrumentRepository crossInstrumentRepository, ILogFactory logFactory)
+        public CrossRateInstrumentService(ICrossRateInstrumentRepository crossRateInstrumentRepository, ILogFactory logFactory)
         {
-            _crossInstrumentRepository = crossInstrumentRepository;
+            _crossRateInstrumentRepository = crossRateInstrumentRepository;
             _cache = new InMemoryCache<CrossRateInstrument>(instrument => instrument.AssetPairId, false);
             _log = logFactory.CreateLog(this);
         }
@@ -30,7 +30,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
 
             if (crossInstruments == null)
             {
-                crossInstruments = await _crossInstrumentRepository.GetAllAsync();
+                crossInstruments = await _crossRateInstrumentRepository.GetAllAsync();
                 
                 _cache.Initialize(crossInstruments);
             }
@@ -52,11 +52,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
 
         public async Task AddAsync(CrossRateInstrument crossInstrument)
         {
-            await _crossInstrumentRepository.InsertAsync(crossInstrument);
+            await _crossRateInstrumentRepository.InsertAsync(crossInstrument);
             
             _cache.Set(crossInstrument);
 
-            _log.InfoWithDetails("Cross instrument was added", crossInstrument);
+            _log.InfoWithDetails("Cross-rate instrument was added", crossInstrument);
         }
 
         public async Task UpdateAsync(CrossRateInstrument crossInstrument)
@@ -65,22 +65,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
             
             currentCrossInstrument.Update(crossInstrument);
             
-            await _crossInstrumentRepository.UpdateAsync(currentCrossInstrument);
+            await _crossRateInstrumentRepository.UpdateAsync(currentCrossInstrument);
             
             _cache.Set(currentCrossInstrument);
             
-            _log.InfoWithDetails("Cross instrument was updated", currentCrossInstrument);
+            _log.InfoWithDetails("Cross-rate instrument was updated", currentCrossInstrument);
         }
 
         public async Task DeleteAsync(string assetPairId)
         {
             CrossRateInstrument crossInstrument = await GetByAssetPairIdAsync(assetPairId);
 
-            await _crossInstrumentRepository.DeleteAsync(assetPairId);
+            await _crossRateInstrumentRepository.DeleteAsync(assetPairId);
 
             _cache.Remove(assetPairId);
 
-            _log.InfoWithDetails("Cross instrument was deleted", crossInstrument);
+            _log.InfoWithDetails("Cross-rate instrument was deleted", crossInstrument);
         }
     }
 }
