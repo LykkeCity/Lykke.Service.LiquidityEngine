@@ -37,8 +37,6 @@ namespace Lykke.Service.LiquidityEngine
             builder.RegisterModule(new AzureRepositories.AutofacModule(
                 _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
 
-            builder.RegisterInstance<ICacheManager>(new MemoryCacheManager());
-
             builder.RegisterType<StartupManager>()
                 .As<IStartupManager>();
 
