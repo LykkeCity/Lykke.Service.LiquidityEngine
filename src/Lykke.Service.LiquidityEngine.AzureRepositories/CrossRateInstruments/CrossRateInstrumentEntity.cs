@@ -25,31 +25,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments
 
         public string AssetPairId { get; set; }
 
-        public string QuoteSource
-        {
-            get => _quoteSource;
-            set
-            {
-                if (_quoteSource != value)
-                {
-                    _quoteSource = value;
-                    MarkValueTypePropertyAsDirty("QuoteSource");
-                }
-            }
-        }
+        public string QuoteSource { get; set; }
 
-        public string ExternalAssetPairId
-        {
-            get => _externalAssetPairId;
-            set
-            {
-                if (_externalAssetPairId != value)
-                {
-                    _externalAssetPairId = value;
-                    MarkValueTypePropertyAsDirty("ExternalAssetPairId");
-                }
-            }
-        }
+        public string ExternalAssetPairId { get; set; }
 
         public bool IsInverse
         {

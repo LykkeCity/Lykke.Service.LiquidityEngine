@@ -85,7 +85,7 @@ MatchingEngineClient:
       settings-key: MatchingEngine-Port
     Host:
       settings-key: MatchingEngine-Host
-      
+
 SlackNotifications:
   AzureQueue:
     ConnectionString:
