@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
 {
@@ -22,7 +23,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         {
             lock (_sync)
             {
-                return Initialized ? _cache.Values : null;
+                return Initialized ? _cache.Values.ToArray() : null;
             }
         }
 
