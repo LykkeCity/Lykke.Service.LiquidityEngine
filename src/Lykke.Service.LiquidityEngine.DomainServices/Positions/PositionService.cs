@@ -110,8 +110,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     internalTrades.Select(o => o.Id).ToArray());
             }
 
-            position.PriceUsd = await _rateService.CalculatePriceInUsd(position.AssetPairId, position.Price);
-
             await _openPositionRepository.InsertAsync(position);
 
             await _positionRepository.InsertAsync(position);
