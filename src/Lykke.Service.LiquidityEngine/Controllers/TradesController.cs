@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -77,6 +77,24 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                 throw new ValidationApiException(HttpStatusCode.NotFound, "Internal trade does not exist.");
 
             return Mapper.Map<InternalTradeModel>(internalTrade);
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">An internal trade.</response>
+        /// <response code="404">Asset pair does not exist.</response>
+        [HttpGet("internal/{assetPairId}/time")]
+        [ProducesResponseType(typeof(InternalTradeModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+        public Task<LastInternalTradeTimeModel> GetLastInternalTradeTimeAsync(string assetPairId)
+        {
+            DateTime lastInternalTradeTime = _tradeService.GetLastInternalTradeTime(assetPairId);
+
+            return Task.FromResult(
+                new LastInternalTradeTimeModel
+                {
+                    AssetPairId = assetPairId,
+                    LastInternalTradeTime = lastInternalTradeTime
+                });
         }
     }
 }

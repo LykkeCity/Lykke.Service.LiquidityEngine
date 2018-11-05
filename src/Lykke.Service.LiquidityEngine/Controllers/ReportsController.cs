@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Lykke.Service.LiquidityEngine.Controllers
 {
     [Route("/api/[controller]")]
+    [ResponseCache(Duration = 5)]
     public class ReportsController : Controller, IReportsApi
     {
         private readonly ISummaryReportService _summaryReportService;

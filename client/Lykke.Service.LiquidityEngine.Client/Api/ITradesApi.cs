@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -48,5 +48,13 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <returns>An internal trade.</returns>
         [Get("/api/trades/internal/{tradeId}")]
         Task<InternalTradeModel> GetInternalTradeByIdAsync(string tradeId);
+
+        /// <summary>
+        /// Returns last internal trade's time for the specified asset pair.
+        /// </summary>
+        /// <param name="assetPairId">The asset pair identifier.</param>
+        /// <returns>Last internal trade time.</returns>
+        [Get("/api/trades/internal/{assetPairId}/time")]
+        Task<LastInternalTradeTimeModel> GetLastInternalTradeTimeAsync(string assetPairId);
     }
 }
