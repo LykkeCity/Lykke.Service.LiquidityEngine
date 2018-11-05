@@ -9,8 +9,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments
     [ValueTypeMergingStrategy(ValueTypeMergingStrategy.UpdateIfDirty)]
     public class CrossRateInstrumentEntity : AzureTableEntity
     {
-        private string _quoteSource;
-        private string _externalAssetPairId;
         private bool _isInverse;
 
         public CrossRateInstrumentEntity()

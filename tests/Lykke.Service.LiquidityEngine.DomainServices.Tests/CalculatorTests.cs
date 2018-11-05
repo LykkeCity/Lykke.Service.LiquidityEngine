@@ -83,10 +83,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 LimitOrder.CreateSell(6130.929m, 0.02m),
                 LimitOrder.CreateSell(6060.000m, 0.01m),
                 LimitOrder.CreateBuy(5890.500m, 0.01m),
-                LimitOrder.CreateBuy(5820.500m, 0.02m),
-                LimitOrder.CreateBuy(5743.786m, 0.03m),
-                LimitOrder.CreateBuy(5660.572m, 0.04m),
-                LimitOrder.CreateBuy(5571.072m, 0.05m)
+                LimitOrder.CreateBuy(5820.499m, 0.02m),
+                LimitOrder.CreateBuy(5743.785m, 0.03m),
+                LimitOrder.CreateBuy(5660.571m, 0.04m),
+                LimitOrder.CreateBuy(5571.071m, 0.05m)
             };
 
             // act
@@ -132,11 +132,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 LimitOrder.CreateSell(6209.429m, 0.03m),
                 LimitOrder.CreateSell(6130.929m, 0.02m),
                 LimitOrder.CreateSell(6060.000m, 0.01m),
-                LimitOrder.CreateBuy(5866.742m, 0.01m),
-                LimitOrder.CreateBuy(5820.500m, 0.02m),
-                LimitOrder.CreateBuy(5743.786m, 0.03m),
-                LimitOrder.CreateBuy(5660.572m, 0.04m),
-                LimitOrder.CreateBuy(5571.072m, 0.05m)
+                LimitOrder.CreateBuy(5866.741m, 0.01m),
+                LimitOrder.CreateBuy(5820.499m, 0.02m),
+                LimitOrder.CreateBuy(5743.785m, 0.03m),
+                LimitOrder.CreateBuy(5660.571m, 0.04m),
+                LimitOrder.CreateBuy(5571.071m, 0.05m)
             };
 
             // act
@@ -183,10 +183,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 LimitOrder.CreateSell(6130.929m, 0.02m),
                 LimitOrder.CreateSell(6083.958m, 0.01m),
                 LimitOrder.CreateBuy(5890.500m, 0.01m),
-                LimitOrder.CreateBuy(5820.500m, 0.02m),
-                LimitOrder.CreateBuy(5743.786m, 0.03m),
-                LimitOrder.CreateBuy(5660.572m, 0.04m),
-                LimitOrder.CreateBuy(5571.072m, 0.05m)
+                LimitOrder.CreateBuy(5820.499m, 0.02m),
+                LimitOrder.CreateBuy(5743.785m, 0.03m),
+                LimitOrder.CreateBuy(5660.571m, 0.04m),
+                LimitOrder.CreateBuy(5571.071m, 0.05m)
             };
 
             // act

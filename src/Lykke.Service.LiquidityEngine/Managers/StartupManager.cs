@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Sdk;
+using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 
@@ -17,6 +18,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
         private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
+        private readonly ITradeService _tradeService;
 
         public StartupManager(
             LykkeBalancesTimer lykkeBalancesTimer,
@@ -26,7 +28,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             LykkeTradeSubscriber lykkeTradeSubscriber,
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
             B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
-            QuoteSubscriber[] quoteSubscribers)
+            QuoteSubscriber[] quoteSubscribers,
+            ITradeService tradeService)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
             _externalBalancesTimer = externalBalancesTimer;
@@ -36,10 +39,13 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
             _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
             _quoteSubscribers = quoteSubscribers;
+            _tradeService = tradeService;
         }
 
         public Task StartAsync()
         {
+            _tradeService.Initialize();
+            
             _b2C2QuoteSubscriber.Start();
             
             _b2C2OrderBooksSubscriber.Start();
