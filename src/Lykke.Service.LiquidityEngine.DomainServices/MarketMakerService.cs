@@ -178,7 +178,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             await ValidateBalanceAsync(limitOrders, assetPair);
 
-            WriteInfoLog(instrument.AssetPairId, quotes, limitOrders, "Direct limit orders calculated");
+            WriteInfoLog(instrument.AssetPairId, quotes, timeSinceLastTrade, limitOrders,
+                "Direct limit orders calculated");
 
             return new OrderBook
             {
@@ -225,7 +226,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             await ValidateBalanceAsync(crossLimitOrders, assetPair);
 
-            WriteInfoLog(crossInstrument.AssetPairId, new[] {quote}, crossLimitOrders, "Cross limit orders calculated");
+            WriteInfoLog(crossInstrument.AssetPairId, directOrderBook.AssetPairId, quote, crossLimitOrders,
+                "Cross limit orders calculated");
 
             return new OrderBook
             {
@@ -397,17 +399,41 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.Idle);
         }
 
-        private void WriteInfoLog(string assetPair, Quote[] quotes, IReadOnlyCollection<LimitOrder> limitOrders,
-            string message, [CallerMemberName] string process = nameof(WriteInfoLog))
+        private void WriteInfoLog(string assetPair, Quote[] quotes, TimeSpan timeSinceLastTrade,
+            IEnumerable<LimitOrder> limitOrders, string message,
+            [CallerMemberName] string process = nameof(WriteInfoLog))
         {
             _log.InfoWithDetails(message, new
             {
                 AssetPair = assetPair,
+                TimeSinceLastTrade = timeSinceLastTrade,
                 Quotes = quotes.Select(quote => new
                 {
                     quote.Ask,
                     quote.Bid
                 }),
+                LimitOrders = limitOrders.Select(o => new
+                {
+                    Type = o.Type.ToString(),
+                    o.Price,
+                    o.Volume
+                })
+            }, "data", process);
+        }
+
+        private void WriteInfoLog(string assetPair, string directAssetPair, Quote quote,
+            IEnumerable<LimitOrder> limitOrders, string message,
+            [CallerMemberName] string process = nameof(WriteInfoLog))
+        {
+            _log.InfoWithDetails(message, new
+            {
+                AssetPair = assetPair,
+                DirectAssetPair = directAssetPair,
+                Quote = new
+                {
+                    quote.Ask,
+                    quote.Bid
+                },
                 LimitOrders = limitOrders.Select(o => new
                 {
                     Type = o.Type.ToString(),

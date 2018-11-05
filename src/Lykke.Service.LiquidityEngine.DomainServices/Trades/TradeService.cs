@@ -19,6 +19,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
         private readonly ConcurrentDictionary<string, DateTime> _internalLastInternalTradeTime =
             new ConcurrentDictionary<string, DateTime>();
 
+        private bool _initialized;
+        private DateTime _defaultTradeTime;
+        
         public TradeService(
             IInternalTradeRepository internalTradeRepository,
             IExternalTradeRepository externalTradeRepository)
@@ -27,10 +30,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
             _externalTradeRepository = externalTradeRepository;
         }
 
+        public void Initialize()
+        {
+            if (!_initialized)
+            {
+                _initialized = true;
+                _defaultTradeTime = DateTime.UtcNow;
+            }
+        }
+
         public DateTime GetLastInternalTradeTime(string assetPairId)
         {
             if (!_internalLastInternalTradeTime.TryGetValue(assetPairId, out DateTime time))
-                time = DateTime.MinValue;
+                time = _defaultTradeTime;
 
             return time;
         }

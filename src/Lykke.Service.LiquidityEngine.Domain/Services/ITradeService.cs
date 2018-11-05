@@ -6,6 +6,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 {
     public interface ITradeService
     {
+        void Initialize();
+        
         DateTime GetLastInternalTradeTime(string assetPairId);
         
         Task<IReadOnlyCollection<ExternalTrade>>GetExternalTradesAsync(DateTime startDate, DateTime endDate, int limit);

@@ -97,13 +97,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     buyFirstLevelMarkup = markup;
             }
 
-            limitOrders.Add(LimitOrder.CreateSell(
-                (sellRawPrice * (1 + sellFirstLevelMarkup)).TruncateDecimalPlaces(priceAccuracy, true),
-                Math.Round(levels[0].Volume, volumeAccuracy)));
+            decimal sellFirstLevelPrice =
+                (sellRawPrice * (1 + sellFirstLevelMarkup)).TruncateDecimalPlaces(priceAccuracy, true);
 
-            limitOrders.Add(LimitOrder.CreateBuy(
-                (buyRawPrice * (1 - buyFirstLevelMarkup)).TruncateDecimalPlaces(priceAccuracy, true),
-                Math.Round(levels[0].Volume, volumeAccuracy)));
+            decimal buyFirstLevelPrice =
+                (buyRawPrice * (1 - buyFirstLevelMarkup)).TruncateDecimalPlaces(priceAccuracy);
+
+            limitOrders.Add(LimitOrder.CreateSell(sellFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy)));
+            limitOrders.Add(LimitOrder.CreateBuy(buyFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy)));
 
             for (int i = 1; i < levels.Length; i++)
             {
@@ -123,12 +124,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 buyRawPrice = (buyMarketPrice * sumVolume - prevBuyMarketPrice * prevSumVolume) / levels[i].Volume;
 
-                limitOrders.Add(LimitOrder.CreateSell(
-                    (sellRawPrice * (1 + levels[i].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                decimal sellPrice = (sellRawPrice * (1 + levels[i].Markup)).TruncateDecimalPlaces(priceAccuracy, true);
+
+                decimal buyPrice = (buyRawPrice * (1 - levels[i].Markup)).TruncateDecimalPlaces(priceAccuracy);
+
+                limitOrders.Add(LimitOrder.CreateSell(Math.Max(sellFirstLevelPrice, sellPrice),
                     Math.Round(levels[i].Volume, volumeAccuracy)));
 
-                limitOrders.Add(LimitOrder.CreateBuy(
-                    (buyRawPrice * (1 - levels[i].Markup)).TruncateDecimalPlaces(priceAccuracy, true),
+                limitOrders.Add(LimitOrder.CreateBuy(Math.Min(buyFirstLevelPrice, buyPrice),
                     Math.Round(levels[i].Volume, volumeAccuracy)));
             }
 
