@@ -201,6 +201,56 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         }
         
         [TestMethod]
+        public void Create_Dynamically_Distributed_Limit_Orders_By_Levels_With_Sell_Smart_Markup_With_One_Quote()
+        {
+            // arrange
+
+            int priceAccuracy = 3;
+            int volumeAccuracy = 8;
+
+            var quote1 = new Quote("BTCUSD", DateTime.UtcNow, 6000, 5950, "none");
+            var quote2 = new Quote("BTCUSD", DateTime.UtcNow, 6000, 5950, "none");
+
+            decimal baseAssetBalance = -10;
+            decimal quoteAssetBalance = -10;
+            int timeSinceLastTrade = 1;
+            int halfLifePeriod = 30;
+                
+            var levels = new[]
+            {
+                new InstrumentLevel {Number = 1, Volume = 0.01m, Markup = 0.01m},
+                new InstrumentLevel {Number = 2, Volume = 0.02m, Markup = 0.02m},
+                new InstrumentLevel {Number = 3, Volume = 0.03m, Markup = 0.03m},
+                new InstrumentLevel {Number = 4, Volume = 0.04m, Markup = 0.04m},
+                new InstrumentLevel {Number = 5, Volume = 0.05m, Markup = 0.05m}
+            };
+
+            var expectedLimitOrders = new List<LimitOrder>
+            {
+                LimitOrder.CreateSell(6300.000m, 0.05m),
+                LimitOrder.CreateSell(6240.000m, 0.04m),
+                LimitOrder.CreateSell(6180.000m, 0.03m),
+                LimitOrder.CreateSell(6120.000m, 0.02m),
+                LimitOrder.CreateSell(6083.958m, 0.01m),
+                LimitOrder.CreateBuy(5890.500m, 0.01m),
+                LimitOrder.CreateBuy(5831.000m, 0.02m),
+                LimitOrder.CreateBuy(5771.500m, 0.03m),
+                LimitOrder.CreateBuy(5712.000m, 0.04m),
+                LimitOrder.CreateBuy(5652.500m, 0.05m)
+            };
+
+            // act
+
+            IReadOnlyCollection<LimitOrder> actualLimitOrders = Calculator.CalculateLimitOrders(quote1, quote2, levels,
+                baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, priceAccuracy,
+                volumeAccuracy);
+
+            // assert
+
+            Assert.IsTrue(AreEqual(expectedLimitOrders, actualLimitOrders));
+        }
+        
+        [TestMethod]
         public void Calculate_Direct_Cross_Sell_Price()
         {
             // arrange
