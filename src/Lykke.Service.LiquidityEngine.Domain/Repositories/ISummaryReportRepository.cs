@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Lykke.Service.LiquidityEngine.Domain.Repositories
@@ -7,7 +7,7 @@ namespace Lykke.Service.LiquidityEngine.Domain.Repositories
     {
         Task<IReadOnlyCollection<SummaryReport>> GetAllAsync();
 
-        Task<SummaryReport> GetByAssetPairAsync(string assetPairId);
+        Task<SummaryReport> GetByAssetPairAsync(string assetPairId, string tradeAssetPairId);
 
         Task InsertAsync(SummaryReport summaryReport);
 
@@ -15,6 +15,6 @@ namespace Lykke.Service.LiquidityEngine.Domain.Repositories
 
         Task DeleteAsync();
         
-        Task DeleteAsync(string assetPairId);
+        Task DeleteAsync(string assetPairId, string tradeAssetPairId);
     }
 }

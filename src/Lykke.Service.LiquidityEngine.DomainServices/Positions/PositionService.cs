@@ -39,9 +39,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             _log = logFactory.CreateLog(this);
         }
 
-        public Task<IReadOnlyCollection<Position>> GetAllAsync(DateTime startDate, DateTime endDate, int limit)
+        public Task<IReadOnlyCollection<Position>> GetAllAsync(
+            DateTime startDate, DateTime endDate, int limit, string assetPairId, string tradeAssetPairId)
         {
-            return _positionRepository.GetAsync(startDate, endDate, limit);
+            return _positionRepository.GetAsync(startDate, endDate, limit, assetPairId, tradeAssetPairId);
         }
 
         public Task<IReadOnlyCollection<Position>> GetOpenAllAsync()

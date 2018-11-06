@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using Lykke.Sdk;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
+using Lykke.Service.LiquidityEngine.Migration;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 
 namespace Lykke.Service.LiquidityEngine.Managers
@@ -18,6 +19,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
         private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
+        private readonly StorageMigrationService _storageMigrationService;
         private readonly ITradeService _tradeService;
 
         public StartupManager(
@@ -29,6 +31,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
             B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
             QuoteSubscriber[] quoteSubscribers,
+            StorageMigrationService storageMigrationService,
             ITradeService tradeService)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
@@ -39,20 +42,23 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
             _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
             _quoteSubscribers = quoteSubscribers;
+            _storageMigrationService = storageMigrationService;
             _tradeService = tradeService;
         }
 
-        public Task StartAsync()
+        public async Task StartAsync()
         {
             _tradeService.Initialize();
             
+            await _storageMigrationService.MigrateStorageAsync();
+
             _b2C2QuoteSubscriber.Start();
-            
+
             _b2C2OrderBooksSubscriber.Start();
-                
+
             foreach (QuoteSubscriber quoteSubscriber in _quoteSubscribers)
                 quoteSubscriber.Start();
-            
+
             _lykkeTradeSubscriber.Start();
 
             _lykkeBalancesTimer.Start();
@@ -60,10 +66,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _externalBalancesTimer.Start();
 
             _marketMakerTimer.Start();
-            
+
             _hedgingTimer.Start();
-            
-            return Task.CompletedTask;
         }
     }
 }

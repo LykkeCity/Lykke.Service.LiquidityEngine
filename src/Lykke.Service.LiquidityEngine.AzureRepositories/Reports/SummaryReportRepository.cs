@@ -23,16 +23,16 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
             return Mapper.Map<SummaryReport[]>(entities);
         }
 
-        public async Task<SummaryReport> GetByAssetPairAsync(string assetPairId)
+        public async Task<SummaryReport> GetByAssetPairAsync(string assetPairId, string tradeAssetPairId)
         {
-            SummaryReportEntity entity = await _storage.GetDataAsync(GetPartitionKey(), GetRowKey(assetPairId));
+            SummaryReportEntity entity = await _storage.GetDataAsync(GetPartitionKey(assetPairId), GetRowKey(tradeAssetPairId));
 
             return Mapper.Map<SummaryReport>(entity);
         }
 
         public async Task InsertAsync(SummaryReport summaryReport)
         {
-            var entity = new SummaryReportEntity(GetPartitionKey(), GetRowKey(summaryReport.AssetPairId));
+            var entity = new SummaryReportEntity(GetPartitionKey(summaryReport.AssetPairId), GetRowKey(summaryReport.TradeAssetPairId));
 
             Mapper.Map(summaryReport, entity);
 
@@ -41,7 +41,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
 
         public async Task UpdateAsync(SummaryReport summaryReport)
         {
-            await _storage.MergeAsync(GetPartitionKey(), GetRowKey(summaryReport.AssetPairId), entity =>
+            await _storage.MergeAsync(GetPartitionKey(summaryReport.AssetPairId), GetRowKey(summaryReport.TradeAssetPairId), entity =>
             {
                 Mapper.Map(summaryReport, entity);
                 return entity;
@@ -53,15 +53,15 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
             return _storage.DeleteAsync();
         }
 
-        public Task DeleteAsync(string assetPairId)
+        public Task DeleteAsync(string assetPairId, string tradeAssetPairId)
         {
-            return _storage.DeleteAsync(GetPartitionKey(), GetRowKey(assetPairId));
+            return _storage.DeleteAsync(GetPartitionKey(assetPairId), GetRowKey(tradeAssetPairId));
         }
-        
-        private static string GetPartitionKey()
-            => "SummaryReport";
 
-        private static string GetRowKey(string assetPairId)
+        private static string GetPartitionKey(string assetPairId)
             => assetPairId;
+
+        private static string GetRowKey(string tradeAssetPairId)
+            => tradeAssetPairId;
     }
 }

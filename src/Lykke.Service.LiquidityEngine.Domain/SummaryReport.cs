@@ -11,6 +11,11 @@
         public string AssetPairId { get; set; }
 
         /// <summary>
+        /// The identifier of the traded asset pair.
+        /// </summary>
+        public string TradeAssetPairId { get; set; }
+
+        /// <summary>
         /// The number of open positions.
         /// </summary>
         public int OpenPositionsCount { get; set; }

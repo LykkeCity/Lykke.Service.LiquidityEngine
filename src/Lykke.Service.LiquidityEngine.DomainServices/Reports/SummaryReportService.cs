@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -43,13 +43,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         {
             IReadOnlyCollection<SummaryReport> summaryReports = await GetAllAsync();
 
-            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == position.AssetPairId);
+            SummaryReport summaryReport = summaryReports.SingleOrDefault(o =>
+                o.AssetPairId == position.AssetPairId && o.TradeAssetPairId == position.TradeAssetPairId);
 
             bool isNew = false;
 
             if (summaryReport == null)
             {
-                summaryReport = new SummaryReport {AssetPairId = position.AssetPairId};
+                summaryReport = new SummaryReport
+                {
+                    AssetPairId = position.AssetPairId,
+                    TradeAssetPairId = position.TradeAssetPairId
+                };
                 isNew = true;
             }
 
@@ -70,7 +75,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         {
             IReadOnlyCollection<SummaryReport> summaryReports = await GetAllAsync();
 
-            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == position.AssetPairId);
+            SummaryReport summaryReport = summaryReports.SingleOrDefault(o =>
+                o.AssetPairId == position.AssetPairId && o.TradeAssetPairId == position.TradeAssetPairId);
 
             if (summaryReport == null)
             {

@@ -13,6 +13,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Trades;
+using Lykke.Service.LiquidityEngine.AzureRepositories.VersionControl;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
 using Lykke.SettingsReader;
 
@@ -136,6 +137,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                     AzureTableStorage<MarketMakerStateEntity>.Create(_connectionString,
                         "MarketMakerState", container.Resolve<ILogFactory>())))
                 .As<IMarketMakerStateRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new VersionControlRepository(
+                    AzureTableStorage<SystemVersionEntity>.Create(_connectionString,
+                        "Version", container.Resolve<ILogFactory>())))
+                .As<IVersionControlRepository>()
                 .SingleInstance();
         }
     }

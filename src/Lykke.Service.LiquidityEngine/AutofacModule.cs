@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using Autofac;
-using Common.Cache;
 using JetBrains.Annotations;
 using Lykke.B2c2Client;
 using Lykke.B2c2Client.Settings;
@@ -10,6 +9,8 @@ using Lykke.Service.Assets.Client;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.LiquidityEngine.Managers;
+using Lykke.Service.LiquidityEngine.Migration;
+using Lykke.Service.LiquidityEngine.Migration.Operations;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
@@ -43,7 +44,10 @@ namespace Lykke.Service.LiquidityEngine
             builder.RegisterType<ShutdownManager>()
                 .As<IShutdownManager>();
 
+            RegisterMigration(builder);
+
             RegisterClients(builder);
+
             RegisterRabbit(builder);
         }
 
@@ -108,6 +112,17 @@ namespace Lykke.Service.LiquidityEngine
                     }))
                     .SingleInstance();
             }
+        }
+
+        private void RegisterMigration(ContainerBuilder builder)
+        {
+            builder.RegisterType<StorageMigrationService>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<MigrateSummaryReportOperation>()
+                .As<IMigrationOperation>()
+                .SingleInstance();
         }
     }
 }

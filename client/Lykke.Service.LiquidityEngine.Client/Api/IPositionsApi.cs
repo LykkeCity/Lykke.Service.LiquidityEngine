@@ -1,9 +1,9 @@
+﻿using JetBrains.Annotations;
+using Lykke.Service.LiquidityEngine.Client.Models.Positions;
+using Refit;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
-using Lykke.Service.LiquidityEngine.Client.Models.Positions;
-using Refit;
 
 namespace Lykke.Service.LiquidityEngine.Client.Api
 {
@@ -19,9 +19,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="startDate">The start date of period.</param>
         /// <param name="endDate">The end date of period.</param>
         /// <param name="limit">The maximum number of positions.</param>
+        /// <param name="assetPairId">Asset pair identifier to filter positions by asset pair</param>
+        /// <param name="tradeAssetPairId">Asset pair identifir to filter positions by traded asset pair</param>
         /// <returns>A collection of positions.</returns>
         [Get("/api/positions")]
-        Task<IReadOnlyCollection<PositionModel>> GetAllAsync(DateTime startDate, DateTime endDate, int limit);
+        Task<IReadOnlyCollection<PositionModel>> GetAllAsync(
+            DateTime startDate, DateTime endDate, int limit, string assetPairId, string tradeAssetPairId);
 
         /// <summary>
         /// Returns a collection of opened positions.
