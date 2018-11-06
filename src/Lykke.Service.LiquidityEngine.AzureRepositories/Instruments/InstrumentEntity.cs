@@ -16,6 +16,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
         private int _volumeAccuracy;
         private decimal _minVolume;
         private int _halfLifePeriod;
+        private bool _allowSmartMarkup;
 
         public InstrumentEntity()
         {
@@ -37,7 +38,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_mode != value)
                 {
                     _mode = value;
-                    MarkValueTypePropertyAsDirty("Mode");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -50,7 +51,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_pnLThreshold != value)
                 {
                     _pnLThreshold = value;
-                    MarkValueTypePropertyAsDirty("PnLThreshold");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -63,7 +64,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_inventoryThreshold != value)
                 {
                     _inventoryThreshold = value;
-                    MarkValueTypePropertyAsDirty("InventoryThreshold");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -76,7 +77,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_volumeAccuracy != value)
                 {
                     _volumeAccuracy = value;
-                    MarkValueTypePropertyAsDirty("VolumeAccuracy");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -89,12 +90,23 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_minVolume != value)
                 {
                     _minVolume = value;
-                    MarkValueTypePropertyAsDirty("MinVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
 
-        public bool AllowSmartMarkup { get; set; }
+        public bool AllowSmartMarkup
+        {
+            get => _allowSmartMarkup;
+            set
+            {
+                if (_allowSmartMarkup != value)
+                {
+                    _allowSmartMarkup = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
 
         public int HalfLifePeriod
         {
@@ -104,7 +116,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_halfLifePeriod != value)
                 {
                     _halfLifePeriod = value;
-                    MarkValueTypePropertyAsDirty("HalfLifePeriod");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

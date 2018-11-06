@@ -31,7 +31,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_enabled != value)
                 {
                     _enabled = value;
-                    MarkValueTypePropertyAsDirty("Enabled");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -44,7 +44,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_error != value)
                 {
                     _error = value;
-                    MarkValueTypePropertyAsDirty("Error");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

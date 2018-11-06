@@ -29,7 +29,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_limitOrderPriceMaxDeviation != value)
                 {
                     _limitOrderPriceMaxDeviation = value;
-                    MarkValueTypePropertyAsDirty("LimitOrderPriceMaxDeviation");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

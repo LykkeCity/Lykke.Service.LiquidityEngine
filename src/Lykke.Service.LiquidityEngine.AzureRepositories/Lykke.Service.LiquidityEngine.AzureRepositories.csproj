@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="7.0.1" />
-    <PackageReference Include="Lykke.AzureStorage" Version="8.11.0" />
+    <PackageReference Include="Lykke.AzureStorage" Version="8.13.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lykke.Service.LiquidityEngine.Domain\Lykke.Service.LiquidityEngine.Domain.csproj" />

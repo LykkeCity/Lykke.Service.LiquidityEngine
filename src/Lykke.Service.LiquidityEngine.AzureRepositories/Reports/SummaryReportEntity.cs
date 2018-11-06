@@ -42,7 +42,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_openPositionsCount != value)
                 {
                     _openPositionsCount = value;
-                    MarkValueTypePropertyAsDirty("OpenPositionsCount");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -55,7 +55,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_closedPositionsCount != value)
                 {
                     _closedPositionsCount = value;
-                    MarkValueTypePropertyAsDirty("ClosedPositionsCount");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -68,7 +68,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_pnL != value)
                 {
                     _pnL = value;
-                    MarkValueTypePropertyAsDirty("PnL");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -81,7 +81,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_pnLUsd != value)
                 {
                     _pnLUsd = value;
-                    MarkValueTypePropertyAsDirty("PnLUsd");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -94,7 +94,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_baseAssetVolume != value)
                 {
                     _baseAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("BaseAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -107,7 +107,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_quoteAssetVolume != value)
                 {
                     _quoteAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("QuoteAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -120,7 +120,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_totalSellBaseAssetVolume != value)
                 {
                     _totalSellBaseAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("TotalSellBaseAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -133,7 +133,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_totalBuyBaseAssetVolume != value)
                 {
                     _totalBuyBaseAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("TotalBuyBaseAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -146,7 +146,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_totalSellQuoteAssetVolume != value)
                 {
                     _totalSellQuoteAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("TotalSellQuoteAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -159,7 +159,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_totalBuyQuoteAssetVolume != value)
                 {
                     _totalBuyQuoteAssetVolume = value;
-                    MarkValueTypePropertyAsDirty("TotalBuyQuoteAssetVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -172,7 +172,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_sellTradesCount != value)
                 {
                     _sellTradesCount = value;
-                    MarkValueTypePropertyAsDirty("SellTradesCount");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -185,7 +185,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_buyTradesCount != value)
                 {
                     _buyTradesCount = value;
-                    MarkValueTypePropertyAsDirty("BuyTradesCount");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

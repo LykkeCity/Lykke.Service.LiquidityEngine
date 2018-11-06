@@ -31,7 +31,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Credits
                 if (_amount != value)
                 {
                     _amount = value;
-                    MarkValueTypePropertyAsDirty("Amount");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

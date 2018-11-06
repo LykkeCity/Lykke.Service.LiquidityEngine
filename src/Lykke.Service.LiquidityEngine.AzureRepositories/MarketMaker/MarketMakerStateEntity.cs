@@ -14,7 +14,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker
         private MarketMakerStatus _status;
         private DateTime _time;
         private MarketMakerError _error;
-        private string _errorMessage;
 
         public MarketMakerStateEntity()
         {
@@ -34,7 +33,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker
                 if (_status != value)
                 {
                     _status = value;
-                    MarkValueTypePropertyAsDirty("Status");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -47,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker
                 if (_time != value)
                 {
                     _time = value;
-                    MarkValueTypePropertyAsDirty("Time");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -60,22 +59,11 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker
                 if (_error != value)
                 {
                     _error = value;
-                    MarkValueTypePropertyAsDirty("Error");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
 
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set
-            {
-                if (_errorMessage != value)
-                {
-                    _errorMessage = value;
-                    MarkValueTypePropertyAsDirty("ErrorMessage");
-                }
-            }
-        }
+        public string ErrorMessage { get; set; }
     }
 }
