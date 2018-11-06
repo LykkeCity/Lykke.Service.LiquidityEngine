@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -14,10 +14,14 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     public class ReportsController : Controller, IReportsApi
     {
         private readonly ISummaryReportService _summaryReportService;
+        private readonly ICrossRateInstrumentService _crossRateInstrumentService;
 
-        public ReportsController(ISummaryReportService summaryReportService)
+        public ReportsController(
+            ISummaryReportService summaryReportService,
+            ICrossRateInstrumentService crossRateInstrumentService)
         {
             _summaryReportService = summaryReportService;
+            _crossRateInstrumentService = crossRateInstrumentService;
         }
 
         /// <inheritdoc/>
@@ -28,7 +32,15 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         {
             IReadOnlyCollection<SummaryReport> summaryReports = await _summaryReportService.GetAllAsync();
 
-            return Mapper.Map<SummaryReportModel[]>(summaryReports);
+            var model = Mapper.Map<SummaryReportModel[]>(summaryReports);
+
+            foreach (SummaryReportModel summaryReportModel in model)
+            {
+                summaryReportModel.PnLUsd = await _crossRateInstrumentService.ConvertPriceAsync(
+                    summaryReportModel.AssetPairId, summaryReportModel.PnL);
+            }
+
+            return model;
         }
     }
 }

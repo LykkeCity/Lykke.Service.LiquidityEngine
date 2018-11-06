@@ -12,7 +12,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
         private int _openPositionsCount;
         private int _closedPositionsCount;
         private decimal _pnL;
-        private decimal? _pnLUsd;
         private decimal _baseAssetVolume;
         private decimal _quoteAssetVolume;
         private decimal _totalSellBaseAssetVolume;
@@ -70,19 +69,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
                 if (_pnL != value)
                 {
                     _pnL = value;
-                    MarkValueTypePropertyAsDirty();
-                }
-            }
-        }
-
-        public decimal? PnLUsd
-        {
-            get => _pnLUsd;
-            set
-            {
-                if (_pnLUsd != value)
-                {
-                    _pnLUsd = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }

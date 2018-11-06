@@ -14,5 +14,7 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         Task UpdateAsync(CrossRateInstrument crossInstrument);
         
         Task DeleteAsync(string assetPairId);
+
+        Task<decimal?> ConvertPriceAsync(string assetPairId, decimal price);
     }
 }

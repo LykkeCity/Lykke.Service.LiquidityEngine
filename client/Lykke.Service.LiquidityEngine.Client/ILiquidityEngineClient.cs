@@ -30,6 +30,11 @@ namespace Lykke.Service.LiquidityEngine.Client
         ICreditsApi Credits { get; }
 
         /// <summary>
+        /// Cross rate instruments API.
+        /// </summary>
+        ICrossRateInstrumentsApi CrossRateInstruments { get; }
+
+        /// <summary>
         /// Instruments API.
         /// </summary>
         IInstrumentsApi Instruments { get; }
