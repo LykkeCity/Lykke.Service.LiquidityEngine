@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using AzureStorage;
@@ -48,9 +48,11 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
             });
         }
 
-        public Task DeleteAsync()
+        public async Task DeleteAsync()
         {
-            return _storage.DeleteAsync();
+            IList<SummaryReportEntity> entities = await _storage.GetDataAsync();
+
+            await _storage.DeleteAsync(entities);
         }
 
         public Task DeleteAsync(string assetPairId, string tradeAssetPairId)
