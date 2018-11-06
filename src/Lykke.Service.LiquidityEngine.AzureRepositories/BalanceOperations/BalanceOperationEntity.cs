@@ -31,7 +31,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations
                 if (_time != value)
                 {
                     _time = value;
-                    MarkValueTypePropertyAsDirty("Time");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -48,7 +48,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations
                 if (_amount != value)
                 {
                     _amount = value;
-                    MarkValueTypePropertyAsDirty("Amount");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

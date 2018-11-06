@@ -32,7 +32,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_isInverse != value)
                 {
                     _isInverse = value;
-                    MarkValueTypePropertyAsDirty("IsInverse");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -47,7 +47,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                 if (_externalAssetPairId != value)
                 {
                     _externalAssetPairId = value;
-                    MarkValueTypePropertyAsDirty("ExternalAssetPairId");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

@@ -45,7 +45,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 if (_type != value)
                 {
                     _type = value;
-                    MarkValueTypePropertyAsDirty("Type");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 if (_time != value)
                 {
                     _time = value;
-                    MarkValueTypePropertyAsDirty("Time");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -71,7 +71,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 if (_price != value)
                 {
                     _price = value;
-                    MarkValueTypePropertyAsDirty("Price");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -84,7 +84,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 if (_volume != value)
                 {
                     _volume = value;
-                    MarkValueTypePropertyAsDirty("Volume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -97,7 +97,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 if (_remainingVolume != value)
                 {
                     _remainingVolume = value;
-                    MarkValueTypePropertyAsDirty("RemainingVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -110,7 +110,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 if (_status != value)
                 {
                     _status = value;
-                    MarkValueTypePropertyAsDirty("Status");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -123,7 +123,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
                 if (_oppositeSideVolume != value)
                 {
                     _oppositeSideVolume = value;
-                    MarkValueTypePropertyAsDirty("OppositeSideVolume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

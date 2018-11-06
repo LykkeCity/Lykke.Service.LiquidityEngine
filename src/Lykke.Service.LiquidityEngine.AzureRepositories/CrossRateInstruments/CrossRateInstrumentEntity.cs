@@ -35,7 +35,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments
                 if (_isInverse != value)
                 {
                     _isInverse = value;
-                    MarkValueTypePropertyAsDirty("IsInverse");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

@@ -46,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_type != value)
                 {
                     _type = value;
-                    MarkValueTypePropertyAsDirty("Type");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -59,7 +59,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_date != value)
                 {
                     _date = value;
-                    MarkValueTypePropertyAsDirty("Date");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -72,7 +72,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_price != value)
                 {
                     _price = value;
-                    MarkValueTypePropertyAsDirty("Price");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -85,7 +85,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_priceUsd != value)
                 {
                     _priceUsd = value;
-                    MarkValueTypePropertyAsDirty("PriceUsd");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_volume != value)
                 {
                     _volume = value;
-                    MarkValueTypePropertyAsDirty("Volume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -111,7 +111,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_closeDate != value)
                 {
                     _closeDate = value;
-                    MarkValueTypePropertyAsDirty("CloseDate");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -124,7 +124,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_closePrice != value)
                 {
                     _closePrice = value;
-                    MarkValueTypePropertyAsDirty("ClosePrice");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -137,7 +137,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_closePriceUsd != value)
                 {
                     _closePriceUsd = value;
-                    MarkValueTypePropertyAsDirty("ClosePriceUsd");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -150,7 +150,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_pnL != value)
                 {
                     _pnL = value;
-                    MarkValueTypePropertyAsDirty("PnL");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -163,7 +163,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_pnLUsd != value)
                 {
                     _pnLUsd = value;
-                    MarkValueTypePropertyAsDirty("PnLUsd");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -184,7 +184,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_tradeAvgPrice != value)
                 {
                     _tradeAvgPrice = value;
-                    MarkValueTypePropertyAsDirty("TradeAvgPrice");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

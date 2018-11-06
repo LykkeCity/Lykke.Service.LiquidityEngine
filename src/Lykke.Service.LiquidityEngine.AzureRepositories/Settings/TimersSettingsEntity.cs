@@ -33,7 +33,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_marketMaker != value)
                 {
                     _marketMaker = value;
-                    MarkValueTypePropertyAsDirty("MarketMaker");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -46,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_hedging != value)
                 {
                     _hedging = value;
-                    MarkValueTypePropertyAsDirty("Hedging");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -59,7 +59,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_lykkeBalances != value)
                 {
                     _lykkeBalances = value;
-                    MarkValueTypePropertyAsDirty("LykkeBalances");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
@@ -72,7 +72,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_externalBalances != value)
                 {
                     _externalBalances = value;
-                    MarkValueTypePropertyAsDirty("ExternalBalances");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }

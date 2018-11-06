@@ -31,7 +31,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_volume != value)
                 {
                     _volume = value;
-                    MarkValueTypePropertyAsDirty("Volume");
+                    MarkValueTypePropertyAsDirty();
                 }
             }
         }
