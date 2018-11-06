@@ -41,25 +41,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.OrderBooks
                 .OrderByDescending(o => o.Price)
                 .ToArray();
 
-            if (sellLimitOrders.Length == 2 || buyLimitOrders.Length == 2)
-            {
-                return new[]
-                {
-                    CreateQuote(orderBook, sellLimitOrders[0].Price, buyLimitOrders[0].Price),
-                    CreateQuote(orderBook, sellLimitOrders[1].Price, buyLimitOrders[1].Price)
-                };
-            }
+            if (sellLimitOrders.Length == 0 || buyLimitOrders.Length == 0)
+                return null;
 
-            if (sellLimitOrders.Length == 1 || buyLimitOrders.Length == 1)
-            {
-                return new[]
-                {
-                    CreateQuote(orderBook, sellLimitOrders[0].Price, buyLimitOrders[0].Price),
-                    CreateQuote(orderBook, sellLimitOrders[0].Price, buyLimitOrders[0].Price)
-                };
-            }
+            decimal secondAsk = sellLimitOrders.Length == 2
+                ? sellLimitOrders[1].Price
+                : sellLimitOrders[0].Price;
 
-            return null;
+            decimal secondBid = buyLimitOrders.Length == 2
+                ? buyLimitOrders[1].Price
+                : buyLimitOrders[0].Price;
+
+            return new[]
+            {
+                CreateQuote(orderBook, sellLimitOrders[0].Price, buyLimitOrders[0].Price),
+                CreateQuote(orderBook, secondAsk, secondBid)
+            };
         }
 
         private static Quote CreateQuote(OrderBook orderBook, decimal ask, decimal bid)
