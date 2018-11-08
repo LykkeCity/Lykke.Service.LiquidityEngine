@@ -21,7 +21,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         public SummaryReportService(ISummaryReportRepository summaryReportRepository, ILogFactory logFactory)
         {
             _summaryReportRepository = summaryReportRepository;
-            _cache = new InMemoryCache<SummaryReport>(summaryReport => summaryReport.AssetPairId, false);
+            _cache = new InMemoryCache<SummaryReport>(CacheKey, false);
             _log = logFactory.CreateLog(this);
         }
 
@@ -89,6 +89,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
             await _summaryReportRepository.UpdateAsync(summaryReport);
             
             _cache.Set(summaryReport);
+        }
+
+        private static string CacheKey(SummaryReport summaryReport)
+        {
+            return $"{summaryReport.AssetPairId}_{summaryReport.TradeAssetPairId}";
         }
     }
 }
