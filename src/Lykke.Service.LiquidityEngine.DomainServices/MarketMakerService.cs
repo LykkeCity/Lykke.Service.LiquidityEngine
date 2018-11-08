@@ -366,11 +366,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             if (instrument.PnLThreshold == 0)
                 return;
 
-            IReadOnlyCollection<SummaryReport> summaryReports = await _summaryReportService.GetAllAsync();
+            IReadOnlyCollection<SummaryReport> summaryReports = (await _summaryReportService.GetAllAsync())
+                .Where(o => o.AssetPairId == instrument.AssetPairId)
+                .ToArray();
 
-            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == instrument.AssetPairId);
+            decimal totalPnL = summaryReports.Select(o => o.PnL).DefaultIfEmpty(0).Sum();
 
-            if (summaryReport != null && summaryReport.PnL < 0 && instrument.PnLThreshold < Math.Abs(summaryReport.PnL))
+            if (summaryReports.Count > 0 && totalPnL < 0 && instrument.PnLThreshold < Math.Abs(totalPnL))
                 SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.LowPnL);
         }
 
