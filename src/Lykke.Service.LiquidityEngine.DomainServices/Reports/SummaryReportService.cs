@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -21,7 +21,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         public SummaryReportService(ISummaryReportRepository summaryReportRepository, ILogFactory logFactory)
         {
             _summaryReportRepository = summaryReportRepository;
-            _cache = new InMemoryCache<SummaryReport>(summaryReport => summaryReport.AssetPairId, false);
+            _cache = new InMemoryCache<SummaryReport>(CacheKey, false);
             _log = logFactory.CreateLog(this);
         }
 
@@ -43,13 +43,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         {
             IReadOnlyCollection<SummaryReport> summaryReports = await GetAllAsync();
 
-            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == position.AssetPairId);
+            SummaryReport summaryReport = summaryReports.SingleOrDefault(o =>
+                o.AssetPairId == position.AssetPairId && o.TradeAssetPairId == position.TradeAssetPairId);
 
             bool isNew = false;
 
             if (summaryReport == null)
             {
-                summaryReport = new SummaryReport {AssetPairId = position.AssetPairId};
+                summaryReport = new SummaryReport
+                {
+                    AssetPairId = position.AssetPairId,
+                    TradeAssetPairId = position.TradeAssetPairId
+                };
                 isNew = true;
             }
 
@@ -70,7 +75,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         {
             IReadOnlyCollection<SummaryReport> summaryReports = await GetAllAsync();
 
-            SummaryReport summaryReport = summaryReports.SingleOrDefault(o => o.AssetPairId == position.AssetPairId);
+            SummaryReport summaryReport = summaryReports.SingleOrDefault(o =>
+                o.AssetPairId == position.AssetPairId && o.TradeAssetPairId == position.TradeAssetPairId);
 
             if (summaryReport == null)
             {
@@ -83,6 +89,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
             await _summaryReportRepository.UpdateAsync(summaryReport);
             
             _cache.Set(summaryReport);
+        }
+
+        private static string CacheKey(SummaryReport summaryReport)
+        {
+            return $"{summaryReport.AssetPairId}_{summaryReport.TradeAssetPairId}";
         }
     }
 }

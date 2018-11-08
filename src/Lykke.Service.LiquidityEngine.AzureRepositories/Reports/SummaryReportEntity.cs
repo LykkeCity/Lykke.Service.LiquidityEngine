@@ -34,6 +34,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Reports
         
         public string AssetPairId { get; set; }
 
+        public string TradeAssetPairId { get; set; }
+
         public int OpenPositionsCount
         {
             get => _openPositionsCount;

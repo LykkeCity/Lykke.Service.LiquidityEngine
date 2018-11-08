@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,7 +6,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 {
     public interface IPositionService
     {
-        Task<IReadOnlyCollection<Position>> GetAllAsync(DateTime startDate, DateTime endDate, int limit);
+        Task<IReadOnlyCollection<Position>> GetAllAsync(
+            DateTime startDate, DateTime endDate, int limit, string assetPairId, string tradeAssetPairId);
 
         Task<IReadOnlyCollection<Position>> GetOpenAllAsync();
 

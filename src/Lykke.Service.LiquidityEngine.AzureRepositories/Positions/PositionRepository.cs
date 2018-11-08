@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -26,7 +26,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             _indicesStorage = indicesStorage;
         }
 
-        public async Task<IReadOnlyCollection<Position>> GetAsync(DateTime startDate, DateTime endDate, int limit)
+        public async Task<IReadOnlyCollection<Position>> GetAsync(
+            DateTime startDate, DateTime endDate, int limit, string assetPairId, string tradeAssetPairId)
         {
             string filter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(AzureTableEntity.PartitionKey), QueryComparisons.GreaterThan,
@@ -34,6 +35,20 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(AzureTableEntity.PartitionKey), QueryComparisons.LessThan,
                     GetPartitionKey(startDate.Date.AddMilliseconds(-1))));
+
+            if (!string.IsNullOrEmpty(assetPairId))
+            {
+                filter = TableQuery.CombineFilters(filter, TableOperators.And,
+                    TableQuery.GenerateFilterCondition(nameof(PositionEntity.AssetPairId), QueryComparisons.Equal,
+                        assetPairId));
+            }
+
+            if (!string.IsNullOrEmpty(tradeAssetPairId))
+            {
+                filter = TableQuery.CombineFilters(filter, TableOperators.And,
+                    TableQuery.GenerateFilterCondition(nameof(PositionEntity.TradeAssetPairId), QueryComparisons.Equal,
+                        tradeAssetPairId));
+            }
 
             var query = new TableQuery<PositionEntity>().Where(filter).Take(limit);
 

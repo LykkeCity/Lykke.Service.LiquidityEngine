@@ -10,6 +10,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Trades;
+using Lykke.Service.LiquidityEngine.AzureRepositories.VersionControl;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 
@@ -69,6 +70,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             
             CreateMap<CrossInstrument, CrossInstrumentEntity>(MemberList.Source);
             CreateMap<CrossInstrumentEntity, CrossInstrument>(MemberList.Destination);
+
+            CreateMap<SystemVersion, SystemVersionEntity>(MemberList.Source);
+            CreateMap<SystemVersionEntity, SystemVersion>(MemberList.Destination);
         }
     }
 }

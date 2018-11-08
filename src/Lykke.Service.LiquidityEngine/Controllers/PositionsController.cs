@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -25,10 +25,11 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">A collection of positions.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<PositionModel>> GetAllAsync(DateTime startDate, DateTime endDate,
-            int limit)
+        public async Task<IReadOnlyCollection<PositionModel>> GetAllAsync(
+            DateTime startDate, DateTime endDate, int limit, string assetPairId, string tradeAssetPairId)
         {
-            IReadOnlyCollection<Position> positions = await _positionService.GetAllAsync(startDate, endDate, limit);
+            IReadOnlyCollection<Position> positions =
+                await _positionService.GetAllAsync(startDate, endDate, limit, assetPairId, tradeAssetPairId);
 
             return Mapper.Map<PositionModel[]>(positions);
         }
