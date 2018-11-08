@@ -19,12 +19,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.VersionControl
         {
             SystemVersionEntity entity = await _storage.GetDataAsync(GetPartitionKey(), GetRowKey());
 
-            return entity != null
-                ? Mapper.Map<SystemVersion>(entity)
-                : new SystemVersion { VersionNumber = 0 };
+            return Mapper.Map<SystemVersion>(entity);
         }
 
-        public async Task UpdateAsync(SystemVersion systemVersion)
+        public async Task InsertOrReplaceAsync(SystemVersion systemVersion)
         {
             var entity = new SystemVersionEntity(GetPartitionKey(), GetRowKey());
 

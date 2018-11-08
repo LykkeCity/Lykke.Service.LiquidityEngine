@@ -6,6 +6,6 @@ namespace Lykke.Service.LiquidityEngine.Domain.Repositories
     {
         Task<SystemVersion> GetAsync();
 
-        Task UpdateAsync(SystemVersion systemVersion);
+        Task InsertOrReplaceAsync(SystemVersion systemVersion);
     }
 }

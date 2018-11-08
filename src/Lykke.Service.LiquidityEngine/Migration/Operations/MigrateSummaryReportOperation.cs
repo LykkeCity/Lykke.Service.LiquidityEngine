@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Log;
+using JetBrains.Annotations;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
@@ -8,11 +9,15 @@ using Lykke.Service.LiquidityEngine.Domain.Repositories;
 
 namespace Lykke.Service.LiquidityEngine.Migration.Operations
 {
-    [StorageMigrationOperation(Name = "Migrate summary report", ApplyToVersion = 0, UpdatedVersion = 1)]
+    [UsedImplicitly]
     public class MigrateSummaryReportOperation : IMigrationOperation
     {
         private readonly ISummaryReportRepository _summaryReportRepository;
         private readonly ILog _log;
+
+        public int ApplyToVersion => 0;
+
+        public int UpdatedVersion => 1;
 
         public MigrateSummaryReportOperation(
             ISummaryReportRepository summaryReportRepository,
