@@ -6,8 +6,6 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
     [TestClass]
     public class PositionTests
     {
-        private const decimal UsdRate = 1;
-
         [TestMethod]
         public void LongPosition_PositivePnL()
         {
@@ -74,7 +72,11 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
                 }
             });
 
-            position.Close(Guid.NewGuid().ToString(), closePrice, closePrice * UsdRate);
+            position.Close(new ExternalTrade
+            {
+                Id = Guid.NewGuid().ToString(),
+                Price = closePrice
+            });
 
             return position;
         }

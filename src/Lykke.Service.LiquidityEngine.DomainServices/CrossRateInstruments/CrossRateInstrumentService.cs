@@ -8,22 +8,34 @@ using Lykke.Service.LiquidityEngine.Domain.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lykke.Service.Assets.Client;
+using Lykke.Service.Assets.Client.Models;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
 {
     public class CrossRateInstrumentService : ICrossRateInstrumentService
     {
+        public const string UsdAssetId = "USD";
+
         private readonly ICrossRateInstrumentRepository _crossRateInstrumentRepository;
+        private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IQuoteService _quoteService;
         private readonly InMemoryCache<CrossRateInstrument> _cache;
         private readonly ILog _log;
 
-        public CrossRateInstrumentService(ICrossRateInstrumentRepository crossRateInstrumentRepository, ILogFactory logFactory)
+        public CrossRateInstrumentService(
+            ICrossRateInstrumentRepository crossRateInstrumentRepository,
+            IAssetsServiceWithCache assetsServiceWithCache,
+            IQuoteService quoteService,
+            ILogFactory logFactory)
         {
             _crossRateInstrumentRepository = crossRateInstrumentRepository;
+            _assetsServiceWithCache = assetsServiceWithCache;
+            _quoteService = quoteService;
             _cache = new InMemoryCache<CrossRateInstrument>(instrument => instrument.AssetPairId, false);
             _log = logFactory.CreateLog(this);
         }
-        
+
         public async Task<IReadOnlyCollection<CrossRateInstrument>> GetAllAsync()
         {
             IReadOnlyCollection<CrossRateInstrument> crossInstruments = _cache.GetAll();
@@ -31,7 +43,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
             if (crossInstruments == null)
             {
                 crossInstruments = await _crossRateInstrumentRepository.GetAllAsync();
-                
+
                 _cache.Initialize(crossInstruments);
             }
 
@@ -42,7 +54,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
         {
             IReadOnlyCollection<CrossRateInstrument> crossInstruments = await GetAllAsync();
 
-            CrossRateInstrument crossInstrument = crossInstruments.FirstOrDefault(o => o.AssetPairId == assetPairId);
+            CrossRateInstrument crossInstrument = crossInstruments.SingleOrDefault(o => o.AssetPairId == assetPairId);
 
             if (crossInstrument == null)
                 throw new EntityNotFoundException();
@@ -53,7 +65,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
         public async Task AddAsync(CrossRateInstrument crossInstrument)
         {
             await _crossRateInstrumentRepository.InsertAsync(crossInstrument);
-            
+
             _cache.Set(crossInstrument);
 
             _log.InfoWithDetails("Cross-rate instrument was added", crossInstrument);
@@ -62,13 +74,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
         public async Task UpdateAsync(CrossRateInstrument crossInstrument)
         {
             CrossRateInstrument currentCrossInstrument = await GetByAssetPairIdAsync(crossInstrument.AssetPairId);
-            
+
             currentCrossInstrument.Update(crossInstrument);
-            
+
             await _crossRateInstrumentRepository.UpdateAsync(currentCrossInstrument);
-            
+
             _cache.Set(currentCrossInstrument);
-            
+
             _log.InfoWithDetails("Cross-rate instrument was updated", currentCrossInstrument);
         }
 
@@ -81,6 +93,35 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
             _cache.Remove(assetPairId);
 
             _log.InfoWithDetails("Cross-rate instrument was deleted", crossInstrument);
+        }
+
+        public async Task<decimal?> ConvertPriceAsync(string assetPairId, decimal price)
+        {
+            AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(assetPairId);
+
+            if (assetPair.QuotingAssetId == UsdAssetId)
+                return price;
+            
+            IReadOnlyCollection<CrossRateInstrument> crossInstruments = await GetAllAsync();
+
+            CrossRateInstrument crossInstrument = crossInstruments.SingleOrDefault(o => o.AssetPairId == assetPairId);
+
+            if (crossInstrument == null)
+            {
+                _log.WarningWithDetails("Cross instrument not found", assetPairId);
+                return null;
+            }
+
+            Quote quote = await _quoteService
+                .GetAsync(crossInstrument.QuoteSource, crossInstrument.ExternalAssetPairId);
+
+            if (quote == null)
+            {
+                _log.WarningWithDetails("No quote for cross instrument", crossInstrument);
+                return null;
+            }
+
+            return Calculator.CalculateCrossMidPrice(price, quote, crossInstrument.IsInverse);
         }
     }
 }

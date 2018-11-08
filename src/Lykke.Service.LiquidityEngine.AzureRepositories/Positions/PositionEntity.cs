@@ -15,13 +15,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
         private PositionType _type;
         private DateTime _date;
         private decimal _price;
-        private decimal? _priceUsd;
         private decimal _volume;
         private DateTime _closeDate;
         private decimal _closePrice;
-        private decimal? _closePriceUsd;
         private decimal _pnL;
-        private decimal? _pnLUsd;
         private decimal _tradeAvgPrice;
 
         public PositionEntity()
@@ -77,19 +74,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
-        public decimal? PriceUsd
-        {
-            get => _priceUsd;
-            set
-            {
-                if (_priceUsd != value)
-                {
-                    _priceUsd = value;
-                    MarkValueTypePropertyAsDirty();
-                }
-            }
-        }
-
         public decimal Volume
         {
             get => _volume;
@@ -129,19 +113,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
-        public decimal? ClosePriceUsd
-        {
-            get => _closePriceUsd;
-            set
-            {
-                if (_closePriceUsd != value)
-                {
-                    _closePriceUsd = value;
-                    MarkValueTypePropertyAsDirty();
-                }
-            }
-        }
-
         public decimal PnL
         {
             get => _pnL;
@@ -150,19 +121,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
                 if (_pnL != value)
                 {
                     _pnL = value;
-                    MarkValueTypePropertyAsDirty();
-                }
-            }
-        }
-
-        public decimal? PnLUsd
-        {
-            get => _pnLUsd;
-            set
-            {
-                if (_pnLUsd != value)
-                {
-                    _pnLUsd = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }
