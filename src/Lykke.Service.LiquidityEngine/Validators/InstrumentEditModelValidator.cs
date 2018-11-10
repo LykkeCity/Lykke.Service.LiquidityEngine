@@ -5,9 +5,9 @@ using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 namespace Lykke.Service.LiquidityEngine.Validators
 {
     [UsedImplicitly]
-    public class InstrumentModelValidator : AbstractValidator<InstrumentModel>
+    public class InstrumentEditModelValidator : AbstractValidator<InstrumentModel>
     {
-        public InstrumentModelValidator()
+        public InstrumentEditModelValidator()
         {
             RuleFor(o => o.AssetPairId)
                 .NotEmpty()

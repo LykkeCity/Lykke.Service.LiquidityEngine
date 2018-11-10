@@ -61,7 +61,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [HttpPost]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.Conflict)]
-        public async Task AddAsync([FromBody] InstrumentModel model)
+        public async Task AddAsync([FromBody] InstrumentEditModel model)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [HttpPut]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public async Task UpdateAsync([FromBody] InstrumentModel model)
+        public async Task UpdateAsync([FromBody] InstrumentEditModel model)
         {
             try
             {

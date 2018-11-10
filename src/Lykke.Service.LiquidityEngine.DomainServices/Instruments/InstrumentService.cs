@@ -64,6 +64,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
 
         public async Task AddAsync(Instrument instrument)
         {
+            IReadOnlyCollection<Instrument> instruments = await GetAllAsync();
+            
+            if (instruments.Any(o => o.AssetPairId == instrument.AssetPairId ||
+                                     o.CrossInstruments?.Any(p => p.AssetPairId == instrument.AssetPairId) ==
+                                     true))
+            {
+                throw new InvalidOperationException("The instrument already used");
+            }
+            
             await _instrumentRepository.InsertAsync(instrument);
 
             _cache.Set(instrument);
@@ -148,7 +157,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
         {
             IReadOnlyCollection<Instrument> instruments = await GetAllAsync();
 
-            if (instruments.Any(o => o.AssetPairId == crossInstrument.AssetPairId &&
+            if (instruments.Any(o => o.AssetPairId == crossInstrument.AssetPairId ||
                                      o.CrossInstruments?.Any(p => p.AssetPairId == crossInstrument.AssetPairId) ==
                                      true))
             {

@@ -25,8 +25,9 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<AssetPairLinkModel, AssetPairLink>(MemberList.Destination);
 
             CreateMap<Instrument, InstrumentModel>(MemberList.Source);
-            CreateMap<InstrumentModel, Instrument>(MemberList.Destination)
-                .ForMember(dest => dest.Levels, opt => opt.Ignore());
+            CreateMap<InstrumentEditModel, Instrument>(MemberList.Destination)
+                .ForMember(dest => dest.Levels, opt => opt.Ignore())
+                .ForMember(dest => dest.CrossInstruments, opt => opt.Ignore());
 
             CreateMap<InstrumentLevel, InstrumentLevelModel>(MemberList.Source);
             CreateMap<InstrumentLevelModel, InstrumentLevel>(MemberList.Destination);
