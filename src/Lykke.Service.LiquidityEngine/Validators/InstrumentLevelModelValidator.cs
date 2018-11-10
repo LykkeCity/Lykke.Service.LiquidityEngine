@@ -18,8 +18,7 @@ namespace Lykke.Service.LiquidityEngine.Validators
                 .WithMessage("Volume should be greater than zero");
             
             RuleFor(o => o.Markup)
-                .GreaterThanOrEqualTo(0)
-                .LessThan(1)
+                .InclusiveBetween(0, 1)
                 .WithMessage("Markup should be between zero and one");
         }
     }
