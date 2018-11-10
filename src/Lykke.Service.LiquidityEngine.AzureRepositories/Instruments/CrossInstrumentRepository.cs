@@ -25,7 +25,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
 
         public async Task AddAsync(string assetPairId, CrossInstrument crossInstrument)
         {
-            var entity = new CrossInstrumentEntity(GetPartitionKey(assetPairId), GetRowKey(crossInstrument.AssetPairId));
+            var entity =
+                new CrossInstrumentEntity(GetPartitionKey(assetPairId), GetRowKey(crossInstrument.AssetPairId));
 
             Mapper.Map(crossInstrument, entity);
 
@@ -40,6 +41,13 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Instruments
                     Mapper.Map(crossInstrument, entity);
                     return entity;
                 });
+        }
+
+        public async Task DeleteAsync(string assetPairId)
+        {
+            IEnumerable<CrossInstrumentEntity> entities = await _storage.GetDataAsync(GetPartitionKey(assetPairId));
+
+            await _storage.DeleteAsync(entities);
         }
 
         public Task DeleteAsync(string assetPairId, string crossAssetPairId)
