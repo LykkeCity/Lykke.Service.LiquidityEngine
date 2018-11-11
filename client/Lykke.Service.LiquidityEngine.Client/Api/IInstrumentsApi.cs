@@ -32,14 +32,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// </summary>
         /// <param name="model">The model that describes instrument.</param>
         [Post("/api/instruments")]
-        Task AddAsync([Body] InstrumentModel model);
+        Task AddAsync([Body] InstrumentEditModel model);
 
         /// <summary>
         /// Updates instrument settings (without levels).
         /// </summary>
         /// <param name="model">The model that describes instrument.</param>
         [Put("/api/instruments")]
-        Task UpdateAsync([Body] InstrumentModel model);
+        Task UpdateAsync([Body] InstrumentEditModel model);
 
         /// <summary>
         /// Deletes the instrument settings by asset pair id.

@@ -57,11 +57,11 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
         /// <inheritdoc/>
         /// <response code="204">The instrument successfully added.</response>
-        /// <response code="409">Instrument already exists.</response>
+        /// <response code="400">The instrument already used.</response>
         [HttpPost]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.Conflict)]
-        public async Task AddAsync([FromBody] InstrumentModel model)
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
+        public async Task AddAsync([FromBody] InstrumentEditModel model)
         {
             try
             {
@@ -69,9 +69,9 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
                 await _instrumentService.AddAsync(instrument);
             }
-            catch (EntityAlreadyExistsException)
+            catch (InvalidOperationException exception)
             {
-                throw new ValidationApiException(HttpStatusCode.Conflict, "Instrument already exists.");
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
             }
         }
 
@@ -81,7 +81,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [HttpPut]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public async Task UpdateAsync([FromBody] InstrumentModel model)
+        public async Task UpdateAsync([FromBody] InstrumentEditModel model)
         {
             try
             {
@@ -185,7 +185,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
         /// <inheritdoc/>
         /// <response code="204">The cross instrument successfully added to instrument.</response>
-        /// <response code="400">The cross instrument already exists.</response>
+        /// <response code="400">The instrument already used.</response>
         /// <response code="404">Instrument does not exist.</response>
         [HttpPost("{assetPairId}/cross")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]

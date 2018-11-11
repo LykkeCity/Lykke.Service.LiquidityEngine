@@ -16,16 +16,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
     {
         private readonly IInstrumentRepository _instrumentRepository;
         private readonly ICrossInstrumentRepository _crossInstrumentRepository;
+        private readonly IRemainingVolumeService _remainingVolumeService;
         private readonly InMemoryCache<Instrument> _cache;
         private readonly ILog _log;
 
         public InstrumentService(
             IInstrumentRepository instrumentRepository,
             ICrossInstrumentRepository crossInstrumentRepository,
+            IRemainingVolumeService remainingVolumeService,
             ILogFactory logFactory)
         {
             _instrumentRepository = instrumentRepository;
             _crossInstrumentRepository = crossInstrumentRepository;
+            _remainingVolumeService = remainingVolumeService;
             _cache = new InMemoryCache<Instrument>(instrument => instrument.AssetPairId, false);
             _log = logFactory.CreateLog(this);
         }
@@ -61,6 +64,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
 
         public async Task AddAsync(Instrument instrument)
         {
+            IReadOnlyCollection<Instrument> instruments = await GetAllAsync();
+            
+            if (instruments.Any(o => o.AssetPairId == instrument.AssetPairId ||
+                                     o.CrossInstruments?.Any(p => p.AssetPairId == instrument.AssetPairId) ==
+                                     true))
+            {
+                throw new InvalidOperationException("The instrument already used");
+            }
+            
             await _instrumentRepository.InsertAsync(instrument);
 
             _cache.Set(instrument);
@@ -85,7 +97,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
         {
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
 
+            if(instrument.Mode == InstrumentMode.Active)
+                throw new InvalidOperationException("Can not remove active instrument");
+
+            IReadOnlyCollection<RemainingVolume> remainingVolumes = await _remainingVolumeService.GetAllAsync();
+            
+            if(remainingVolumes.Any(o=>o.AssetPairId == instrument.AssetPairId))
+                throw new InvalidOperationException("Can not remove instrument while remaining volume exist");
+
             await _instrumentRepository.DeleteAsync(assetPairId);
+
+            await _crossInstrumentRepository.DeleteAsync(assetPairId);
 
             _cache.Remove(assetPairId);
 
@@ -135,7 +157,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
         {
             IReadOnlyCollection<Instrument> instruments = await GetAllAsync();
 
-            if (instruments.Any(o => o.AssetPairId == crossInstrument.AssetPairId &&
+            if (instruments.Any(o => o.AssetPairId == crossInstrument.AssetPairId ||
                                      o.CrossInstruments?.Any(p => p.AssetPairId == crossInstrument.AssetPairId) ==
                                      true))
             {

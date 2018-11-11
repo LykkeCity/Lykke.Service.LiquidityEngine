@@ -8,8 +8,10 @@ namespace Lykke.Service.LiquidityEngine.Domain.Repositories
         Task<IReadOnlyCollection<CrossInstrument>> GetAsync(string assetPairId);
 
         Task AddAsync(string assetPairId, CrossInstrument crossInstrument);
-        
+
         Task UpdateAsync(string assetPairId, CrossInstrument crossInstrument);
+
+        Task DeleteAsync(string assetPairId);
 
         Task DeleteAsync(string assetPairId, string crossAssetPairId);
     }
