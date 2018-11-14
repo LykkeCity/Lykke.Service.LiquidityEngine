@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -73,7 +73,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public void AddLevel(InstrumentLevel instrumentLevel)
         {
             if (Levels?.Any(o => o.Number == instrumentLevel.Number) == true)
+            {
                 throw new InvalidOperationException("The level already exists");
+            }
+
+            instrumentLevel.Id = Guid.NewGuid().ToString();
 
             Levels = (Levels ?? new InstrumentLevel[0])
                 .Union(new[] {instrumentLevel})
@@ -84,25 +88,49 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public void UpdateLevel(InstrumentLevel instrumentLevel)
         {
             InstrumentLevel currentLevelVolume = (Levels ?? new InstrumentLevel[0])
-                .FirstOrDefault(o => o.Number == instrumentLevel.Number);
+                .FirstOrDefault(o => !string.IsNullOrEmpty(instrumentLevel.Id)
+                    ? o.Id == instrumentLevel.Id
+                    : o.Number == instrumentLevel.Number);
 
             if (currentLevelVolume == null)
                 throw new InvalidOperationException("The level does not exists");
 
+            if (!string.IsNullOrEmpty(instrumentLevel.Id) && Levels?
+                .Any(o => o.Id != instrumentLevel.Id && o.Number == instrumentLevel.Number) == true)
+            {
+                throw new InvalidOperationException("The level already exists");
+            }
+
+            currentLevelVolume.Number = instrumentLevel.Number;
             currentLevelVolume.Volume = instrumentLevel.Volume;
             currentLevelVolume.Markup = instrumentLevel.Markup;
+
+            // ReSharper disable once AssignNullToNotNullAttribute
+            Levels = Levels
+                .OrderBy(o => o.Number)
+                .ToArray();
         }
 
-        public void RemoveLevel(int levelNumber)
+        public void UpdateLevels(IReadOnlyCollection<InstrumentLevel> instrumentLevels)
+        {
+            Levels = instrumentLevels
+                .OrderBy(o => o.Number)
+                .ToArray();
+        }
+
+        public void RemoveLevel(string levelId)
+        {
+            Levels = (Levels ?? new InstrumentLevel[0])
+                .Where(o => o.Id != levelId)
+                .OrderBy(o => o.Number)
+                .ToArray();
+        }
+
+        public void RemoveLevelByNumber(int levelNumber)
         {
             Levels = (Levels ?? new InstrumentLevel[0])
                 .Where(o => o.Number != levelNumber)
                 .OrderBy(o => o.Number)
-                .Select((levelVolume, index) => new InstrumentLevel
-                {
-                    Number = index + 1,
-                    Volume = levelVolume.Volume
-                })
                 .ToArray();
         }
 

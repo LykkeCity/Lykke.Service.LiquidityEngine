@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
@@ -54,7 +54,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="assetPairId">The identifier of instrument asset pair.</param>
         /// <param name="model">The model that describes level volume.</param>
         [Post("/api/instruments/{assetPairId}/levels")]
-        Task AddLevelAsync(string assetPairId, [Body] InstrumentLevelModel model);
+        Task AddLevelAsync(string assetPairId, [Body] InstrumentLevelAddModel model);
 
         /// <summary>
         /// Updates volume level for the instrument.
@@ -71,6 +71,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="levelNumber">The number of the level.</param>
         [Delete("/api/instruments/{assetPairId}/levels/{levelNumber}")]
         Task RemoveLevelAsync(string assetPairId, int levelNumber);
+
+        /// <summary>
+        /// Removes the level volume from instrument by its identifier.
+        /// </summary>
+        /// <param name="assetPairId">The identifier of instrument asset pair.</param>
+        /// <param name="levelId">The identifier of the level.</param>
+        [Delete("/api/instruments/{assetPairId}/levels/")]
+        Task RemoveLevelByIdAsync(string assetPairId, string levelId);
 
         /// <summary>
         /// Adds the cross instrument to the main instrument.

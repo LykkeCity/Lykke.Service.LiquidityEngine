@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -121,7 +121,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
-        public async Task AddLevelAsync(string assetPairId, [FromBody] InstrumentLevelModel model)
+        public async Task AddLevelAsync(string assetPairId, [FromBody] InstrumentLevelAddModel model)
         {
             try
             {
@@ -168,6 +168,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <inheritdoc/>
         /// <response code="204">The volume level successfully removed from instrument.</response>
         /// <response code="404">Instrument does not exist.</response>
+        [Obsolete("Use identifier to remove level.")]
         [HttpDelete("{assetPairId}/levels/{levelNumber}")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
@@ -175,7 +176,25 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         {
             try
             {
-                await _instrumentService.RemoveLevelAsync(assetPairId, levelNumber);
+                await _instrumentService.RemoveLevelByNumberAsync(assetPairId, levelNumber);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+        }
+
+        /// <inheritdoc/>
+        /// <response code="204">The volume level successfully removed from instrument.</response>
+        /// <response code="404">Instrument does not exist.</response>
+        [HttpDelete("{assetPairId}/levels")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+        public async Task RemoveLevelByIdAsync(string assetPairId, string levelId)
+        {
+            try
+            {
+                await _instrumentService.RemoveLevelAsync(assetPairId, levelId);
             }
             catch (EntityNotFoundException)
             {
