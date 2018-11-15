@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Domain.Cache;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.DomainServices.AssetSettings;
 using Lykke.Service.LiquidityEngine.DomainServices.Audit;
 using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments;
@@ -35,6 +36,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<AssetSettingsService>()
+                .As<IAssetSettingsService>()
+                .SingleInstance();
+
             builder.RegisterType<AssetPairLinkService>()
                 .As<IAssetPairLinkService>()
                 .SingleInstance();

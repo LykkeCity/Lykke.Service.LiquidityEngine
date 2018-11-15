@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.AzureRepositories.AssetSettings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
@@ -21,6 +22,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
     {
         public AutoMapperProfile()
         {
+            CreateMap<Domain.AssetSettings, AssetSettingsEntity>(MemberList.Source);
+            CreateMap<AssetSettingsEntity, Domain.AssetSettings>(MemberList.Destination);
+
             CreateMap<AssetPairLink, AssetPairLinkEntity>(MemberList.Source);
             CreateMap<AssetPairLinkEntity, AssetPairLink>(MemberList.Destination);
 

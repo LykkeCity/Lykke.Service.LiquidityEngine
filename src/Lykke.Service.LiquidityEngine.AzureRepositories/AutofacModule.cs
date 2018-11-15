@@ -4,6 +4,7 @@ using AzureStorage.Tables.Templates.Index;
 using JetBrains.Annotations;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.AzureRepositories.AssetSettings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
@@ -31,6 +32,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
 
         protected override void Load(ContainerBuilder builder)
         {
+            builder.Register(container => new AssetSettingsSettingsRepository(
+                    AzureTableStorage<AssetSettingsEntity>.Create(_connectionString,
+                        "AssetSettings", container.Resolve<ILogFactory>())))
+                .As<IAssetSettingsRepository>()
+                .SingleInstance();
+
             builder.Register(container => new AssetPairLinkRepository(
                     AzureTableStorage<AssetPairLinkEntity>.Create(_connectionString,
                         "AssetPairLinks", container.Resolve<ILogFactory>())))
