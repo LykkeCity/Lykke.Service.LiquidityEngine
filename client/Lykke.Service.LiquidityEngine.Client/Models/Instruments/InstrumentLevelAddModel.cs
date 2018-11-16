@@ -1,15 +1,13 @@
-﻿namespace Lykke.Service.LiquidityEngine.Domain
+﻿using JetBrains.Annotations;
+
+namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
 {
     /// <summary>
-    /// Represents a level of an instrument.
+    /// Represents a level of an instrument on create operations.
     /// </summary>
-    public class InstrumentLevel
+    [PublicAPI]
+    public class InstrumentLevelAddModel
     {
-        /// <summary>
-        /// The identifier of the level.
-        /// </summary>
-        public string Id { get; set; }
-
         /// <summary>
         /// The number of the level.
         /// </summary>

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Lykke.Service.LiquidityEngine.Domain.Services
@@ -19,7 +19,9 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 
         Task UpdateLevelAsync(string assetPairId, InstrumentLevel instrumentLevel);
 
-        Task RemoveLevelAsync(string assetPairId, int levelNumber);
+        Task RemoveLevelAsync(string assetPairId, string levelId);
+
+        Task RemoveLevelByNumberAsync(string assetPairId, int levelNumber);
 
         Task AddCrossInstrumentAsync(string assetPairId, CrossInstrument crossInstrument);
 

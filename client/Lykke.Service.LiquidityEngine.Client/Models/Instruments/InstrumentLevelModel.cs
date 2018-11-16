@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
 {
@@ -8,6 +8,11 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Instruments
     [PublicAPI]
     public class InstrumentLevelModel
     {
+        /// <summary>
+        /// The identifier of the level.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// The number of the level.
         /// </summary>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -140,11 +140,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             _log.InfoWithDetails("Level volume was updated of the instrument", instrument);
         }
 
-        public async Task RemoveLevelAsync(string assetPairId, int levelNumber)
+        public async Task RemoveLevelAsync(string assetPairId, string levelId)
         {
             Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
 
-            instrument.RemoveLevel(levelNumber);
+            instrument.RemoveLevel(levelId);
+
+            await _instrumentRepository.UpdateAsync(instrument);
+
+            _cache.Set(instrument);
+
+            _log.InfoWithDetails("Level volume was removed from the instrument", instrument);
+        }
+
+        public async Task RemoveLevelByNumberAsync(string assetPairId, int levelNumber)
+        {
+            Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
+
+            instrument.RemoveLevelByNumber(levelNumber);
 
             await _instrumentRepository.UpdateAsync(instrument);
 

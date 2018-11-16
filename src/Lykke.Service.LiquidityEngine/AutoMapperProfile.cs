@@ -31,6 +31,8 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<InstrumentLevel, InstrumentLevelModel>(MemberList.Source);
             CreateMap<InstrumentLevelModel, InstrumentLevel>(MemberList.Destination);
+            CreateMap<InstrumentLevelAddModel, InstrumentLevel>(MemberList.Destination)
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<BalanceOperation, BalanceOperationModel>(MemberList.Source);
             CreateMap<BalanceOperationModel, BalanceOperation>(MemberList.Destination);
@@ -67,7 +69,6 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<CrossRateInstrument, CrossRateInstrumentModel>(MemberList.Source);
             CreateMap<CrossRateInstrumentModel, CrossRateInstrument>(MemberList.Destination);
-
         }
     }
 }

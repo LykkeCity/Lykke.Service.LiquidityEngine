@@ -15,21 +15,26 @@ namespace Lykke.Service.LiquidityEngine.Migration
     public class StorageMigrationService
     {
         private readonly IVersionControlRepository _versionControlRepository;
+        private readonly IInstrumentRepository _instrumentRepository;
         private readonly IMigrationOperation[] _migrationOperations;
         private readonly ILog _log;
 
         public StorageMigrationService(
             IVersionControlRepository versionControlRepository,
+            IInstrumentRepository instrumentRepository,
             IMigrationOperation[] migrationOperations,
             ILogFactory logFactory)
         {
             _versionControlRepository = versionControlRepository;
+            _instrumentRepository = instrumentRepository;
             _migrationOperations = migrationOperations;
             _log = logFactory.CreateLog(this);
         }
 
         public async Task MigrateStorageAsync()
         {
+            await MigrateLevels();
+
             IReadOnlyList<IMigrationOperation> operations = _migrationOperations
                 .OrderBy(o => o.ApplyToVersion)
                 .ToArray();
@@ -58,6 +63,39 @@ namespace Lykke.Service.LiquidityEngine.Migration
                     systemVersion.VersionNumber = operation.UpdatedVersion;
 
                     await _versionControlRepository.InsertOrReplaceAsync(systemVersion);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks levels' identifier and fills them if they are empty.
+        /// </summary>
+        /// <returns></returns>
+        private async Task MigrateLevels()
+        {
+            IReadOnlyCollection<Instrument> instruments = await _instrumentRepository.GetAllAsync();
+
+            foreach (Instrument instrument in instruments)
+            {
+                if (instrument.Levels.Any(o => string.IsNullOrEmpty(o.Id)))
+                {
+                    _log.InfoWithDetails("Migrating instrument levels.", instrument);
+
+                    IReadOnlyCollection<InstrumentLevel> levels = instrument.Levels
+                        .Select(o => new InstrumentLevel
+                        {
+                            Id = !string.IsNullOrEmpty(o.Id) ? o.Id : Guid.NewGuid().ToString(),
+                            Number = o.Number,
+                            Markup = o.Markup,
+                            Volume = o.Volume
+                        })
+                        .ToArray();
+
+                    instrument.UpdateLevels(levels);
+
+                    await _instrumentRepository.UpdateAsync(instrument);
+
+                    _log.InfoWithDetails("Instrument updated.", instrument);
                 }
             }
         }
