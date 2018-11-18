@@ -9,6 +9,12 @@ namespace Lykke.Service.LiquidityEngine.Domain
     /// </summary>
     public class Instrument
     {
+        public Instrument()
+        {
+            Levels = new InstrumentLevel[0];
+            CrossInstruments = new CrossInstrument[0];
+        }
+
         /// <summary>
         /// The identifier of an internal asset pair. 
         /// </summary>
