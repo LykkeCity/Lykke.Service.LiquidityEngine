@@ -97,6 +97,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
         /// <inheritdoc/>
         /// <response code="204">The instrument successfully deleted.</response>
+        /// <response code="400">An error occurred while deleting instrument.</response>
         /// <response code="404">Instrument does not exist.</response>
         [HttpDelete("{assetPairId}")]
         [ProducesResponseType((int) HttpStatusCode.NoContent)]
@@ -110,6 +111,10 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             catch (EntityNotFoundException)
             {
                 throw new ValidationApiException(HttpStatusCode.NotFound, "Instrument does not exist.");
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
             }
         }
 
