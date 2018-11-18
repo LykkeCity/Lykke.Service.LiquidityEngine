@@ -81,5 +81,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
             _cache.Set(remainingVolume);
         }
+
+        public async Task DeleteAsync(string assetPairId)
+        {
+            await _remainingVolumeRepository.DeleteAsync(assetPairId);
+
+            _cache.Remove(assetPairId);
+        }
     }
 }

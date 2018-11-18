@@ -10,5 +10,7 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         Task RegisterVolumeAsync(string assetPairId, decimal volume);
 
         Task CloseVolumeAsync(string assetPairId, decimal volume);
+
+        Task DeleteAsync(string assetPairId);
     }
 }
