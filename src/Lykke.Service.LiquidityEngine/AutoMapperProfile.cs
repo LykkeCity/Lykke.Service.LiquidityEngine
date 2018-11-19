@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
+using Lykke.Service.LiquidityEngine.Client.Models.AssetSettings;
 using Lykke.Service.LiquidityEngine.Client.Models.Audit;
 using Lykke.Service.LiquidityEngine.Client.Models.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
@@ -23,6 +24,9 @@ namespace Lykke.Service.LiquidityEngine
         {
             CreateMap<AssetPairLink, AssetPairLinkModel>(MemberList.Source);
             CreateMap<AssetPairLinkModel, AssetPairLink>(MemberList.Destination);
+
+            CreateMap<AssetSettings, AssetSettingsModel>(MemberList.Source);
+            CreateMap<AssetSettingsModel, AssetSettings>(MemberList.Destination);
 
             CreateMap<Instrument, InstrumentModel>(MemberList.Source);
             CreateMap<InstrumentEditModel, Instrument>(MemberList.Destination)

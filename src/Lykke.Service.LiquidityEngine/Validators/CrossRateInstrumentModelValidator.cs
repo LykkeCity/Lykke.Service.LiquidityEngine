@@ -1,13 +1,13 @@
 ﻿using FluentValidation;
 using JetBrains.Annotations;
-using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
+using Lykke.Service.LiquidityEngine.Client.Models.CrossRateInstruments;
 
 namespace Lykke.Service.LiquidityEngine.Validators
 {
     [UsedImplicitly]
-    public class CrossInstrumentModelValidator : AbstractValidator<CrossInstrumentModel>
+    public class CrossRateInstrumentModelValidator : AbstractValidator<CrossRateInstrumentModel>
     {
-        public CrossInstrumentModelValidator()
+        public CrossRateInstrumentModelValidator()
         {
             RuleFor(o => o.AssetPairId)
                 .NotEmpty()
