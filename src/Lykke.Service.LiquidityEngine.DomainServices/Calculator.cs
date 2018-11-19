@@ -205,8 +205,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="price">The price of cross limit order.</param>
         /// <param name="quote">Mid price of cross instrument.</param>
         /// <param name="inverse">Indicates that the quote is inverse.</param>
-        /// <returns>The direct limit order price.</returns>
-        public static decimal CalculateCrossMidPrice(decimal price, Quote quote, bool inverse)
-            => inverse ? price / quote.Mid : price * quote.Mid;
+        /// <returns>The direct limit order price and used cross rate.</returns>
+        public static (decimal, decimal) CalculateCrossMidPrice(decimal price, Quote quote, bool inverse)
+            => (inverse ? price / quote.Mid : price * quote.Mid,
+                inverse ? 1 / quote.Mid : quote.Mid);
     }
 }
