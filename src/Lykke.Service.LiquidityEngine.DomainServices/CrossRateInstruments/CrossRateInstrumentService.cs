@@ -121,7 +121,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments
                 return null;
             }
 
-            return Calculator.CalculateCrossMidPrice(price, quote, crossInstrument.IsInverse);
+            (decimal crossPrice, decimal _) =
+                Calculator.CalculateCrossMidPrice(price, quote, crossInstrument.IsInverse);
+
+            return crossPrice;
         }
     }
 }

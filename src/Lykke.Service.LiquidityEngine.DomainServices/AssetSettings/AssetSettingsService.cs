@@ -148,9 +148,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.AssetSettings
                 return (null, null);
             }
 
-            decimal amountInUsd = Calculator.CalculateCrossMidPrice(amount, quote, settings.IsInverse);
+            (decimal amountInUsd, decimal rate) = Calculator.CalculateCrossMidPrice(amount, quote, settings.IsInverse);
 
-            return (amountInUsd, quote.Mid);
+            return (amountInUsd, rate);
         }
     }
 }
