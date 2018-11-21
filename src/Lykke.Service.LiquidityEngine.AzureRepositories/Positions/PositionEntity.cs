@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using Lykke.AzureStorage.Tables;
 using Lykke.AzureStorage.Tables.Entity.Annotation;
@@ -147,8 +146,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             }
         }
 
-        [JsonValueSerializer]
-        public IReadOnlyCollection<string> Trades { get; set; }
+        public string Trades { get; set; }
 
         public string CloseTradeId { get; set; }
     }

@@ -51,8 +51,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             CreateMap<ExternalTrade, ExternalTradeEntity>(MemberList.Source);
             CreateMap<ExternalTradeEntity, ExternalTrade>(MemberList.Destination);
 
-            CreateMap<Position, PositionEntity>(MemberList.Source);
-            CreateMap<PositionEntity, Position>(MemberList.Destination);
+            CreateMap<Position, PositionEntity>(MemberList.Source)
+                .ForMember(dest => dest.Trades, opt => opt.MapFrom(src => src.TradeId));
+            CreateMap<PositionEntity, Position>(MemberList.Destination)
+                .ForMember(dest => dest.TradeId, opt => opt.MapFrom(src => src.Trades));
 
             CreateMap<RemainingVolume, RemainingVolumeEntity>(MemberList.Source);
             CreateMap<RemainingVolumeEntity, RemainingVolume>(MemberList.Destination);
@@ -62,7 +64,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
 
             CreateMap<MarketMakerSettings, MarketMakerSettingsEntity>(MemberList.Source);
             CreateMap<MarketMakerSettingsEntity, MarketMakerSettings>(MemberList.Destination);
-            
+
             CreateMap<QuoteTimeoutSettings, QuoteTimeoutSettingsEntity>(MemberList.Source);
             CreateMap<QuoteTimeoutSettingsEntity, QuoteTimeoutSettings>(MemberList.Destination);
 
@@ -71,7 +73,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
 
             CreateMap<MarketMakerState, MarketMakerStateEntity>(MemberList.Source);
             CreateMap<MarketMakerStateEntity, MarketMakerState>(MemberList.Destination);
-            
+
             CreateMap<CrossInstrument, CrossInstrumentEntity>(MemberList.Source);
             CreateMap<CrossInstrumentEntity, CrossInstrument>(MemberList.Destination);
 

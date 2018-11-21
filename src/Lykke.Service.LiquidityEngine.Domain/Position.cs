@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Lykke.Service.LiquidityEngine.Domain
 {
@@ -80,9 +78,9 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal TradeAvgPrice { get; set; }
 
         /// <summary>
-        /// A collection of identifiers of the trades that opened position.
+        /// A identifier of the trade that opened position.
         /// </summary>
-        public IReadOnlyCollection<string> Trades { get; set; }
+        public string TradeId { get; set; }
 
         /// <summary>
         /// The identifier of the trade that closed position.
@@ -115,7 +113,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Date = DateTime.UtcNow,
                 Price = externalTrade.Price,
                 Volume = externalTrade.Volume,
-                Trades = new string[0],
                 CloseDate = DateTime.UtcNow,
                 ClosePrice = externalTrade.Price,
                 PnL = decimal.Zero,
@@ -124,7 +121,17 @@ namespace Lykke.Service.LiquidityEngine.Domain
         }
 
         public static Position Open(string assetPairId, decimal price, decimal avgPrice, decimal volume, Quote quote,
-            string tradeAssetPairId, TradeType tradeType, string[] trades)
+            string tradeAssetPairId, TradeType tradeType, string tradeId)
+            => Open(assetPairId, price, avgPrice, volume, quote.AssetPair, quote.Ask, quote.Bid, tradeAssetPairId,
+                tradeType, tradeId);
+
+        public static Position Open(string assetPairId, decimal price, decimal volume, TradeType tradeType,
+            string tradeId)
+            => Open(assetPairId, price, price, volume, null, null, null, assetPairId, tradeType, tradeId);
+
+        private static Position Open(string assetPairId, decimal price, decimal avgPrice, decimal volume,
+            string crossAssetPairId, decimal? crossAsk, decimal? crossBid, string tradeAssetPairId, TradeType tradeType,
+            string tradeId)
         {
             PositionType positionType = tradeType == TradeType.Sell
                 ? PositionType.Short
@@ -138,67 +145,14 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Date = DateTime.UtcNow,
                 Price = price,
                 Volume = volume,
-                Trades = trades,
+                TradeId = tradeId,
                 CloseDate = new DateTime(1900, 1, 1),
-                
-                CrossAssetPairId = quote.AssetPair,
-                CrossAsk = quote.Ask,
-                CrossBid = quote.Bid,
+
+                CrossAssetPairId = crossAssetPairId,
+                CrossAsk = crossAsk,
+                CrossBid = crossBid,
                 TradeAssetPairId = tradeAssetPairId,
                 TradeAvgPrice = avgPrice
-            };
-        }
-        
-        public static Position Open(string assetPairId, decimal price, decimal volume, TradeType tradeType,
-            string[] trades)
-        {
-            PositionType positionType = tradeType == TradeType.Sell
-                ? PositionType.Short
-                : PositionType.Long;
-
-            return new Position
-            {
-                Id = Guid.NewGuid().ToString("D"),
-                AssetPairId = assetPairId,
-                Type = positionType,
-                Date = DateTime.UtcNow,
-                Price = price,
-                Volume = volume,
-                Trades = trades,
-                CloseDate = new DateTime(1900, 1, 1),
-                
-                CrossAssetPairId = null,
-                CrossAsk = null,
-                CrossBid = null,
-                TradeAssetPairId = assetPairId,
-                TradeAvgPrice = price
-            };
-        }
-
-        public static Position Open(IReadOnlyCollection<InternalTrade> internalTrades)
-        {
-            string assetPairId = internalTrades.First().AssetPairId;
-
-            PositionType positionType = internalTrades.First().Type == TradeType.Sell
-                ? PositionType.Short
-                : PositionType.Long;
-
-            decimal avgPrice = internalTrades.Sum(o => o.Price) / internalTrades.Count;
-
-            decimal volume = internalTrades.Sum(o => o.Volume);
-
-            string[] trades = internalTrades.Select(o => o.Id).ToArray();
-
-            return new Position
-            {
-                Id = Guid.NewGuid().ToString("D"),
-                AssetPairId = assetPairId,
-                Type = positionType,
-                Date = DateTime.UtcNow,
-                Price = avgPrice,
-                Volume = volume,
-                Trades = trades,
-                CloseDate = new DateTime(1900, 1, 1)
             };
         }
     }

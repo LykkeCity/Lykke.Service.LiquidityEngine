@@ -3,8 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac.Features.AttributeFilters;
+using Common.Log;
 using JetBrains.Annotations;
+using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
@@ -14,20 +18,29 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
     public class TradeService : ITradeService
     {
         private readonly IInternalTradeRepository _internalTradeRepository;
+        private readonly IInternalTradeRepository _internalTradeRepositoryPostgres;
         private readonly IExternalTradeRepository _externalTradeRepository;
+        private readonly IExternalTradeRepository _externalTradeRepositoryPostgres;
+        private readonly ILog _log;
 
         private readonly ConcurrentDictionary<string, DateTime> _internalLastInternalTradeTime =
             new ConcurrentDictionary<string, DateTime>();
 
         private bool _initialized;
         private DateTime _defaultTradeTime;
-        
+
         public TradeService(
-            IInternalTradeRepository internalTradeRepository,
-            IExternalTradeRepository externalTradeRepository)
+            [KeyFilter("InternalTradeRepositoryAzure")] IInternalTradeRepository internalTradeRepository,
+            [KeyFilter("InternalTradeRepositoryPostgres")] IInternalTradeRepository internalTradeRepositoryPostgres,
+            [KeyFilter("ExternalTradeRepositoryAzure")] IExternalTradeRepository externalTradeRepository,
+            [KeyFilter("ExternalTradeRepositoryPostgres")] IExternalTradeRepository externalTradeRepositoryPostgres,
+            ILogFactory logFactory)
         {
             _internalTradeRepository = internalTradeRepository;
+            _internalTradeRepositoryPostgres = internalTradeRepositoryPostgres;
             _externalTradeRepository = externalTradeRepository;
+            _externalTradeRepositoryPostgres = externalTradeRepositoryPostgres;
+            _log = logFactory.CreateLog(this);
         }
 
         public void Initialize()
@@ -79,13 +92,35 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
                     (assetPairId, time) => lastTradeTime);
             }
 
-            await Task.WhenAll(internalTrades.Select(internalTrade =>
-                _internalTradeRepository.InsertAsync(internalTrade)));
+            foreach (InternalTrade internalTrade in internalTrades)
+            {
+                await _internalTradeRepository.InsertAsync(internalTrade);
+
+                try
+                {
+                    await _internalTradeRepositoryPostgres.InsertAsync(internalTrade);
+                }
+                catch (Exception exception)
+                {
+                    _log.ErrorWithDetails(exception,
+                        "An error occurred while inserting internal trade to the postgres DB", internalTrade);
+                }
+            }
         }
 
-        public Task RegisterAsync(ExternalTrade externalTrade)
+        public async Task RegisterAsync(ExternalTrade externalTrade)
         {
-            return _externalTradeRepository.InsertAsync(externalTrade);
+            await _externalTradeRepository.InsertAsync(externalTrade);
+            
+            try
+            {
+                await _externalTradeRepositoryPostgres.InsertAsync(externalTrade);
+            }
+            catch (Exception exception)
+            {
+                _log.ErrorWithDetails(exception,
+                    "An error occurred while inserting external trade to the postgres DB", externalTrade);
+            }
         }
     }
 }

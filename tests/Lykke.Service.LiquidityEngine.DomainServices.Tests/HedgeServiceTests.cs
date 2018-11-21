@@ -69,16 +69,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
 
-            var position = Position.Open(new[]
-            {
-                new InternalTrade
-                {
-                    AssetPairId = "BTCUSD",
-                    Type = TradeType.Buy,
-                    Price = 6500,
-                    Volume = 1.12345m
-                }
-            });
+            Position position = Position.Open("BTCUSD", 6500, 1.12345m, TradeType.Buy, Guid.NewGuid().ToString());
 
             var instrument = new Instrument
             {
@@ -131,16 +122,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
 
-            var position = Position.Open(new[]
-            {
-                new InternalTrade
-                {
-                    AssetPairId = "BTCUSD",
-                    Type = TradeType.Sell,
-                    Price = 6500,
-                    Volume = 1.12345m
-                }
-            });
+            Position position = Position.Open("BTCUSD", 6500, 1.12345m, TradeType.Sell, Guid.NewGuid().ToString());
 
             var instrument = new Instrument
             {
@@ -193,16 +175,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
 
-            var position = Position.Open(new[]
-            {
-                new InternalTrade
-                {
-                    AssetPairId = "BTCUSD",
-                    Type = TradeType.Sell,
-                    Price = 6500,
-                    Volume = 1.12345m
-                }
-            });
+            Position position = Position.Open("BTCUSD", 6500, 1.12345m, TradeType.Sell, Guid.NewGuid().ToString());
 
             var instrument = new Instrument
             {

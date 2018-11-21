@@ -63,6 +63,26 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return model;
         }
 
+        /// <response code="200">A collection of asset pair summary info.</response>
+        [HttpGet("summaryByPeriod")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<SummaryReportModel>), (int) HttpStatusCode.OK)]
+        public async Task<IReadOnlyCollection<SummaryReportModel>> GetSummaryReportByPeriodAsync(DateTime startDate,
+            DateTime endDate)
+        {
+            IReadOnlyCollection<SummaryReport> summaryReports =
+                await _summaryReportService.GetByPeriodAsync(startDate, endDate);
+
+            var model = Mapper.Map<SummaryReportModel[]>(summaryReports);
+
+            foreach (SummaryReportModel summaryReportModel in model)
+            {
+                summaryReportModel.PnLUsd = await _crossRateInstrumentService.ConvertPriceAsync(
+                    summaryReportModel.AssetPairId, summaryReportModel.PnL);
+            }
+
+            return model;
+        }
+
         /// <inheritdoc/>
         /// <response code="200">A collection of positions reports.</response>
         [HttpGet("positions")]

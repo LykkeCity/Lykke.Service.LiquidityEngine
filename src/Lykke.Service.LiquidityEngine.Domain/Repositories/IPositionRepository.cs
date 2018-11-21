@@ -11,6 +11,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Repositories
 
         Task<Position> GetByIdAsync(string positionId);
 
+        Task<IReadOnlyCollection<SummaryReport>> GetReportAsync(DateTime startDate, DateTime endDate);
+        
         Task InsertAsync(Position position);
 
         Task UpdateAsync(Position position);

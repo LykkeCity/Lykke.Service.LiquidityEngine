@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Autofac.Features.AttributeFilters;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
@@ -89,7 +90,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<PositionService>()
                 .As<IPositionService>()
-                .SingleInstance();
+                .SingleInstance()
+                .WithAttributeFiltering();
 
             builder.RegisterType<PositionReportService>()
                 .As<IPositionReportService>()
@@ -97,7 +99,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<SummaryReportService>()
                 .As<ISummaryReportService>()
-                .SingleInstance();
+                .SingleInstance()
+                .WithAttributeFiltering();
 
             builder.RegisterType<B2C2OrderBookService>()
                 .As<IB2C2OrderBookService>()
@@ -135,7 +138,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<TradeService>()
                 .As<ITradeService>()
-                .SingleInstance();
+                .SingleInstance()
+                .WithAttributeFiltering();
 
             builder.RegisterType<MarketMakerService>()
                 .As<IMarketMakerService>()
