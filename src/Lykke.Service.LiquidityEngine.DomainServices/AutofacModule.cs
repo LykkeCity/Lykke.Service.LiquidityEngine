@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using JetBrains.Annotations;
-using Lykke.Service.LiquidityEngine.Domain.Cache;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetSettings;
@@ -92,6 +91,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IPositionService>()
                 .SingleInstance();
 
+            builder.RegisterType<PositionReportService>()
+                .As<IPositionReportService>()
+                .SingleInstance();
+
             builder.RegisterType<SummaryReportService>()
                 .As<ISummaryReportService>()
                 .SingleInstance();
@@ -142,16 +145,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IHedgeService>()
                 .SingleInstance();
 
-            RegisterCache(builder);
-
             RegisterTimers(builder);
-        }
-
-        private void RegisterCache(ContainerBuilder builder)
-        {
-            builder.RegisterType<BalanceCache>()
-                .As<IBalanceCache>()
-                .SingleInstance();
         }
 
         private void RegisterTimers(ContainerBuilder builder)
