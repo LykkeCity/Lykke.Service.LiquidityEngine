@@ -63,6 +63,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return model;
         }
 
+        /// <inheritdoc/>
         /// <response code="200">A collection of asset pair summary info.</response>
         [HttpGet("summaryByPeriod")]
         [ProducesResponseType(typeof(IReadOnlyCollection<SummaryReportModel>), (int) HttpStatusCode.OK)]

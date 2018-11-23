@@ -21,6 +21,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         Task<IReadOnlyCollection<SummaryReportModel>> GetSummaryReportAsync();
 
         /// <summary>
+        /// Returns summary report for each asset pair for specified period.
+        /// </summary>
+        /// <returns>A collection of asset pair summary info.</returns>
+        [Get("/api/reports/summaryByPeriod")]
+        Task<IReadOnlyCollection<SummaryReportModel>> GetSummaryReportByPeriodAsync(
+            DateTime startDate, DateTime endDate);
+
+        /// <summary>
         /// Returns position report.
         /// </summary>
         /// <returns>A collection of positions reports.</returns>
