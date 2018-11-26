@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         private readonly ICreditService _creditService;
         private readonly ICrossRateInstrumentService _crossRateInstrumentService;
         private readonly ISummaryReportService _summaryReportService;
+        private readonly IPositionReportService _positionReportService;
         private readonly IAssetsServiceWithCache _lykkeAssetService;
 
         public ReportsController(
@@ -30,6 +32,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             ICreditService creditService,
             ICrossRateInstrumentService crossRateInstrumentService,
             ISummaryReportService summaryReportService,
+            IPositionReportService positionReportService,
             IAssetsServiceWithCache lykkeAssetService)
         {
             _assetSettingsService = assetSettingsService;
@@ -37,6 +40,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             _creditService = creditService;
             _crossRateInstrumentService = crossRateInstrumentService;
             _summaryReportService = summaryReportService;
+            _positionReportService = positionReportService;
             _lykkeAssetService = lykkeAssetService;
         }
 
@@ -57,6 +61,19 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             }
 
             return model;
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">A collection of positions reports.</response>
+        [HttpGet("positions")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<PositionReportModel>), (int) HttpStatusCode.OK)]
+        public async Task<IReadOnlyCollection<PositionReportModel>> GetPositionsReportAsync(DateTime startDate,
+            DateTime endDate, int limit)
+        {
+            IReadOnlyCollection<PositionReport> positionReports =
+                await _positionReportService.GetByPeriodAsync(startDate, endDate, limit);
+
+            return Mapper.Map<PositionReportModel[]>(positionReports);
         }
 
         [HttpGet("balances")]

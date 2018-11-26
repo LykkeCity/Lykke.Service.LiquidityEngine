@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.Reports;
@@ -18,6 +19,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <returns>A collection of asset pair summary info.</returns>
         [Get("/api/reports/summary")]
         Task<IReadOnlyCollection<SummaryReportModel>> GetSummaryReportAsync();
+
+        /// <summary>
+        /// Returns position report.
+        /// </summary>
+        /// <returns>A collection of positions reports.</returns>
+        [Get("/api/reports/positions")]
+        Task<IReadOnlyCollection<PositionReportModel>> GetPositionsReportAsync(DateTime startDate, DateTime endDate,
+            int limit);
 
         /// <summary>
         /// Returns balance report for each asset.

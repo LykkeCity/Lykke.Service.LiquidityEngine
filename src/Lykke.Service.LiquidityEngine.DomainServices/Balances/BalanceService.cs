@@ -8,7 +8,6 @@ using Lykke.Common.Log;
 using Lykke.Service.Balances.AutorestClient.Models;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.LiquidityEngine.Domain;
-using Lykke.Service.LiquidityEngine.Domain.Cache;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
@@ -22,31 +21,36 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
         private readonly ISettingsService _settingsService;
         private readonly IBalancesClient _balancesClient;
         private readonly IExternalExchangeService _externalExchangeService;
-        private readonly IBalanceCache _cache;
+        private readonly InMemoryCache<Balance> _cache;
         private readonly ILog _log;
 
         public BalanceService(
             ISettingsService settingsService,
             IBalancesClient balancesClient,
             IExternalExchangeService externalExchangeService,
-            IBalanceCache cache,
             ILogFactory logFactory)
         {
             _settingsService = settingsService;
             _balancesClient = balancesClient;
             _externalExchangeService = externalExchangeService;
-            _cache = cache;
+            _cache = new InMemoryCache<Balance>(GetKey, true);
             _log = logFactory.CreateLog(this);
         }
 
         public Task<IReadOnlyCollection<Balance>> GetAsync(string exchange)
         {
-            return Task.FromResult(_cache.Get(exchange));
+            Balance[] balances = _cache.GetAll()
+                .Where(o => o.Exchange == exchange)
+                .ToArray();
+
+            return Task.FromResult<IReadOnlyCollection<Balance>>(balances);
         }
 
         public Task<Balance> GetByAssetIdAsync(string exchange, string assetId)
         {
-            return Task.FromResult(_cache.Get(exchange, assetId) ?? new Balance(exchange, assetId, decimal.Zero));
+            Balance balance = _cache.Get(GetKey(assetId, exchange)) ?? new Balance(exchange, assetId, decimal.Zero);
+            
+            return Task.FromResult(balance);
         }
 
         public async Task UpdateLykkeBalancesAsync()
@@ -86,5 +90,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
                 _log.ErrorWithDetails(exception, "An error occurred while getting balances from External exchange.");
             }
         }
+
+        private static string GetKey(Balance balance)
+            => GetKey(balance.AssetId, balance.Exchange);
+
+        private static string GetKey(string assetId, string exchange)
+            => $"{assetId}_{exchange}".ToUpper();
     }
 }
