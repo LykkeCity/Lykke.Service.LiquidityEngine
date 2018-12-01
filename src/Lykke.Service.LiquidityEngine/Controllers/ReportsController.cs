@@ -22,6 +22,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         private readonly IBalanceService _balanceService;
         private readonly ICreditService _creditService;
         private readonly ICrossRateInstrumentService _crossRateInstrumentService;
+        private readonly IInstrumentService _instrumentService;
+        private readonly IPositionService _positionService;
         private readonly ISummaryReportService _summaryReportService;
         private readonly IPositionReportService _positionReportService;
         private readonly IAssetsServiceWithCache _lykkeAssetService;
@@ -31,6 +33,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             IBalanceService balanceService,
             ICreditService creditService,
             ICrossRateInstrumentService crossRateInstrumentService,
+            IInstrumentService instrumentService,
+            IPositionService positionService,
             ISummaryReportService summaryReportService,
             IPositionReportService positionReportService,
             IAssetsServiceWithCache lykkeAssetService)
@@ -39,6 +43,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             _balanceService = balanceService;
             _creditService = creditService;
             _crossRateInstrumentService = crossRateInstrumentService;
+            _instrumentService = instrumentService;
+            _positionService = positionService;
             _summaryReportService = summaryReportService;
             _positionReportService = positionReportService;
             _lykkeAssetService = lykkeAssetService;
@@ -54,11 +60,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
             var model = Mapper.Map<SummaryReportModel[]>(summaryReports);
 
-            foreach (SummaryReportModel summaryReportModel in model)
-            {
-                summaryReportModel.PnLUsd = await _crossRateInstrumentService.ConvertPriceAsync(
-                    summaryReportModel.AssetPairId, summaryReportModel.PnL);
-            }
+            await ExtendSummaryReportAsync(model);
 
             return model;
         }
@@ -161,6 +163,30 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return rows
                 .Where(o => o.TotalAmount != 0)
                 .ToArray();
+        }
+
+        private async Task ExtendSummaryReportAsync(IReadOnlyCollection<SummaryReportModel> summaryReport)
+        {
+            IReadOnlyCollection<Position> openPositions = await _positionService.GetOpenAllAsync();
+            IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
+
+            foreach (SummaryReportModel summaryReportModel in summaryReport)
+            {
+                Instrument instrument =
+                    instruments.FirstOrDefault(o => o.AssetPairId == summaryReportModel.AssetPairId);
+
+                decimal openVolume = openPositions
+                    .Where(o => o.AssetPairId == summaryReportModel.AssetPairId &&
+                                o.TradeAssetPairId == summaryReportModel.TradeAssetPairId)
+                    .Sum(o => Math.Abs(o.Volume));
+
+                decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(
+                    summaryReportModel.AssetPairId, summaryReportModel.PnL);
+
+                summaryReportModel.OpenVolume = openVolume;
+                summaryReportModel.OpenVolumeLimit = openVolume / instrument?.InventoryThreshold;
+                summaryReportModel.PnLUsd = pnlUsd;
+            }
         }
     }
 }

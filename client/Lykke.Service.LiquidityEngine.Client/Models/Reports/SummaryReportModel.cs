@@ -77,5 +77,15 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
         /// The number of buy trades.
         /// </summary>
         public int BuyTradesCount { get; set; }
+
+        /// <summary>
+        /// The sum of absolute volume for all open positions.
+        /// </summary>
+        public decimal OpenVolume { get; set; }
+
+        /// <summary>
+        /// The rate of open volume to max allowed inventory. 
+        /// </summary>
+        public decimal? OpenVolumeLimit { get; set; }
     }
 }
