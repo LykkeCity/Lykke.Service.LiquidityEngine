@@ -95,7 +95,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<PositionReportService>()
                 .As<IPositionReportService>()
-                .SingleInstance();
+                .SingleInstance()
+                .WithAttributeFiltering();
 
             builder.RegisterType<SummaryReportService>()
                 .As<ISummaryReportService>()
