@@ -205,12 +205,10 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
             foreach (Balance balance in externalBalances)
             {
-                (decimal? amountInUsd, _) = await _assetSettingsService.ConvertAmountAsync(balance.AssetId, Math.Abs(balance.Amount));
+                (decimal? amountInUsd, _) = await _assetSettingsService.ConvertAmountAsync(balance.AssetId, balance.Amount);
 
                 if (balance.Amount < 0)
-                {
-                    riskExposure += amountInUsd ?? 0;
-                }
+                    riskExposure += Math.Abs(amountInUsd ?? 0);
 
                 equity += amountInUsd ?? 0;
             }
