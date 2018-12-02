@@ -47,6 +47,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <inheritdoc/>
         /// <response code="200">A collection of asset pair summary info.</response>
         [HttpGet("summary")]
+        [ResponseCache(Duration = 5)]
         [ProducesResponseType(typeof(IReadOnlyCollection<SummaryReportModel>), (int) HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<SummaryReportModel>> GetSummaryReportAsync()
         {
@@ -66,6 +67,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <inheritdoc/>
         /// <response code="200">A collection of asset pair summary info.</response>
         [HttpGet("summaryByPeriod")]
+        [ResponseCache(Duration = 5)]
         [ProducesResponseType(typeof(IReadOnlyCollection<SummaryReportModel>), (int) HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<SummaryReportModel>> GetSummaryReportByPeriodAsync(DateTime startDate,
             DateTime endDate)
@@ -87,6 +89,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <inheritdoc/>
         /// <response code="200">A collection of positions reports.</response>
         [HttpGet("positions")]
+        [ResponseCache(Duration = 5)]
         [ProducesResponseType(typeof(IReadOnlyCollection<PositionReportModel>), (int) HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<PositionReportModel>> GetPositionsReportAsync(DateTime startDate,
             DateTime endDate, int limit)
@@ -98,6 +101,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         }
 
         [HttpGet("balances")]
+        [ResponseCache(Duration = 5)]
         [ProducesResponseType(typeof(IReadOnlyCollection<BalanceReportModel>), (int) HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<BalanceReportModel>> GetBalancesReportAsync()
         {
