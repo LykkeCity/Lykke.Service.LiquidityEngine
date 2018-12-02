@@ -7,6 +7,9 @@ LiquidityEngineService:
   AssetsCacheExpirationPeriod: 00:10:00
 
   Db:
+    PostgresConnectionString:
+      settings-key: LiquidityEngineService-PostgresConnectionString
+      
     DataConnectionString:
       settings-key: LiquidityEngineService-DataConnectionString
       types:

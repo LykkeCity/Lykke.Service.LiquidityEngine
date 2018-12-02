@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac.Features.AttributeFilters;
 using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
@@ -14,6 +15,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
     public class PositionService : IPositionService
     {
         private readonly IPositionRepository _positionRepository;
+        private readonly IPositionRepository _positionRepositoryPostgres;
         private readonly IOpenPositionRepository _openPositionRepository;
         private readonly ISummaryReportService _summaryReportService;
         private readonly IInstrumentService _instrumentService;
@@ -21,7 +23,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
         private readonly ILog _log;
 
         public PositionService(
-            IPositionRepository positionRepository,
+            [KeyFilter("PositionRepositoryAzure")] IPositionRepository positionRepository,
+            [KeyFilter("PositionRepositoryPostgres")] IPositionRepository positionRepositoryPostgres,
             IOpenPositionRepository openPositionRepository,
             ISummaryReportService summaryReportService,
             IInstrumentService instrumentService,
@@ -29,6 +32,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             ILogFactory logFactory)
         {
             _positionRepository = positionRepository;
+            _positionRepositoryPostgres = positionRepositoryPostgres;
             _openPositionRepository = openPositionRepository;
             _summaryReportService = summaryReportService;
             _instrumentService = instrumentService;
@@ -72,11 +76,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                 return;
             }
 
-            decimal avgPrice = internalTrades.Sum(o => o.Price) / internalTrades.Count;
-
-            decimal volume = internalTrades.Sum(o => o.Volume);
-
-            Position position;
+            var positions = new List<Position>();
 
             if (assetPairId != instrument.AssetPairId)
             {
@@ -91,26 +91,46 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     return;
                 }
 
-                decimal price = tradeType == TradeType.Sell
-                    ? Calculator.CalculateDirectSellPrice(avgPrice, quote, crossInstrument.IsInverse)
-                    : Calculator.CalculateDirectBuyPrice(avgPrice, quote, crossInstrument.IsInverse);
+                foreach (InternalTrade internalTrade in internalTrades)
+                {
+                    decimal price = tradeType == TradeType.Sell
+                        ? Calculator.CalculateDirectSellPrice(internalTrade.Price, quote, crossInstrument.IsInverse)
+                        : Calculator.CalculateDirectBuyPrice(internalTrade.Price, quote, crossInstrument.IsInverse);
 
-                position = Position.Open(instrument.AssetPairId, price, avgPrice, volume, quote,
-                    crossInstrument.AssetPairId, tradeType, internalTrades.Select(o => o.Id).ToArray());
+                    positions.Add(Position.Open(instrument.AssetPairId, price, internalTrade.Price,
+                        internalTrade.Volume, quote, crossInstrument.AssetPairId, tradeType, internalTrade.Id));
+                }
             }
             else
             {
-                position = Position.Open(instrument.AssetPairId, avgPrice, volume, tradeType,
-                    internalTrades.Select(o => o.Id).ToArray());
+                foreach (InternalTrade internalTrade in internalTrades)
+                {
+                    positions.Add(Position.Open(instrument.AssetPairId, internalTrade.Price, internalTrade.Volume,
+                        tradeType, internalTrade.Id));
+                }
             }
 
-            await _openPositionRepository.InsertAsync(position);
+            foreach (Position position in positions)
+            {
+                await _openPositionRepository.InsertAsync(position);
 
-            await _positionRepository.InsertAsync(position);
+                await _positionRepository.InsertAsync(position);
 
-            await _summaryReportService.RegisterOpenPositionAsync(position, internalTrades);
+                try
+                {
+                    await _positionRepositoryPostgres.InsertAsync(position);
+                }
+                catch (Exception exception)
+                {
+                    _log.ErrorWithDetails(exception, "An error occurred while inserting position to the postgres DB",
+                        position);
+                }
 
-            _log.InfoWithDetails("Position was opened", position);
+                await _summaryReportService.RegisterOpenPositionAsync(position,
+                    internalTrades.Where(o => o.Id == position.TradeId).ToArray());
+
+                _log.InfoWithDetails("Position was opened", position);
+            }
         }
 
         public async Task CloseAsync(Position position, ExternalTrade externalTrade)
@@ -118,6 +138,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             position.Close(externalTrade);
 
             await _positionRepository.UpdateAsync(position);
+
+            try
+            {
+                await _positionRepositoryPostgres.UpdateAsync(position);
+            }
+            catch (Exception exception)
+            {
+                _log.ErrorWithDetails(exception, "An error occurred while updating position in the postgres DB",
+                    position);
+            }
 
             await _openPositionRepository.DeleteAsync(position.AssetPairId, position.Id);
 
@@ -131,6 +161,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             Position position = Position.Create(assetPairId, externalTrade);
 
             await _positionRepository.InsertAsync(position);
+
+            try
+            {
+                await _positionRepositoryPostgres.InsertAsync(position);
+            }
+            catch (Exception exception)
+            {
+                _log.ErrorWithDetails(exception,
+                    "An error occurred while inserting remaining volume position to the postgres DB", position);
+            }
 
             _log.InfoWithDetails("Position with remaining volume was closed", position);
         }

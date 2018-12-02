@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Autofac.Features.AttributeFilters;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
 using Lykke.Service.LiquidityEngine.Domain.Services;
@@ -14,7 +14,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         private readonly ICrossRateInstrumentService _crossRateInstrumentService;
 
         public PositionReportService(
-            IPositionRepository positionRepository,
+            [KeyFilter("PositionRepositoryAzure")] IPositionRepository positionRepository,
             ICrossRateInstrumentService crossRateInstrumentService)
         {
             _positionRepository = positionRepository;
@@ -53,7 +53,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
                     CrossBid = position.CrossBid,
                     CrossAssetPairId = position.CrossAssetPairId,
                     TradeAssetPairId = position.TradeAssetPairId,
-                    InternalTradesId = position.Trades?.FirstOrDefault(),
+                    InternalTradesId = position.TradeId,
                     ExternalTradeId = position.CloseTradeId
                 });
             }

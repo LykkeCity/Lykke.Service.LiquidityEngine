@@ -70,6 +70,11 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
             return Mapper.Map<Position>(entity);
         }
 
+        public Task<IReadOnlyCollection<SummaryReport>> GetReportAsync(DateTime startDate, DateTime endDate)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task InsertAsync(Position position)
         {
             var entity = new PositionEntity(GetPartitionKey(position.Date), GetRowKey(position.Id));

@@ -37,6 +37,8 @@ namespace Lykke.Service.LiquidityEngine
                 _settings.CurrentValue.LiquidityEngineService.WalletId));
             builder.RegisterModule(new AzureRepositories.AutofacModule(
                 _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
+            builder.RegisterModule(new PostgresRepositories.AutofacModule(
+                _settings.CurrentValue.LiquidityEngineService.Db.PostgresConnectionString));
 
             builder.RegisterType<StartupManager>()
                 .As<IStartupManager>();
@@ -91,7 +93,7 @@ namespace Lykke.Service.LiquidityEngine
                     .B2C2Quotes))
                 .AsSelf()
                 .SingleInstance();
-            
+
             builder.RegisterType<B2C2OrderBooksSubscriber>()
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
                     .B2C2OrderBooks))

@@ -20,6 +20,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IExternalExchangeService _externalExchangeService;
         private readonly IMarketMakerStateService _marketMakerStateService;
         private readonly IRemainingVolumeService _remainingVolumeService;
+        private readonly ITradeService _tradeService;
         private readonly ILog _log;
 
         private readonly Dictionary<string, Tuple<int, int>> _attempts =
@@ -31,6 +32,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IExternalExchangeService externalExchangeService,
             IMarketMakerStateService marketMakerStateService,
             IRemainingVolumeService remainingVolumeService,
+            ITradeService tradeService,
             ILogFactory logFactory)
         {
             _positionService = positionService;
@@ -38,6 +40,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _externalExchangeService = externalExchangeService;
             _marketMakerStateService = marketMakerStateService;
             _remainingVolumeService = remainingVolumeService;
+            _tradeService = tradeService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -78,11 +81,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     });
                     continue;
                 }
-                
+
                 ExternalTrade externalTrade = await ExecuteLimitOrderAsync(group.Key, volume, positionType);
 
                 if (externalTrade != null)
                 {
+                    await _tradeService.RegisterAsync(externalTrade);
+
                     foreach (Position position in group)
                         await _positionService.CloseAsync(position, externalTrade);
 
@@ -119,6 +124,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 if (externalTrade != null)
                 {
+                    await _tradeService.RegisterAsync(externalTrade);
+
                     await _positionService.CloseRemainingVolumeAsync(instrument.AssetPairId, externalTrade);
 
                     await _remainingVolumeService.RegisterVolumeAsync(instrument.AssetPairId,

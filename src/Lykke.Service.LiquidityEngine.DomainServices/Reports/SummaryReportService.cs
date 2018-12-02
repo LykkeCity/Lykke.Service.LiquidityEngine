@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac.Features.AttributeFilters;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.Common.Log;
@@ -15,12 +17,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
     public class SummaryReportService : ISummaryReportService
     {
         private readonly ISummaryReportRepository _summaryReportRepository;
+        private readonly IPositionRepository _positionRepositoryPostgres;
         private readonly InMemoryCache<SummaryReport> _cache;
         private readonly ILog _log;
 
-        public SummaryReportService(ISummaryReportRepository summaryReportRepository, ILogFactory logFactory)
+        public SummaryReportService(
+            ISummaryReportRepository summaryReportRepository,
+            [KeyFilter("PositionRepositoryPostgres")] IPositionRepository positionRepositoryPostgres,
+            ILogFactory logFactory)
         {
             _summaryReportRepository = summaryReportRepository;
+            _positionRepositoryPostgres = positionRepositoryPostgres;
             _cache = new InMemoryCache<SummaryReport>(CacheKey, false);
             _log = logFactory.CreateLog(this);
         }
@@ -37,6 +44,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
             }
 
             return summaryReports;
+        }
+
+        public Task<IReadOnlyCollection<SummaryReport>> GetByPeriodAsync(DateTime startDate, DateTime endDate)
+        {
+            return _positionRepositoryPostgres.GetReportAsync(startDate, endDate);
         }
 
         public async Task RegisterOpenPositionAsync(Position position, IReadOnlyCollection<InternalTrade> internalTrades)

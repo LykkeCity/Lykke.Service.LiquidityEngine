@@ -103,7 +103,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                         "InternalTrades", container.Resolve<ILogFactory>()),
                     AzureTableStorage<AzureIndex>.Create(_connectionString,
                         "InternalTradesIndices", container.Resolve<ILogFactory>())))
-                .As<IInternalTradeRepository>()
+                .Named<IInternalTradeRepository>("InternalTradeRepositoryAzure")
                 .SingleInstance();
 
             builder.Register(container => new ExternalTradeRepository(
@@ -111,7 +111,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                         "ExternalTrades", container.Resolve<ILogFactory>()),
                     AzureTableStorage<AzureIndex>.Create(_connectionString,
                         "ExternalTradesIndices", container.Resolve<ILogFactory>())))
-                .As<IExternalTradeRepository>()
+                .Named<IExternalTradeRepository>("ExternalTradeRepositoryAzure")
                 .SingleInstance();
 
             builder.Register(container => new PositionRepository(
@@ -119,7 +119,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                         "Positions", container.Resolve<ILogFactory>()),
                     AzureTableStorage<AzureIndex>.Create(_connectionString,
                         "PositionsIndices", container.Resolve<ILogFactory>())))
-                .As<IPositionRepository>()
+                .Named<IPositionRepository>("PositionRepositoryAzure")
                 .SingleInstance();
 
             builder.Register(container => new OpenPositionRepository(

@@ -60,17 +60,7 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
 
         private static Position OpenClosePosition(TradeType type, decimal openPrice, decimal closePrice, decimal volume)
         {
-            Position position = Position.Open(new[]
-            {
-                new InternalTrade
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    AssetPairId = "BTCUSD",
-                    Type = type,
-                    Price = openPrice,
-                    Volume = volume
-                }
-            });
+            Position position = Position.Open("BTCUSD", openPrice, volume, type, Guid.NewGuid().ToString());
 
             position.Close(new ExternalTrade
             {

@@ -44,7 +44,10 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<ExternalTrade, ExternalTradeModel>(MemberList.Source);
             CreateMap<InternalTrade, InternalTradeModel>(MemberList.Source);
 
-            CreateMap<Position, PositionModel>(MemberList.Source);
+            CreateMap<Position, PositionModel>(MemberList.Source)
+                .ForMember(dest => dest.Trades, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.TradeId)
+                    ? new string[0]
+                    : new[] {src.TradeId}));
 
             CreateMap<RemainingVolume, RemainingVolumeModel>(MemberList.Source);
 
@@ -55,7 +58,7 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<MarketMakerSettings, MarketMakerSettingsModel>(MemberList.Source);
             CreateMap<MarketMakerSettingsModel, MarketMakerSettings>(MemberList.Destination);
-            
+
             CreateMap<QuoteThresholdSettings, QuoteThresholdSettingsModel>(MemberList.Source);
             CreateMap<QuoteThresholdSettingsModel, QuoteThresholdSettings>(MemberList.Destination);
 

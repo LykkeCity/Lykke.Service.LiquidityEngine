@@ -27,6 +27,7 @@ namespace Lykke.Service.LiquidityEngine
                     Mapper.Initialize(cfg =>
                     {
                         cfg.AddProfiles(typeof(AzureRepositories.AutoMapperProfile));
+                        cfg.AddProfiles(typeof(PostgresRepositories.AutoMapperProfile));
                         cfg.AddProfiles(typeof(AutoMapperProfile));
                     });
 
