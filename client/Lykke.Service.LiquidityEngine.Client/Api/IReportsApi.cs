@@ -42,5 +42,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <returns>A collection of asset balance info.</returns>
         [Get("/api/reports/balances")]
         Task<IReadOnlyCollection<BalanceReportModel>> GetBalancesReportAsync();
+
+        /// <summary>
+        /// Returns report with current balance indicators.
+        /// </summary>
+        /// <returns>A balance indicators report.</returns>
+        [Get("/api/reports/balanceindicators")]
+        Task<BalanceIndicatorsReportModel> GetBalanceIndicatorsReportAsync();
     }
 }

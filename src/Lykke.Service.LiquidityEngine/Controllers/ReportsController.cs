@@ -102,6 +102,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return Mapper.Map<PositionReportModel[]>(positionReports);
         }
 
+        /// <inheritdoc/>
+        /// <response code="200">A collection of asset balance info.</response>
         [HttpGet("balances")]
         [ResponseCache(Duration = 5)]
         [ProducesResponseType(typeof(IReadOnlyCollection<BalanceReportModel>), (int) HttpStatusCode.OK)]
@@ -188,6 +190,34 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             return rows
                 .Where(o => o.TotalAmount != 0)
                 .ToArray();
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">A balance indicators report.</response>
+        [HttpGet("balanceindicators")]
+        [ProducesResponseType(typeof(BalanceIndicatorsReportModel), (int) HttpStatusCode.OK)]
+        public async Task<BalanceIndicatorsReportModel> GetBalanceIndicatorsReportAsync()
+        {
+            IReadOnlyCollection<Balance> externalBalances = await _balanceService.GetAsync(ExchangeNames.External);
+
+            decimal riskExposure = 0;
+            decimal equity = 0;
+
+            foreach (Balance balance in externalBalances)
+            {
+                (decimal? amountInUsd, _) = await _assetSettingsService.ConvertAmountAsync(balance.AssetId, balance.Amount);
+
+                if (balance.Amount < 0)
+                    riskExposure += Math.Abs(amountInUsd ?? 0);
+
+                equity += amountInUsd ?? 0;
+            }
+
+            return new BalanceIndicatorsReportModel
+            {
+                Equity = equity,
+                RiskExposure = riskExposure
+            };
         }
 
         private async Task ExtendSummaryReportAsync(IReadOnlyCollection<SummaryReportModel> summaryReport)
