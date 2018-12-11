@@ -36,7 +36,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
                     };
                 }
 
-                _cache.Initialize(new[] {marketMakerSettings});
+                _cache.Set(marketMakerSettings);
             }
 
             return marketMakerSettings;

@@ -32,7 +32,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             CreateMap<CrossRateInstrumentEntity, CrossRateInstrument>(MemberList.Destination);
 
             CreateMap<Instrument, InstrumentEntity>(MemberList.Source)
-                .ForSourceMember(src => src.CrossInstruments, opt => opt.Ignore());
+                .ForSourceMember(src => src.CrossInstruments, opt => opt.DoNotValidate());
             CreateMap<InstrumentEntity, Instrument>(MemberList.Destination)
                 .ForMember(src => src.CrossInstruments, opt => opt.Ignore());
 
