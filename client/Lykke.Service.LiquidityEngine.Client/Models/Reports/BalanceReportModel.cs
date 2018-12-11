@@ -34,6 +34,11 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
         public decimal? LykkeCreditAmount { get; set; }
 
         /// <summary>
+        /// Indicates disbalance of current amount and credit amount on Lykke exchange.
+        /// </summary>
+        public decimal? LykkeDisbalance { get; set; }
+
+        /// <summary>
         /// The balance amount on external exchange.
         /// </summary>
         public decimal? ExternalAmount { get; set; }
