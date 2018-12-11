@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac.Features.AttributeFilters;
@@ -30,10 +31,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
         private DateTime _defaultTradeTime;
 
         public TradeService(
-            [KeyFilter("InternalTradeRepositoryAzure")] IInternalTradeRepository internalTradeRepository,
-            [KeyFilter("InternalTradeRepositoryPostgres")] IInternalTradeRepository internalTradeRepositoryPostgres,
-            [KeyFilter("ExternalTradeRepositoryAzure")] IExternalTradeRepository externalTradeRepository,
-            [KeyFilter("ExternalTradeRepositoryPostgres")] IExternalTradeRepository externalTradeRepositoryPostgres,
+            [KeyFilter("InternalTradeRepositoryAzure")]
+            IInternalTradeRepository internalTradeRepository,
+            [KeyFilter("InternalTradeRepositoryPostgres")]
+            IInternalTradeRepository internalTradeRepositoryPostgres,
+            [KeyFilter("ExternalTradeRepositoryAzure")]
+            IExternalTradeRepository externalTradeRepository,
+            [KeyFilter("ExternalTradeRepositoryPostgres")]
+            IExternalTradeRepository externalTradeRepositoryPostgres,
             ILogFactory logFactory)
         {
             _internalTradeRepository = internalTradeRepository;
@@ -92,10 +97,30 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
                     (assetPairId, time) => lastTradeTime);
             }
 
+            var sw = new Stopwatch();
+
             foreach (InternalTrade internalTrade in internalTrades)
             {
-                await _internalTradeRepository.InsertAsync(internalTrade);
+                sw.Reset();
+                sw.Start();
 
+                _log.Info("Inserting internal trade to the Azure storage");
+                
+                try
+                {
+                    await _internalTradeRepository.InsertAsync(internalTrade);
+                }
+                finally
+                {
+                    sw.Stop();
+                    _log.Info("Internal trade inserted to the Azure storage", new {sw.ElapsedMilliseconds});
+                }
+
+                sw.Reset();
+                sw.Start();
+
+                _log.Info("Inserting internal trade to the Postgres storage");
+                
                 try
                 {
                     await _internalTradeRepositoryPostgres.InsertAsync(internalTrade);
@@ -103,15 +128,35 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
                 catch (Exception exception)
                 {
                     _log.ErrorWithDetails(exception,
-                        "An error occurred while inserting internal trade to the postgres DB", internalTrade);
+                        "An error occurred while inserting internal trade to the Postgres DB", internalTrade);
+                }
+                finally
+                {
+                    sw.Stop();
+                    _log.Info("Internal trade inserted to the Postgres storage", new {sw.ElapsedMilliseconds});
                 }
             }
         }
 
         public async Task RegisterAsync(ExternalTrade externalTrade)
         {
-            await _externalTradeRepository.InsertAsync(externalTrade);
+            var sw = new Stopwatch();
+
+            sw.Start();
             
+            try
+            {
+                await _externalTradeRepository.InsertAsync(externalTrade);
+            }
+            finally
+            {
+                sw.Stop();
+                _log.Info("External trade inserted to the Azure storage", new {sw.ElapsedMilliseconds});
+            }
+
+            sw.Reset();
+            sw.Start();
+
             try
             {
                 await _externalTradeRepositoryPostgres.InsertAsync(externalTrade);
@@ -119,7 +164,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
             catch (Exception exception)
             {
                 _log.ErrorWithDetails(exception,
-                    "An error occurred while inserting external trade to the postgres DB", externalTrade);
+                    "An error occurred while inserting external trade to the Postgres DB", externalTrade);
+            }
+            finally
+            {
+                sw.Stop();
+                _log.Info("External trade inserted to the Postgres storage", new {sw.ElapsedMilliseconds});
             }
         }
     }

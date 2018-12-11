@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac.Features.AttributeFilters;
@@ -109,25 +110,63 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                         tradeType, internalTrade.Id));
                 }
             }
-
+            
+            var sw = new Stopwatch();
+            
             foreach (Position position in positions)
             {
-                await _openPositionRepository.InsertAsync(position);
+                sw.Reset();
+                sw.Start();
 
-                await _positionRepository.InsertAsync(position);
+                _log.Info("Inserting position to the Azure storage");
+                
+                try
+                {
+                    await _openPositionRepository.InsertAsync(position);
 
+                    await _positionRepository.InsertAsync(position);
+                }
+                finally
+                {
+                    sw.Stop();
+                    _log.Info("Position inserted to the Azure storage", new {sw.ElapsedMilliseconds});
+                }
+
+                sw.Reset();
+                sw.Start();
+                
+                _log.Info("Inserting position to the Postgres storage");
+                
                 try
                 {
                     await _positionRepositoryPostgres.InsertAsync(position);
                 }
                 catch (Exception exception)
                 {
-                    _log.ErrorWithDetails(exception, "An error occurred while inserting position to the postgres DB",
+                    _log.ErrorWithDetails(exception, "An error occurred while inserting position to the Postgres DB",
                         position);
                 }
-
-                await _summaryReportService.RegisterOpenPositionAsync(position,
-                    internalTrades.Where(o => o.Id == position.TradeId).ToArray());
+                finally
+                {
+                    sw.Stop();
+                    _log.Info("Position inserted to the Postgres storage", new {sw.ElapsedMilliseconds});
+                }
+                
+                sw.Reset();
+                sw.Start();
+                
+                _log.Info("Updating summary report in the Azure storage");
+                
+                try
+                {
+                    await _summaryReportService.RegisterOpenPositionAsync(position,
+                        internalTrades.Where(o => o.Id == position.TradeId).ToArray());
+                }
+                finally
+                {
+                    sw.Stop();
+                    _log.Info("Summary report updated int the Azure storage", new {sw.ElapsedMilliseconds});
+                }
 
                 _log.InfoWithDetails("Position was opened", position);
             }

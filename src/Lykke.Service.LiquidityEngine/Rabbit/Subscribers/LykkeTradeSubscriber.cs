@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -43,6 +44,8 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             _log = logFactory.CreateLog(this);
         }
 
+        public DateTime LastMessageTime { get; private set; }
+
         public void Start()
         {
             var settings = RabbitMqSubscriptionSettings
@@ -58,6 +61,8 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 .Subscribe(ProcessMessageAsync)
                 .CreateDefaultBinding()
                 .Start();
+            
+            LastMessageTime = DateTime.UtcNow;
         }
 
         public void Stop()
@@ -74,6 +79,8 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         {
             try
             {
+                LastMessageTime = DateTime.UtcNow;
+                
                 if (limitOrders.Orders == null || limitOrders.Orders.Count == 0)
                     return;
 
@@ -82,24 +89,53 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 if (string.IsNullOrEmpty(walletId))
                     return;
 
-                IEnumerable<LimitOrderWithTrades> clientLimitOrders = limitOrders.Orders
+                LimitOrderWithTrades[] clientLimitOrders = limitOrders.Orders
                     .Where(o => o.Order?.ClientId == walletId)
-                    .Where(o => o.Trades?.Count > 0);
+                    .Where(o => o.Trades?.Count > 0)
+                    .ToArray();
 
+                _log.InfoWithDetails("Trades received", new {Count = clientLimitOrders.Length});
+                
                 IReadOnlyCollection<InternalTrade> trades = CreateReports(clientLimitOrders);
 
                 if (trades.Any())
                 {
-                    await _tradeService.RegisterAsync(trades);
-                    await _positionService.OpenAsync(trades);
+                    var sw = new Stopwatch();
+                    
+                    sw.Start();
+                    
+                    try
+                    {
+                        Task processTask = ExecuteAsync(trades);
+                        Task delayTask = Task.Delay(TimeSpan.FromMinutes(1));
 
-                    _log.InfoWithDetails("Traders were handled", clientLimitOrders);
+                        Task task = await Task.WhenAny(processTask, delayTask);
+
+                        if (task == delayTask)
+                            _log.WarningWithDetails("Trades processing takes more than one minute", trades);
+
+                        await processTask;
+
+                        _log.InfoWithDetails("Trades handled", clientLimitOrders);
+                    }
+                    finally
+                    {
+                        sw.Stop();
+                        _log.Info("Trades handling time", new {sw.ElapsedMilliseconds});
+                    }
                 }
             }
             catch (Exception exception)
             {
                 _log.Error(exception, "An error occurred during processing trades", limitOrders);
+                throw;
             }
+        }
+
+        private async Task ExecuteAsync(IReadOnlyCollection<InternalTrade> trades)
+        {
+            await _tradeService.RegisterAsync(trades);
+            await _positionService.OpenAsync(trades);
         }
 
         private static IReadOnlyCollection<InternalTrade> CreateReports(IEnumerable<LimitOrderWithTrades> limitOrders)

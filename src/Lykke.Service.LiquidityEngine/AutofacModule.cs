@@ -11,6 +11,7 @@ using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.LiquidityEngine.Managers;
 using Lykke.Service.LiquidityEngine.Migration;
 using Lykke.Service.LiquidityEngine.Migration.Operations;
+using Lykke.Service.LiquidityEngine.Rabbit;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
@@ -82,6 +83,10 @@ namespace Lykke.Service.LiquidityEngine
 
         private void RegisterRabbit(ContainerBuilder builder)
         {
+            builder.RegisterType<LykkeTradeSubscriberMonitor>()
+                .AsSelf()
+                .SingleInstance();
+                
             builder.RegisterType<LykkeTradeSubscriber>()
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
                     .LykkeTrades))
