@@ -19,16 +19,25 @@ LiquidityEngineService:
       settings-key: LiquidityEngineService-LogsConnectionString
       types:
       - AzureTableStorage
+      
+    LykkeTradesMeQueuesDeduplicatorConnectionString:
+      settings-key: LiquidityEngineService-LykkeTradesMeQueuesDeduplicatorConnectionString
+      types:
+      - AzureTableStorage
 
   Rabbit:
     Subscribers:
       LykkeTrades:
         ConnectionString:
-          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-ConnectionString
+          settings-key: MatchingEngineRabbitMqConnectionString
+          types:
+          - RabbitMq
+        AlternateConnectionString:
+          settings-key: AlternateMatchingEngineRabbitMqConnectionString
           types:
           - RabbitMq
         Exchange:
-          settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Exchange
+          settings-key: MatchingEngineSpotEventsExchange
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Queue
 

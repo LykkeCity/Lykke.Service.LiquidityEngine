@@ -9,6 +9,10 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscrib
         [AmqpCheck]
         public string ConnectionString { get; set; }
 
+        [Optional]
+        [AmqpCheck]
+        public string AlternateConnectionString { get; set; }
+
         public string Exchange { get; set; }
 
         public string Queue { get; set; }

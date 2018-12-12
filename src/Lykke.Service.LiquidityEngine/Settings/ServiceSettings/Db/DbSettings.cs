@@ -13,5 +13,8 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Db
 
         [AzureTableCheck]
         public string LogsConnectionString { get; set; }
+        
+        [AzureTableCheck]
+        public string LykkeTradesMeQueuesDeduplicatorConnectionString { get; set; }
     }
 }

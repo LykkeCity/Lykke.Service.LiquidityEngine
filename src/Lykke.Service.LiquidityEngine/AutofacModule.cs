@@ -37,7 +37,8 @@ namespace Lykke.Service.LiquidityEngine
                 _settings.CurrentValue.LiquidityEngineService.Name,
                 _settings.CurrentValue.LiquidityEngineService.WalletId));
             builder.RegisterModule(new AzureRepositories.AutofacModule(
-                _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
+                _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString),
+                _settings.Nested(o => o.LiquidityEngineService.Db.LykkeTradesMeQueuesDeduplicatorConnectionString)));
             builder.RegisterModule(new PostgresRepositories.AutofacModule(
                 _settings.CurrentValue.LiquidityEngineService.Db.PostgresConnectionString));
 
@@ -86,7 +87,7 @@ namespace Lykke.Service.LiquidityEngine
             builder.RegisterType<LykkeTradeSubscriberMonitor>()
                 .AsSelf()
                 .SingleInstance();
-                
+
             builder.RegisterType<LykkeTradeSubscriber>()
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
                     .LykkeTrades))
