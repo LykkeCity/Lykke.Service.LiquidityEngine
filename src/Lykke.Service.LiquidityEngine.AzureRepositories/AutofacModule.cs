@@ -3,6 +3,8 @@ using AzureStorage.Tables;
 using AzureStorage.Tables.Templates.Index;
 using JetBrains.Annotations;
 using Lykke.Common.Log;
+using Lykke.RabbitMq.Azure.Deduplicator;
+using Lykke.RabbitMqBroker.Deduplication;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.AzureRepositories.AssetSettings;
 using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
@@ -24,10 +26,14 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
     public class AutofacModule : Module
     {
         private readonly IReloadingManager<string> _connectionString;
+        private readonly IReloadingManager<string> _lykkeTradesDeduplicatorConnectionString;
 
-        public AutofacModule(IReloadingManager<string> connectionString)
+        public AutofacModule(
+            IReloadingManager<string> connectionString,
+            IReloadingManager<string> lykkeTradesDeduplicatorConnectionString)
         {
             _connectionString = connectionString;
+            _lykkeTradesDeduplicatorConnectionString = lykkeTradesDeduplicatorConnectionString;
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -150,6 +156,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                     AzureTableStorage<SystemVersionEntity>.Create(_connectionString,
                         "Version", container.Resolve<ILogFactory>())))
                 .As<IVersionControlRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new AzureStorageDeduplicator(
+                    AzureTableStorage<DuplicateEntity>.Create(_lykkeTradesDeduplicatorConnectionString,
+                        "LykkeTradesDeduplicator", container.Resolve<ILogFactory>())))
+                .As<IDeduplicator>()
                 .SingleInstance();
         }
     }

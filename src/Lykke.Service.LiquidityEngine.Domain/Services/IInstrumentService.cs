@@ -9,6 +9,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 
         Task<Instrument> GetByAssetPairIdAsync(string assetPairId);
 
+        Task<Instrument> FundAsync(string assetPairId);
+
         Task AddAsync(Instrument instrument);
 
         Task UpdateAsync(Instrument instrument);

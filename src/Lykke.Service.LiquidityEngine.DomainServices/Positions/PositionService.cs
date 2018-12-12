@@ -9,6 +9,7 @@ using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Utils;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 {
@@ -20,6 +21,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
         private readonly ISummaryReportService _summaryReportService;
         private readonly IInstrumentService _instrumentService;
         private readonly IQuoteService _quoteService;
+        private readonly ITradeService _tradeService;
         private readonly ILog _log;
 
         public PositionService(
@@ -29,6 +31,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             ISummaryReportService summaryReportService,
             IInstrumentService instrumentService,
             IQuoteService quoteService,
+            ITradeService tradeService,
             ILogFactory logFactory)
         {
             _positionRepository = positionRepository;
@@ -37,6 +40,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             _summaryReportService = summaryReportService;
             _instrumentService = instrumentService;
             _quoteService = quoteService;
+            _tradeService = tradeService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -58,76 +62,74 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task OpenAsync(IReadOnlyCollection<InternalTrade> internalTrades)
         {
-            if (internalTrades.Count == 0)
-                return;
-
-            string assetPairId = internalTrades.First().AssetPairId;
-
-            TradeType tradeType = internalTrades.First().Type;
-
-            IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
-
-            Instrument instrument = instruments.FirstOrDefault(o =>
-                o.AssetPairId == assetPairId || o.CrossInstruments.Any(p => p.AssetPairId == assetPairId));
-
-            if (instrument == null)
-            {
-                _log.WarningWithDetails($"Can not open position. Unknown instrument '{assetPairId}'.", internalTrades);
-                return;
-            }
-
             var positions = new List<Position>();
 
-            if (assetPairId != instrument.AssetPairId)
+            foreach (InternalTrade internalTrade in internalTrades)
             {
-                CrossInstrument crossInstrument = instrument.CrossInstruments.Single(o => o.AssetPairId == assetPairId);
+                Instrument instrument = await _instrumentService.FundAsync(internalTrade.AssetPairId);
 
-                Quote quote =
-                    await _quoteService.GetAsync(crossInstrument.QuoteSource, crossInstrument.ExternalAssetPairId);
-
-                if (quote == null)
+                if (instrument == null)
                 {
-                    _log.WarningWithDetails($"Can not open position. No quote '{assetPairId}'.", internalTrades);
-                    return;
+                    _log.WarningWithDetails("Can not open position. Unknown instrument.", internalTrade);
+                    continue;
                 }
 
-                foreach (InternalTrade internalTrade in internalTrades)
+                if (internalTrade.AssetPairId != instrument.AssetPairId)
                 {
-                    decimal price = tradeType == TradeType.Sell
-                        ? Calculator.CalculateDirectSellPrice(internalTrade.Price, quote, crossInstrument.IsInverse)
-                        : Calculator.CalculateDirectBuyPrice(internalTrade.Price, quote, crossInstrument.IsInverse);
+                    CrossInstrument crossInstrument = instrument.CrossInstruments
+                        .Single(o => o.AssetPairId == internalTrade.AssetPairId);
 
-                    positions.Add(Position.Open(instrument.AssetPairId, price, internalTrade.Price,
-                        internalTrade.Volume, quote, crossInstrument.AssetPairId, tradeType, internalTrade.Id));
+                    Quote quote = await _quoteService.GetAsync(crossInstrument.QuoteSource,
+                        crossInstrument.ExternalAssetPairId);
+
+                    if (quote != null)
+                    {
+                        decimal price = internalTrade.Type == TradeType.Sell
+                            ? Calculator.CalculateDirectSellPrice(internalTrade.Price, quote, crossInstrument.IsInverse)
+                            : Calculator.CalculateDirectBuyPrice(internalTrade.Price, quote, crossInstrument.IsInverse);
+
+                        positions.Add(Position.Open(instrument.AssetPairId, price, internalTrade.Price,
+                            internalTrade.Volume, quote, crossInstrument.AssetPairId, internalTrade.Type,
+                            internalTrade.Id));
+                    }
+                    else
+                    {
+                        _log.WarningWithDetails("Can not open position. No quote.", internalTrade);
+                    }
                 }
-            }
-            else
-            {
-                foreach (InternalTrade internalTrade in internalTrades)
+                else
                 {
                     positions.Add(Position.Open(instrument.AssetPairId, internalTrade.Price, internalTrade.Volume,
-                        tradeType, internalTrade.Id));
+                        internalTrade.Type, internalTrade.Id));
                 }
             }
+
+            await _tradeService.RegisterAsync(internalTrades);
 
             foreach (Position position in positions)
             {
-                await _openPositionRepository.InsertAsync(position);
+                await TraceWrapper.TraceExecutionTimeAsync("Inserting position to the Azure storage",
+                    () => _positionRepository.InsertAsync(position), _log);
 
-                await _positionRepository.InsertAsync(position);
+                await TraceWrapper.TraceExecutionTimeAsync("Inserting open position to the Azure storage",
+                    () => _openPositionRepository.InsertAsync(position), _log);
+
+                _log.Info("Inserting position to the Postgres storage");
 
                 try
                 {
-                    await _positionRepositoryPostgres.InsertAsync(position);
+                    await TraceWrapper.TraceExecutionTimeAsync("Inserting position to the Postgres storage",
+                        () => _positionRepositoryPostgres.InsertAsync(position), _log);
                 }
                 catch (Exception exception)
                 {
-                    _log.ErrorWithDetails(exception, "An error occurred while inserting position to the postgres DB",
+                    _log.ErrorWithDetails(exception, "An error occurred while inserting position to the Postgres DB",
                         position);
                 }
 
-                await _summaryReportService.RegisterOpenPositionAsync(position,
-                    internalTrades.Where(o => o.Id == position.TradeId).ToArray());
+                await TraceWrapper.TraceExecutionTimeAsync("Updating summary report in the Azure storage",
+                    () => _summaryReportService.RegisterOpenPositionAsync(position,
+                        internalTrades.Where(o => o.Id == position.TradeId).ToArray()), _log);
 
                 _log.InfoWithDetails("Position was opened", position);
             }
@@ -135,6 +137,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseAsync(Position position, ExternalTrade externalTrade)
         {
+            await _tradeService.RegisterAsync(externalTrade);
+            
+            await _openPositionRepository.DeleteAsync(position.AssetPairId, position.Id);
+            
             position.Close(externalTrade);
 
             await _positionRepository.UpdateAsync(position);
@@ -149,8 +155,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     position);
             }
 
-            await _openPositionRepository.DeleteAsync(position.AssetPairId, position.Id);
-
             await _summaryReportService.RegisterClosePositionAsync(position);
 
             _log.InfoWithDetails("Position was closed", position);
@@ -158,6 +162,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade)
         {
+            await _tradeService.RegisterAsync(externalTrade);
+            
             Position position = Position.Create(assetPairId, externalTrade);
 
             await _positionRepository.InsertAsync(position);

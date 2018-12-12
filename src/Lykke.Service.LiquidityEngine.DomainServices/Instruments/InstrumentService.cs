@@ -62,6 +62,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             return instrument;
         }
 
+        public async Task<Instrument> FundAsync(string assetPairId)
+        {
+            IReadOnlyCollection<Instrument> instruments = await GetAllAsync();
+
+            return instruments.FirstOrDefault(o =>
+                o.AssetPairId == assetPairId || o.CrossInstruments.Any(p => p.AssetPairId == assetPairId));
+        }
+
         public async Task AddAsync(Instrument instrument)
         {
             IReadOnlyCollection<Instrument> instruments = await GetAllAsync();

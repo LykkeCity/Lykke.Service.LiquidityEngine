@@ -11,6 +11,7 @@ using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.LiquidityEngine.Managers;
 using Lykke.Service.LiquidityEngine.Migration;
 using Lykke.Service.LiquidityEngine.Migration.Operations;
+using Lykke.Service.LiquidityEngine.Rabbit;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
@@ -36,7 +37,8 @@ namespace Lykke.Service.LiquidityEngine
                 _settings.CurrentValue.LiquidityEngineService.Name,
                 _settings.CurrentValue.LiquidityEngineService.WalletId));
             builder.RegisterModule(new AzureRepositories.AutofacModule(
-                _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString)));
+                _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString),
+                _settings.Nested(o => o.LiquidityEngineService.Db.LykkeTradesMeQueuesDeduplicatorConnectionString)));
             builder.RegisterModule(new PostgresRepositories.AutofacModule(
                 _settings.CurrentValue.LiquidityEngineService.Db.PostgresConnectionString));
 
@@ -82,6 +84,10 @@ namespace Lykke.Service.LiquidityEngine
 
         private void RegisterRabbit(ContainerBuilder builder)
         {
+            builder.RegisterType<LykkeTradeSubscriberMonitor>()
+                .AsSelf()
+                .SingleInstance();
+
             builder.RegisterType<LykkeTradeSubscriber>()
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
                     .LykkeTrades))

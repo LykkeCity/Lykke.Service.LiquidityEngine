@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac.Features.AttributeFilters;
@@ -11,6 +12,7 @@ using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Utils;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
 {
@@ -30,10 +32,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
         private DateTime _defaultTradeTime;
 
         public TradeService(
-            [KeyFilter("InternalTradeRepositoryAzure")] IInternalTradeRepository internalTradeRepository,
-            [KeyFilter("InternalTradeRepositoryPostgres")] IInternalTradeRepository internalTradeRepositoryPostgres,
-            [KeyFilter("ExternalTradeRepositoryAzure")] IExternalTradeRepository externalTradeRepository,
-            [KeyFilter("ExternalTradeRepositoryPostgres")] IExternalTradeRepository externalTradeRepositoryPostgres,
+            [KeyFilter("InternalTradeRepositoryAzure")]
+            IInternalTradeRepository internalTradeRepository,
+            [KeyFilter("InternalTradeRepositoryPostgres")]
+            IInternalTradeRepository internalTradeRepositoryPostgres,
+            [KeyFilter("ExternalTradeRepositoryAzure")]
+            IExternalTradeRepository externalTradeRepository,
+            [KeyFilter("ExternalTradeRepositoryPostgres")]
+            IExternalTradeRepository externalTradeRepositoryPostgres,
             ILogFactory logFactory)
         {
             _internalTradeRepository = internalTradeRepository;
@@ -94,32 +100,38 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
 
             foreach (InternalTrade internalTrade in internalTrades)
             {
-                await _internalTradeRepository.InsertAsync(internalTrade);
+                await TraceWrapper.TraceExecutionTimeAsync("Inserting internal trade to the Azure storage",
+                    () => _internalTradeRepository.InsertAsync(internalTrade), _log);
 
                 try
                 {
-                    await _internalTradeRepositoryPostgres.InsertAsync(internalTrade);
+                    await TraceWrapper.TraceExecutionTimeAsync("Inserting internal trade to the Postgres storage",
+                        () => _internalTradeRepositoryPostgres.InsertAsync(internalTrade), _log);
                 }
                 catch (Exception exception)
                 {
                     _log.ErrorWithDetails(exception,
-                        "An error occurred while inserting internal trade to the postgres DB", internalTrade);
+                        "An error occurred while inserting internal trade to the Postgres DB", internalTrade);
                 }
             }
         }
 
         public async Task RegisterAsync(ExternalTrade externalTrade)
         {
-            await _externalTradeRepository.InsertAsync(externalTrade);
-            
+            await TraceWrapper.TraceExecutionTimeAsync("Inserting external trade to the Azure storage",
+                () => _externalTradeRepository.InsertAsync(externalTrade), _log);
+
             try
             {
+                await TraceWrapper.TraceExecutionTimeAsync("Inserting external trade to the Postgres storage",
+                    () => _externalTradeRepositoryPostgres.InsertAsync(externalTrade), _log);
+
                 await _externalTradeRepositoryPostgres.InsertAsync(externalTrade);
             }
             catch (Exception exception)
             {
                 _log.ErrorWithDetails(exception,
-                    "An error occurred while inserting external trade to the postgres DB", externalTrade);
+                    "An error occurred while inserting external trade to the Postgres DB", externalTrade);
             }
         }
     }

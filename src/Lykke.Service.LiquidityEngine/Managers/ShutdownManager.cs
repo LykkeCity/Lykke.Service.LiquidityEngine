@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using Lykke.Sdk;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
+using Lykke.Service.LiquidityEngine.Rabbit;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 
 namespace Lykke.Service.LiquidityEngine.Managers
@@ -17,6 +18,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
         private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
+        private readonly LykkeTradeSubscriberMonitor _lykkeTradeSubscriberMonitor;
 
         public ShutdownManager(
             LykkeBalancesTimer lykkeBalancesTimer,
@@ -26,7 +28,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             LykkeTradeSubscriber lykkeTradeSubscriber,
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
             B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
-            QuoteSubscriber[] quoteSubscribers)
+            QuoteSubscriber[] quoteSubscribers,
+            LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
             _externalBalancesTimer = externalBalancesTimer;
@@ -36,10 +39,13 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
             _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
             _quoteSubscribers = quoteSubscribers;
+            _lykkeTradeSubscriberMonitor = lykkeTradeSubscriberMonitor;
         }
 
         public Task StopAsync()
         {
+            _lykkeTradeSubscriberMonitor.Stop();
+            
             _b2C2QuoteSubscriber.Stop();
 
             _b2C2OrderBooksSubscriber.Stop();

@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common;
 using Common.Log;
 using JetBrains.Annotations;
 using Lykke.Common.Log;
-using Lykke.MatchingEngine.Connector.Models.Common;
-using Lykke.MatchingEngine.Connector.Models.RabbitMq;
+using Lykke.MatchingEngine.Connector.Models.Events;
+using Lykke.MatchingEngine.Connector.Models.Events.Common;
 using Lykke.RabbitMqBroker;
+using Lykke.RabbitMqBroker.Deduplication;
 using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Utils;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers;
 
 namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
@@ -21,43 +24,49 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
     {
         private readonly SubscriberSettings _settings;
         private readonly ISettingsService _settingsService;
-        private readonly ITradeService _tradeService;
         private readonly IPositionService _positionService;
+        private readonly IDeduplicator _deduplicator;
         private readonly ILogFactory _logFactory;
         private readonly ILog _log;
 
-        private RabbitMqSubscriber<LimitOrders> _subscriber;
+        private IStopable _subscriber;
 
         public LykkeTradeSubscriber(
             SubscriberSettings settings,
             ISettingsService settingsService,
-            ITradeService tradeService,
             IPositionService positionService,
+            IDeduplicator deduplicator,
             ILogFactory logFactory)
         {
             _settings = settings;
             _settingsService = settingsService;
-            _tradeService = tradeService;
             _positionService = positionService;
+            _deduplicator = deduplicator;
             _logFactory = logFactory;
             _log = logFactory.CreateLog(this);
         }
 
+        public DateTime LastMessageTime { get; private set; }
+
         public void Start()
         {
             var settings = RabbitMqSubscriptionSettings
-                .CreateForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue)
+                .ForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue)
+                .UseRoutingKey(((int) MessageType.Order).ToString())
                 .MakeDurable();
 
-            settings.DeadLetterExchangeName = null;
-
-            _subscriber = new RabbitMqSubscriber<LimitOrders>(_logFactory, settings,
-                    new ResilientErrorHandlingStrategy(_logFactory, settings, TimeSpan.FromSeconds(10)))
-                .SetMessageDeserializer(new JsonMessageDeserializer<LimitOrders>())
-                .SetMessageReadStrategy(new MessageReadQueueStrategy())
+            _subscriber = new RabbitMqSubscriber<ExecutionEvent>(
+                    _logFactory, settings, new ResilientErrorHandlingStrategy(_logFactory, settings,
+                        TimeSpan.FromSeconds(10),
+                        next: new DeadQueueErrorHandlingStrategy(_logFactory, settings)))
+                .SetMessageDeserializer(new ProtobufMessageDeserializer<ExecutionEvent>())
                 .Subscribe(ProcessMessageAsync)
                 .CreateDefaultBinding()
+                .SetAlternativeExchange(_settings.AlternateConnectionString)
+                .SetDeduplicator(_deduplicator)
                 .Start();
+
+            LastMessageTime = DateTime.UtcNow;
         }
 
         public void Stop()
@@ -70,114 +79,101 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             _subscriber?.Dispose();
         }
 
-        private async Task ProcessMessageAsync(LimitOrders limitOrders)
+        private async Task ProcessMessageAsync(ExecutionEvent message)
         {
             try
             {
-                if (limitOrders.Orders == null || limitOrders.Orders.Count == 0)
+                LastMessageTime = DateTime.UtcNow;
+
+                if (message.Header.MessageType != MessageType.Order)
                     return;
 
                 string walletId = await _settingsService.GetWalletIdAsync();
 
-                if (string.IsNullOrEmpty(walletId))
-                    return;
+                Order[] orders = message.Orders
+                    .Where(o => o.WalletId == walletId)
+                    .Where(o => o.Side != OrderSide.UnknownOrderSide)
+                    .Where(o => o.Trades?.Count > 0)
+                    .ToArray();
 
-                IEnumerable<LimitOrderWithTrades> clientLimitOrders = limitOrders.Orders
-                    .Where(o => o.Order?.ClientId == walletId)
-                    .Where(o => o.Trades?.Count > 0);
+                _log.InfoWithDetails("Trades received", new {Count = orders.Length});
 
-                IReadOnlyCollection<InternalTrade> trades = CreateReports(clientLimitOrders);
-
-                if (trades.Any())
+                if (orders.Any())
                 {
-                    await _tradeService.RegisterAsync(trades);
-                    await _positionService.OpenAsync(trades);
+                    await TraceWrapper.TraceExecutionTimeAsync("Trades handling", () => ExecuteAsync(orders), _log);
 
-                    _log.InfoWithDetails("Traders were handled", clientLimitOrders);
+                    _log.InfoWithDetails("Trades handled", orders);
                 }
             }
             catch (Exception exception)
             {
-                _log.Error(exception, "An error occurred during processing trades", limitOrders);
+                _log.Error(exception, "An error occurred while processing trades", message);
+                throw;
             }
         }
 
-        private static IReadOnlyCollection<InternalTrade> CreateReports(IEnumerable<LimitOrderWithTrades> limitOrders)
+        private async Task ExecuteAsync(Order[] orders)
         {
-            var executionReports = new List<InternalTrade>();
+            var internalTrades = new List<InternalTrade>();
 
-            foreach (LimitOrderWithTrades limitOrderModel in limitOrders)
+            foreach (Order order in orders)
             {
                 // The limit order fully executed. The remaining volume is zero.
-                if (limitOrderModel.Order.Status == OrderStatus.Matched)
-                {
-                    IReadOnlyList<InternalTrade> orderExecutionReports =
-                        CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, true);
-
-                    executionReports.AddRange(orderExecutionReports);
-                }
+                if (order.Status == OrderStatus.Matched)
+                    internalTrades.AddRange(Map(order, true));
 
                 // The limit order partially executed.
-                if (limitOrderModel.Order.Status == OrderStatus.Processing)
-                {
-                    IReadOnlyList<InternalTrade> orderExecutionReports =
-                        CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, false);
-
-                    executionReports.AddRange(orderExecutionReports);
-                }
+                if (order.Status == OrderStatus.PartiallyMatched)
+                    internalTrades.AddRange(Map(order, false));
 
                 // The limit order was cancelled by matching engine after processing trades.
                 // In this case order partially executed and remaining volume is less than min volume allowed by asset pair.
-                if (limitOrderModel.Order.Status == OrderStatus.Cancelled)
-                {
-                    IReadOnlyList<InternalTrade> orderExecutionReports =
-                        CreateInternalTrades(limitOrderModel.Order, limitOrderModel.Trades, true);
-
-                    executionReports.AddRange(orderExecutionReports);
-                }
+                if (order.Status == OrderStatus.Cancelled)
+                    internalTrades.AddRange(Map(order, true));
             }
 
-            return executionReports;
+            Task processTask = _positionService.OpenAsync(internalTrades);
+            Task delayTask = Task.Delay(TimeSpan.FromMinutes(1));
+
+            Task task = await Task.WhenAny(processTask, delayTask);
+
+            if (task == delayTask)
+                _log.WarningWithDetails("Trades processing takes more than one minute", internalTrades);
+
+            await processTask;
         }
 
-        private static IReadOnlyList<InternalTrade> CreateInternalTrades(
-            MatchingEngine.Connector.Models.RabbitMq.LimitOrder limitOrder,
-            IReadOnlyList<LimitTradeInfo> trades,
-            bool completed)
+        private static IReadOnlyList<InternalTrade> Map(Order order, bool completed)
         {
             var reports = new List<InternalTrade>();
 
-            for (int i = 0; i < trades.Count; i++)
+            for (int i = 0; i < order.Trades.Count; i++)
             {
-                LimitTradeInfo trade = trades[i];
+                Trade trade = order.Trades[i];
 
-                TradeType tradeType = limitOrder.Volume < 0
+                TradeType tradeType = order.Side == OrderSide.Sell
                     ? TradeType.Sell
                     : TradeType.Buy;
 
-                TradeStatus executionStatus = i == trades.Count - 1 && completed
+                TradeStatus executionStatus = i == order.Trades.Count - 1 && completed
                     ? TradeStatus.Fill
                     : TradeStatus.PartialFill;
 
                 reports.Add(new InternalTrade
                 {
                     Id = trade.TradeId,
-                    AssetPairId = limitOrder.AssetPairId,
-                    ExchangeOrderId = limitOrder.Id,
-                    LimitOrderId = limitOrder.ExternalId,
+                    AssetPairId = order.AssetPairId,
+                    ExchangeOrderId = order.Id,
+                    LimitOrderId = order.ExternalId,
                     Status = executionStatus,
                     Type = tradeType,
                     Time = trade.Timestamp,
-                    Price = (decimal) trade.Price,
-                    Volume = tradeType == TradeType.Buy
-                        ? (decimal) trade.OppositeVolume
-                        : (decimal) trade.Volume,
-                    OppositeClientId = trade.OppositeClientId,
+                    Price = decimal.Parse(trade.Price),
+                    Volume = Math.Abs(decimal.Parse(trade.BaseVolume)),
+                    OppositeClientId = trade.OppositeWalletId,
                     OppositeLimitOrderId = trade.OppositeOrderId,
-                    OppositeSideVolume = tradeType == TradeType.Buy
-                        ? (decimal) trade.Volume
-                        : (decimal) trade.OppositeVolume,
-                    RemainingVolume = (decimal) limitOrder.RemainingVolume
+                    OppositeSideVolume = Math.Abs(decimal.Parse(trade.QuotingVolume)),
+                    RemainingVolume = Math.Abs(decimal.Parse(order.RemainingVolume))
                 });
             }
 

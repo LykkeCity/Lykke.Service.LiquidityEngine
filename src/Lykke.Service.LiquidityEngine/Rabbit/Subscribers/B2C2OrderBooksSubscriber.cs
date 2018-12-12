@@ -31,7 +31,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         public void Start()
         {
             var settings = RabbitMqSubscriptionSettings
-                .CreateForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue);
+                .ForSubscriber(_settings.ConnectionString, _settings.Exchange, _settings.Queue);
 
             settings.DeadLetterExchangeName = null;
 

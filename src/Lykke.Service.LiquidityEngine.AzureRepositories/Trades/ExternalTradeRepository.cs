@@ -60,12 +60,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Trades
 
             Mapper.Map(externalTrade, entity);
 
-            await _storage.InsertAsync(entity);
+            await _storage.InsertOrReplaceAsync(entity);
 
             AzureIndex index = new AzureIndex(GetIndexPartitionKey(externalTrade.Id), GetRowKey(externalTrade.Id),
                 entity);
 
-            await _indicesStorage.InsertAsync(index);
+            await _indicesStorage.InsertOrReplaceAsync(index);
         }
         
         private static string GetPartitionKey(DateTime time)
