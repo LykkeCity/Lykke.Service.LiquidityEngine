@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
@@ -15,6 +14,7 @@ using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Utils;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers;
 
 namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
@@ -24,7 +24,6 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
     {
         private readonly SubscriberSettings _settings;
         private readonly ISettingsService _settingsService;
-        private readonly ITradeService _tradeService;
         private readonly IPositionService _positionService;
         private readonly IDeduplicator _deduplicator;
         private readonly ILogFactory _logFactory;
@@ -35,14 +34,12 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         public LykkeTradeSubscriber(
             SubscriberSettings settings,
             ISettingsService settingsService,
-            ITradeService tradeService,
             IPositionService positionService,
             IDeduplicator deduplicator,
             ILogFactory logFactory)
         {
             _settings = settings;
             _settingsService = settingsService;
-            _tradeService = tradeService;
             _positionService = positionService;
             _deduplicator = deduplicator;
             _logFactory = logFactory;
@@ -103,21 +100,9 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 
                 if (orders.Any())
                 {
-                    var sw = new Stopwatch();
+                    await TraceWrapper.TraceExecutionTimeAsync("Trades handling", () => ExecuteAsync(orders), _log);
 
-                    sw.Start();
-
-                    try
-                    {
-                        await ExecuteAsync(orders);
-
-                        _log.InfoWithDetails("Trades handled", orders);
-                    }
-                    finally
-                    {
-                        sw.Stop();
-                        _log.Info("Trades handling time", new {sw.ElapsedMilliseconds});
-                    }
+                    _log.InfoWithDetails("Trades handled", orders);
                 }
             }
             catch (Exception exception)
@@ -129,46 +114,33 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 
         private async Task ExecuteAsync(Order[] orders)
         {
-            try
+            var internalTrades = new List<InternalTrade>();
+
+            foreach (Order order in orders)
             {
-                var internalTrades = new List<InternalTrade>();
+                // The limit order fully executed. The remaining volume is zero.
+                if (order.Status == OrderStatus.Matched)
+                    internalTrades.AddRange(Map(order, true));
 
-                foreach (Order order in orders)
-                {
-                    // The limit order fully executed. The remaining volume is zero.
-                    if (order.Status == OrderStatus.Matched)
-                        internalTrades.AddRange(Map(order, true));
+                // The limit order partially executed.
+                if (order.Status == OrderStatus.PartiallyMatched)
+                    internalTrades.AddRange(Map(order, false));
 
-                    // The limit order partially executed.
-                    if (order.Status == OrderStatus.PartiallyMatched)
-                        internalTrades.AddRange(Map(order, false));
-
-                    // The limit order was cancelled by matching engine after processing trades.
-                    // In this case order partially executed and remaining volume is less than min volume allowed by asset pair.
-                    if (order.Status == OrderStatus.Cancelled)
-                        internalTrades.AddRange(Map(order, true));
-                }
-
-                Task processTask = Task.Run(async () =>
-                {
-                    await _tradeService.RegisterAsync(internalTrades);
-                    await _positionService.OpenAsync(internalTrades);
-                });
-
-                Task delayTask = Task.Delay(TimeSpan.FromMinutes(1));
-
-                Task task = await Task.WhenAny(processTask, delayTask);
-
-                if (task == delayTask)
-                    _log.WarningWithDetails("Trades processing takes more than one minute", internalTrades);
-
-                await processTask;
+                // The limit order was cancelled by matching engine after processing trades.
+                // In this case order partially executed and remaining volume is less than min volume allowed by asset pair.
+                if (order.Status == OrderStatus.Cancelled)
+                    internalTrades.AddRange(Map(order, true));
             }
-            catch (Exception exception)
-            {
-                _log.ErrorWithDetails(exception, "An error occurred while processing trades", orders);
-                throw;
-            }
+
+            Task processTask = _positionService.OpenAsync(internalTrades);
+            Task delayTask = Task.Delay(TimeSpan.FromMinutes(1));
+
+            Task task = await Task.WhenAny(processTask, delayTask);
+
+            if (task == delayTask)
+                _log.WarningWithDetails("Trades processing takes more than one minute", internalTrades);
+
+            await processTask;
         }
 
         private static IReadOnlyList<InternalTrade> Map(Order order, bool completed)

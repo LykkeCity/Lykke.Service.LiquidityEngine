@@ -28,9 +28,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly Mock<IRemainingVolumeService> _remainingVolumeServiceMock =
             new Mock<IRemainingVolumeService>();
-
-        private readonly Mock<ITradeService> _tradeService =
-            new Mock<ITradeService>();
         
         private readonly List<Position> _openPositions = new List<Position>();
 
@@ -64,7 +61,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _externalExchangeServiceMock.Object,
                 _marketMakerStateServiceMock.Object,
                 _remainingVolumeServiceMock.Object,
-                _tradeService.Object,
                 EmptyLogFactory.Instance);
         }
 
