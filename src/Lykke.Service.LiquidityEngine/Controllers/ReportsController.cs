@@ -177,8 +177,9 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             {
                 decimal lykkeBalance = (balance.LykkeAmount ?? 0) - (balance.LykkeCreditAmount ?? 0);
                 decimal totalAmount = lykkeBalance + (balance.ExternalAmount ?? 0);
+
                 (decimal? totalAmountInUsd, decimal? rate)
-                    = balance.ExternalAssetId != null
+                    = balance.ExternalAssetId != null && totalAmount > 0
                         ? await _assetSettingsService.ConvertAmountAsync(balance.ExternalAssetId, totalAmount)
                         : (null, null);
 
