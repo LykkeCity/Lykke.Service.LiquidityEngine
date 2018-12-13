@@ -114,8 +114,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                 await TraceWrapper.TraceExecutionTimeAsync("Inserting open position to the Azure storage",
                     () => _openPositionRepository.InsertAsync(position), _log);
 
-                _log.Info("Inserting position to the Postgres storage");
-
                 try
                 {
                     await TraceWrapper.TraceExecutionTimeAsync("Inserting position to the Postgres storage",
@@ -131,33 +129,36 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     () => _summaryReportService.RegisterOpenPositionAsync(position,
                         internalTrades.Where(o => o.Id == position.TradeId).ToArray()), _log);
 
-                _log.InfoWithDetails("Position was opened", position);
+                _log.InfoWithDetails("Position opened", position);
             }
         }
 
-        public async Task CloseAsync(Position position, ExternalTrade externalTrade)
+        public async Task CloseAsync(IReadOnlyCollection<Position> positions, ExternalTrade externalTrade)
         {
             await _tradeService.RegisterAsync(externalTrade);
-            
-            await _openPositionRepository.DeleteAsync(position.AssetPairId, position.Id);
-            
-            position.Close(externalTrade);
 
-            await _positionRepository.UpdateAsync(position);
-
-            try
+            foreach (Position position in positions)
             {
-                await _positionRepositoryPostgres.UpdateAsync(position);
-            }
-            catch (Exception exception)
-            {
-                _log.ErrorWithDetails(exception, "An error occurred while updating position in the postgres DB",
-                    position);
-            }
+                await _openPositionRepository.DeleteAsync(position.AssetPairId, position.Id);
+            
+                position.Close(externalTrade);
 
-            await _summaryReportService.RegisterClosePositionAsync(position);
+                await _positionRepository.UpdateAsync(position);
 
-            _log.InfoWithDetails("Position was closed", position);
+                try
+                {
+                    await _positionRepositoryPostgres.UpdateAsync(position);
+                }
+                catch (Exception exception)
+                {
+                    _log.ErrorWithDetails(exception, "An error occurred while updating position in the postgres DB",
+                        position);
+                }
+
+                await _summaryReportService.RegisterClosePositionAsync(position);
+
+                _log.InfoWithDetails("Position closed", position);
+            }
         }
 
         public async Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade)
@@ -178,7 +179,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     "An error occurred while inserting remaining volume position to the postgres DB", position);
             }
 
-            _log.InfoWithDetails("Position with remaining volume was closed", position);
+            _log.InfoWithDetails("Position with remaining volume closed", position);
         }
     }
 }

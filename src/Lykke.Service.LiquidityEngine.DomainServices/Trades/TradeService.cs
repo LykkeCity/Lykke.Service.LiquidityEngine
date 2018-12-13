@@ -125,8 +125,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Trades
             {
                 await TraceWrapper.TraceExecutionTimeAsync("Inserting external trade to the Postgres storage",
                     () => _externalTradeRepositoryPostgres.InsertAsync(externalTrade), _log);
-
-                await _externalTradeRepositoryPostgres.InsertAsync(externalTrade);
             }
             catch (Exception exception)
             {
