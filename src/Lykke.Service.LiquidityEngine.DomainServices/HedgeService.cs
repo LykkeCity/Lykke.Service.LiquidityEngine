@@ -83,8 +83,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 if (externalTrade != null)
                 {
-                    foreach (Position position in group)
-                        await _positionService.CloseAsync(position, externalTrade);
+                    await _positionService.CloseAsync(group.ToArray(), externalTrade);
 
                     await _remainingVolumeService.RegisterVolumeAsync(group.Key,
                         (originalVolume - volume) * GetSign(positionType));
