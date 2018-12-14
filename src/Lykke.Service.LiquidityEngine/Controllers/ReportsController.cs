@@ -26,7 +26,6 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         private readonly IPositionService _positionService;
         private readonly ISummaryReportService _summaryReportService;
         private readonly IPositionReportService _positionReportService;
-        private readonly IAssetsServiceWithCache _lykkeAssetService;
 
         public ReportsController(
             IAssetSettingsService assetSettingsService,
@@ -47,7 +46,6 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             _positionService = positionService;
             _summaryReportService = summaryReportService;
             _positionReportService = positionReportService;
-            _lykkeAssetService = lykkeAssetService;
         }
 
         /// <inheritdoc/>
@@ -124,7 +122,6 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
             foreach (string assetId in lykkeAssets)
             {
-                var asset = await _lykkeAssetService.TryGetAssetAsync(assetId);
                 AssetSettings settings = assetSettings.FirstOrDefault(o => o.LykkeAssetId == assetId);
                 lykkeBalances.TryGetValue(assetId, out Balance balance);
                 lykkeCredits.TryGetValue(assetId, out Credit credit);
@@ -134,19 +131,24 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
                 model.Add(new BalanceReportModel
                 {
-                    Asset = asset?.DisplayId ?? assetId,
+                    Asset = settings?.AssetId ?? assetId,
                     LykkeAssetId = assetId,
+                    ExternalAssetId = settings?.AssetId,
                     LykkeAmount = balanceAmount,
                     LykkeCreditAmount = creditAmount,
-                    ExternalAssetId = settings?.AssetId
+                    LykkeDisbalance = balanceAmount - creditAmount,
                 });
             }
 
             foreach (Balance externalBalance in externalBalances)
             {
+                AssetSettings settings =
+                    assetSettings.FirstOrDefault(o => o.ExternalAssetPairId == externalBalance.AssetId);
+
                 model.Add(new BalanceReportModel
                 {
                     Asset = externalBalance.AssetId,
+                    LykkeAssetId = settings?.LykkeAssetId,
                     ExternalAssetId = externalBalance.AssetId,
                     ExternalAmount = externalBalance.Amount
                 });
@@ -175,9 +177,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
             foreach (BalanceReportModel balance in rows)
             {
-                decimal lykkeBalance = (balance.LykkeAmount ?? 0) - (balance.LykkeCreditAmount ?? 0);
-                decimal totalAmount = lykkeBalance + (balance.ExternalAmount ?? 0);
-
+                decimal totalAmount = (balance.LykkeDisbalance ?? 0) + (balance.ExternalAmount ?? 0);
                 (decimal? totalAmountInUsd, decimal? rate)
                     = balance.ExternalAssetId != null && totalAmount > 0
                         ? await _assetSettingsService.ConvertAmountAsync(balance.ExternalAssetId, totalAmount)
