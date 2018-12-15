@@ -8,7 +8,6 @@ using Lykke.Service.Assets.Client;
 using Lykke.Service.LiquidityEngine.Client.Api;
 using Lykke.Service.LiquidityEngine.Client.Models.Reports;
 using Lykke.Service.LiquidityEngine.Domain;
-using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,9 +17,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     [ResponseCache(Duration = 5)]
     public class ReportsController : Controller, IReportsApi
     {
-        private readonly IAssetSettingsService _assetSettingsService;
-        private readonly IBalanceService _balanceService;
-        private readonly ICreditService _creditService;
+        private readonly IBalanceIndicatorsReportService _balanceIndicatorsReportService;
+        private readonly IBalanceReportService _balanceReportService;
         private readonly ICrossRateInstrumentService _crossRateInstrumentService;
         private readonly IInstrumentService _instrumentService;
         private readonly IPositionService _positionService;
@@ -28,9 +26,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         private readonly IPositionReportService _positionReportService;
 
         public ReportsController(
-            IAssetSettingsService assetSettingsService,
-            IBalanceService balanceService,
-            ICreditService creditService,
+            IBalanceIndicatorsReportService balanceIndicatorsReportService,
+            IBalanceReportService balanceReportService,
             ICrossRateInstrumentService crossRateInstrumentService,
             IInstrumentService instrumentService,
             IPositionService positionService,
@@ -38,9 +35,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             IPositionReportService positionReportService,
             IAssetsServiceWithCache lykkeAssetService)
         {
-            _assetSettingsService = assetSettingsService;
-            _balanceService = balanceService;
-            _creditService = creditService;
+            _balanceIndicatorsReportService = balanceIndicatorsReportService;
+            _balanceReportService = balanceReportService;
             _crossRateInstrumentService = crossRateInstrumentService;
             _instrumentService = instrumentService;
             _positionService = positionService;
@@ -107,118 +103,21 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<BalanceReportModel>), (int) HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<BalanceReportModel>> GetBalancesReportAsync()
         {
-            IDictionary<string, Balance> lykkeBalances = (await _balanceService.GetAsync(ExchangeNames.Lykke))
-                .ToDictionary(o => o.AssetId, o => o);
-            IDictionary<string, Credit> lykkeCredits = (await _creditService.GetAllAsync())
-                .ToDictionary(o => o.AssetId, o => o);
-            IReadOnlyCollection<Balance> externalBalances = await _balanceService.GetAsync(ExchangeNames.External);
-            IReadOnlyCollection<AssetSettings> assetSettings = await _assetSettingsService.GetAllAsync();
+            IReadOnlyCollection<BalanceReport> balanceReports = await _balanceReportService.GetAsync();
 
-            string[] lykkeAssets = lykkeBalances.Keys
-                .Union(lykkeCredits.Keys)
-                .ToArray();
-
-            var model = new List<BalanceReportModel>();
-
-            foreach (string assetId in lykkeAssets)
-            {
-                AssetSettings settings = assetSettings.FirstOrDefault(o => o.LykkeAssetId == assetId);
-                lykkeBalances.TryGetValue(assetId, out Balance balance);
-                lykkeCredits.TryGetValue(assetId, out Credit credit);
-
-                decimal balanceAmount = balance?.Amount ?? decimal.Zero;
-                decimal creditAmount = credit?.Amount ?? decimal.Zero;
-
-                model.Add(new BalanceReportModel
-                {
-                    Asset = settings?.AssetId ?? assetId,
-                    LykkeAssetId = assetId,
-                    ExternalAssetId = settings?.AssetId,
-                    LykkeAmount = balanceAmount,
-                    LykkeCreditAmount = creditAmount,
-                    LykkeDisbalance = balanceAmount - creditAmount,
-                });
-            }
-
-            foreach (Balance externalBalance in externalBalances)
-            {
-                AssetSettings settings =
-                    assetSettings.FirstOrDefault(o => o.ExternalAssetPairId == externalBalance.AssetId);
-
-                model.Add(new BalanceReportModel
-                {
-                    Asset = externalBalance.AssetId,
-                    LykkeAssetId = settings?.LykkeAssetId,
-                    ExternalAssetId = externalBalance.AssetId,
-                    ExternalAmount = externalBalance.Amount
-                });
-            }
-
-            IReadOnlyCollection<BalanceReportModel> rows = model
-                .GroupBy(o => o.ExternalAssetId)
-                .Where(g => g.Key != null)
-                .Select(g =>
-                {
-                    BalanceReportModel lykkeBalance = g.FirstOrDefault(o => o.LykkeAssetId != null);
-                    BalanceReportModel externalBalance = g.FirstOrDefault(o => o.ExternalAmount != null);
-
-                    return new BalanceReportModel
-                    {
-                        Asset = g.Key,
-                        LykkeAssetId = lykkeBalance?.LykkeAssetId,
-                        LykkeAmount = lykkeBalance?.LykkeAmount,
-                        LykkeCreditAmount = lykkeBalance?.LykkeCreditAmount,
-                        ExternalAssetId = externalBalance?.ExternalAssetId,
-                        ExternalAmount = externalBalance?.ExternalAmount
-                    };
-                })
-                .Concat(model.Where(o => o.ExternalAssetId == null))
-                .ToArray();
-
-            foreach (BalanceReportModel balance in rows)
-            {
-                decimal totalAmount = (balance.LykkeDisbalance ?? 0) + (balance.ExternalAmount ?? 0);
-                (decimal? totalAmountInUsd, decimal? rate)
-                    = balance.ExternalAssetId != null && totalAmount > 0
-                        ? await _assetSettingsService.ConvertAmountAsync(balance.ExternalAssetId, totalAmount)
-                        : (null, null);
-
-                balance.TotalAmount = totalAmount;
-                balance.TotalAmountInUsd = totalAmountInUsd;
-                balance.CrossRate = rate;
-            }
-
-            return rows
-                .Where(o => o.TotalAmount != 0)
-                .ToArray();
+            return Mapper.Map<BalanceReportModel[]>(balanceReports);
         }
 
         /// <inheritdoc/>
         /// <response code="200">A balance indicators report.</response>
         [HttpGet("balanceindicators")]
+        [ResponseCache(Duration = 5)]
         [ProducesResponseType(typeof(BalanceIndicatorsReportModel), (int) HttpStatusCode.OK)]
         public async Task<BalanceIndicatorsReportModel> GetBalanceIndicatorsReportAsync()
         {
-            IReadOnlyCollection<Balance> externalBalances = await _balanceService.GetAsync(ExchangeNames.External);
+            BalanceIndicatorsReport balanceIndicatorsReport = await _balanceIndicatorsReportService.GetAsync();
 
-            decimal riskExposure = 0;
-            decimal equity = 0;
-
-            foreach (Balance balance in externalBalances)
-            {
-                (decimal? amountInUsd, _) = await _assetSettingsService.ConvertAmountAsync(balance.AssetId, balance.Amount);
-
-                if (balance.Amount < 0)
-                    riskExposure += Math.Abs(amountInUsd ?? 0);
-
-                equity += amountInUsd ?? 0;
-            }
-
-            return new BalanceIndicatorsReportModel
-            {
-                Equity = equity,
-                RiskExposure = riskExposure
-            };
+            return Mapper.Map<BalanceIndicatorsReportModel>(balanceIndicatorsReport);
         }
 
         private async Task ExtendSummaryReportAsync(IReadOnlyCollection<SummaryReportModel> summaryReport)

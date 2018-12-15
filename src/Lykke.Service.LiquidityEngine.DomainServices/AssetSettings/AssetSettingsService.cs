@@ -65,14 +65,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.AssetSettings
 
         public async Task<Domain.AssetSettings> GetByIdAsync(string assetId)
         {
-            IReadOnlyCollection<Domain.AssetSettings> assets = await GetAllAsync();
+            IReadOnlyCollection<Domain.AssetSettings> assetSettings = await GetAllAsync();
 
-            Domain.AssetSettings assetSettings = assets.SingleOrDefault(o => o.AssetId == assetId);
-
-            if (assetSettings == null)
-                throw new EntityNotFoundException();
-
-            return assetSettings;
+            return assetSettings.SingleOrDefault(o => o.AssetId == assetId);
         }
 
         public async Task AddAsync(Domain.AssetSettings assetSettings)
@@ -99,6 +94,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.AssetSettings
 
             Domain.AssetSettings currentAssetSettings = await GetByIdAsync(assetSettings.AssetId);
 
+            if (currentAssetSettings == null)
+                throw new EntityNotFoundException();
+            
             currentAssetSettings.Update(assetSettings);
 
             await _assetSettingsRepository.UpdateAsync(currentAssetSettings);
@@ -111,12 +109,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.AssetSettings
         public async Task DeleteAsync(string assetId)
         {
             if (assetId == AssetConsts.UsdAssetId)
-            {
                 throw new InvalidOperationException("Can not delete non-editable asset.");
-            }
             
             Domain.AssetSettings assetSettings = await GetByIdAsync(assetId);
 
+            if (assetSettings == null)
+                throw new EntityNotFoundException();
+            
             await _assetSettingsRepository.DeleteAsync(assetId);
 
             _cache.Remove(assetId);
