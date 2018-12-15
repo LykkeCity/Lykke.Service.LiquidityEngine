@@ -39,20 +39,16 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">Asset settings.</response>
         /// <response code="404">Asset settings do not exist.</response>
         [HttpGet("{assetId}")]
-        [ProducesResponseType(typeof(AssetSettingsModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(AssetSettingsModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
         public async Task<AssetSettingsModel> GetByIdAsync(string assetId)
         {
-            try
-            {
-                AssetSettings assetSettings = await _assetSettingsService.GetByIdAsync(assetId);
+            AssetSettings assetSettings = await _assetSettingsService.GetByIdAsync(assetId);
 
-                return Mapper.Map<AssetSettingsModel>(assetSettings);
-            }
-            catch (EntityNotFoundException)
-            {
+            if (assetSettings == null)
                 throw new ValidationApiException(HttpStatusCode.NotFound, "Asset settings do not exist.");
-            }
+
+            return Mapper.Map<AssetSettingsModel>(assetSettings);
         }
 
         /// <inheritdoc/>

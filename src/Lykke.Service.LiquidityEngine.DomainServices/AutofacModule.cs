@@ -93,6 +93,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .SingleInstance()
                 .WithAttributeFiltering();
 
+            builder.RegisterType<BalanceIndicatorsReportService>()
+                .As<IBalanceIndicatorsReportService>()
+                .SingleInstance();
+
+            builder.RegisterType<BalanceReportService>()
+                .As<IBalanceReportService>()
+                .SingleInstance();
+
             builder.RegisterType<PositionReportService>()
                 .As<IPositionReportService>()
                 .SingleInstance()

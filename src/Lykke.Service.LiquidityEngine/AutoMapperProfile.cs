@@ -52,6 +52,10 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<RemainingVolume, RemainingVolumeModel>(MemberList.Source);
 
             CreateMap<SummaryReport, SummaryReportModel>(MemberList.Source);
+            
+            CreateMap<BalanceIndicatorsReport, BalanceIndicatorsReportModel>(MemberList.Source);
+            
+            CreateMap<BalanceReport, BalanceReportModel>(MemberList.Source);
 
             CreateMap<OrderBook, OrderBookModel>(MemberList.Source);
             CreateMap<LimitOrder, LimitOrderModel>(MemberList.Source);
