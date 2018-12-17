@@ -18,16 +18,25 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
     {
         private readonly ISummaryReportRepository _summaryReportRepository;
         private readonly IPositionRepository _positionRepositoryPostgres;
+        private readonly IOpenPositionRepository _openPositionRepository;
+        private readonly IInstrumentService _instrumentService;
+        private readonly ICrossRateInstrumentService _crossRateInstrumentService;
         private readonly InMemoryCache<SummaryReport> _cache;
         private readonly ILog _log;
 
         public SummaryReportService(
             ISummaryReportRepository summaryReportRepository,
             [KeyFilter("PositionRepositoryPostgres")] IPositionRepository positionRepositoryPostgres,
+            IOpenPositionRepository openPositionRepository,
+            IInstrumentService instrumentService,
+            ICrossRateInstrumentService crossRateInstrumentService,
             ILogFactory logFactory)
         {
             _summaryReportRepository = summaryReportRepository;
             _positionRepositoryPostgres = positionRepositoryPostgres;
+            _openPositionRepository = openPositionRepository;
+            _instrumentService = instrumentService;
+            _crossRateInstrumentService = crossRateInstrumentService;
             _cache = new InMemoryCache<SummaryReport>(CacheKey, false);
             _log = logFactory.CreateLog(this);
         }
@@ -46,12 +55,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
             return summaryReports;
         }
 
-        public Task<IReadOnlyCollection<SummaryReport>> GetByPeriodAsync(DateTime startDate, DateTime endDate)
+        public async Task<IReadOnlyCollection<PositionSummaryReport>> GetAsync()
         {
-            return _positionRepositoryPostgres.GetReportAsync(startDate, endDate);
+            IReadOnlyCollection<SummaryReport> summaryReports = await GetAllAsync();
+
+            return await ConvertToReportsAsync(summaryReports);
         }
 
-        public async Task RegisterOpenPositionAsync(Position position, IReadOnlyCollection<InternalTrade> internalTrades)
+        public async Task<IReadOnlyCollection<PositionSummaryReport>> GetByPeriodAsync(DateTime startDate,
+            DateTime endDate)
+        {
+            IReadOnlyCollection<SummaryReport> summaryReports =
+                await _positionRepositoryPostgres.GetReportAsync(startDate, endDate);
+            
+            return await ConvertToReportsAsync(summaryReports);
+        }
+
+        public async Task RegisterOpenPositionAsync(Position position,
+            IReadOnlyCollection<InternalTrade> internalTrades)
         {
             IReadOnlyCollection<SummaryReport> summaryReports = await GetAllAsync();
 
@@ -74,12 +95,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
                 summaryReport.ApplyTrade(internalTrade);
 
             summaryReport.ApplyOpenPosition();
-            
+
             if (isNew)
                 await _summaryReportRepository.InsertAsync(summaryReport);
             else
                 await _summaryReportRepository.UpdateAsync(summaryReport);
-            
+
             _cache.Set(summaryReport);
         }
 
@@ -97,10 +118,55 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
             }
 
             summaryReport.ApplyClosePosition(position);
-            
+
             await _summaryReportRepository.UpdateAsync(summaryReport);
-            
+
             _cache.Set(summaryReport);
+        }
+
+        private async Task<IReadOnlyCollection<PositionSummaryReport>> ConvertToReportsAsync(
+            IEnumerable<SummaryReport> summaryReports)
+        {
+            IReadOnlyCollection<Position> openPositions = await _openPositionRepository.GetAllAsync();
+
+            IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
+
+            var items = new List<PositionSummaryReport>();
+
+            foreach (SummaryReport summaryReport in summaryReports)
+            {
+                Instrument instrument = instruments.FirstOrDefault(o => o.AssetPairId == summaryReport.AssetPairId);
+
+                decimal openVolume = openPositions
+                    .Where(o => o.AssetPairId == summaryReport.AssetPairId &&
+                                o.TradeAssetPairId == summaryReport.TradeAssetPairId)
+                    .Sum(o => Math.Abs(o.Volume));
+
+                decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(summaryReport.AssetPairId,
+                    summaryReport.PnL);
+
+                items.Add(new PositionSummaryReport
+                {
+                    AssetPairId = summaryReport.AssetPairId,
+                    TradeAssetPairId = summaryReport.TradeAssetPairId,
+                    OpenPositionsCount = summaryReport.OpenPositionsCount,
+                    ClosedPositionsCount = summaryReport.ClosedPositionsCount,
+                    PnL = summaryReport.PnL,
+                    PnLUsd = pnlUsd,
+                    BaseAssetVolume = summaryReport.BaseAssetVolume,
+                    QuoteAssetVolume = summaryReport.QuoteAssetVolume,
+                    TotalSellBaseAssetVolume = summaryReport.TotalSellBaseAssetVolume,
+                    TotalBuyBaseAssetVolume = summaryReport.TotalBuyBaseAssetVolume,
+                    TotalSellQuoteAssetVolume = summaryReport.TotalSellQuoteAssetVolume,
+                    TotalBuyQuoteAssetVolume = summaryReport.TotalBuyQuoteAssetVolume,
+                    SellTradesCount = summaryReport.SellTradesCount,
+                    BuyTradesCount = summaryReport.BuyTradesCount,
+                    OpenVolume = openVolume,
+                    OpenVolumeLimit = openVolume / instrument?.InventoryThreshold
+                });
+            }
+
+            return items;
         }
 
         private static string CacheKey(SummaryReport summaryReport)
