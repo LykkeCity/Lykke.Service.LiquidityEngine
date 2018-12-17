@@ -8,7 +8,9 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<IReadOnlyCollection<SummaryReport>> GetAllAsync();
 
-        Task<IReadOnlyCollection<SummaryReport>> GetByPeriodAsync(DateTime startDate, DateTime endDate);
+        Task<IReadOnlyCollection<PositionSummaryReport>> GetAsync();
+        
+        Task<IReadOnlyCollection<PositionSummaryReport>> GetByPeriodAsync(DateTime startDate, DateTime endDate);
         
         Task RegisterOpenPositionAsync(Position position, IReadOnlyCollection<InternalTrade> internalTrades);
 
