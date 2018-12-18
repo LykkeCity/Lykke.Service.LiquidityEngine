@@ -52,7 +52,6 @@ namespace Lykke.Service.LiquidityEngine.Managers
 
         public async Task StartAsync()
         {
-            return;
             _tradeService.Initialize();
             
             await _storageMigrationService.MigrateStorageAsync();
