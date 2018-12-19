@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
 using JetBrains.Annotations;
@@ -150,8 +151,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settlements
             };
 
             await _settlementTradeService.UpdateAsync(settlementTrade);
-            
-            foreach (BalanceOperation balanceOperation in balanceOperations)
+
+            foreach (BalanceOperation balanceOperation in balanceOperations.OrderBy(o => o.Amount))
             {
                 if (balanceOperation.Amount > 0)
                 {
