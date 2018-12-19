@@ -9,5 +9,10 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The maximum price deviation from first level. 
         /// </summary>
         public decimal LimitOrderPriceMaxDeviation { get; set; }
+        
+        /// <summary>
+        /// Common markup for limit orders.
+        /// </summary>
+        public decimal LimitOrderPriceMarkup { get; set; }
     }
 }

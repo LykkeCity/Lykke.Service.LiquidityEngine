@@ -11,7 +11,11 @@ namespace Lykke.Service.LiquidityEngine.Validators
         {
             RuleFor(o => o.LimitOrderPriceMaxDeviation)
                 .InclusiveBetween(0, 1)
-                .WithMessage("Value should be greater than or equal to 0 and less than o equal to 1");
+                .WithMessage("Value should be greater than or equal to 0 and less than or equal to 1");
+
+            RuleFor(o => o.LimitOrderPriceMarkup)
+                .InclusiveBetween(0, 1)
+                .WithMessage("Value should be greater than or equal to 0 and less than or equal to 1");
         }
     }
 }
