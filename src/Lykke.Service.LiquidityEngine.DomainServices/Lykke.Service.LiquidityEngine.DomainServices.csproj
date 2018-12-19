@@ -4,12 +4,14 @@
     <Version>1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Data" Version="3.0.0" />
     <PackageReference Include="Lykke.B2c2Client" Version="2.3.0" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.4.0" />
+    <PackageReference Include="Lykke.Service.Dwh.Client" Version="1.1.0" />
     <PackageReference Include="Lykke.Service.ExchangeOperations.Client" Version="1.2.2" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="2.1.0" />
     <PackageReference Include="Polly" Version="6.1.2" />
     <PackageReference Include="Lykke.MatchingEngineConnector" Version="8.3.2" />
-    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lykke.Service.LiquidityEngine.Domain\Lykke.Service.LiquidityEngine.Domain.csproj" />

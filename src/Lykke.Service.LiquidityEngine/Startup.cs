@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using AutoMapper;
+using AutoMapper.Data;
 
 namespace Lykke.Service.LiquidityEngine
 {
@@ -26,6 +27,7 @@ namespace Lykke.Service.LiquidityEngine
                 {
                     Mapper.Initialize(cfg =>
                     {
+                        cfg.AddDataReaderMapping();
                         cfg.AddProfiles(typeof(AzureRepositories.AutoMapperProfile));
                         cfg.AddProfiles(typeof(PostgresRepositories.AutoMapperProfile));
                         cfg.AddProfiles(typeof(AutoMapperProfile));

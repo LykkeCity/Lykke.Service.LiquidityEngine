@@ -36,7 +36,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
                         MarketMaker = TimeSpan.FromSeconds(5),
                         Hedging = TimeSpan.FromSeconds(1),
                         LykkeBalances = TimeSpan.FromSeconds(1),
-                        ExternalBalances = TimeSpan.FromSeconds(1)
+                        ExternalBalances = TimeSpan.FromSeconds(1),
+                        Settlements = TimeSpan.FromSeconds(5)
                     };
                 }
 

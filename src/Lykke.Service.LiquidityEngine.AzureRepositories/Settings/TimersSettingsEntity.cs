@@ -14,6 +14,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
         private TimeSpan _lykkeBalances;
         private TimeSpan _externalBalances;
         private TimeSpan _hedging;
+        private TimeSpan _settlements;
 
         public TimersSettingsEntity()
         {
@@ -72,6 +73,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_externalBalances != value)
                 {
                     _externalBalances = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+        
+        public TimeSpan Settlements
+        {
+            get => _settlements;
+            set
+            {
+                if (_settlements != value)
+                {
+                    _settlements = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }

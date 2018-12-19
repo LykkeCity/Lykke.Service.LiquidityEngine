@@ -15,6 +15,7 @@ using Lykke.Service.LiquidityEngine.DomainServices.OrderBooks;
 using Lykke.Service.LiquidityEngine.DomainServices.Positions;
 using Lykke.Service.LiquidityEngine.DomainServices.Reports;
 using Lykke.Service.LiquidityEngine.DomainServices.Settings;
+using Lykke.Service.LiquidityEngine.DomainServices.Settlements;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
 using Lykke.Service.LiquidityEngine.DomainServices.Trades;
 
@@ -25,13 +26,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
     {
         private readonly string _instanceName;
         private readonly string _walletId;
+        private readonly string _database;
+        private readonly string _tradesSpName;
 
         public AutofacModule(
             string instanceName,
-            string walletId)
+            string walletId,
+            string database,
+            string tradesSpName)
         {
             _instanceName = instanceName;
             _walletId = walletId;
+            _database = database;
+            _tradesSpName = tradesSpName;
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -58,10 +65,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<CrossRateInstrumentService>()
                 .As<ICrossRateInstrumentService>()
-                .SingleInstance();
-
-            builder.RegisterType<SettlementService>()
-                .As<ISettlementService>()
                 .SingleInstance();
 
             builder.RegisterType<LykkeExchangeService>()
@@ -137,6 +140,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<ITimersSettingsService>()
                 .SingleInstance();
 
+            builder.RegisterType<SettlementService>()
+                .As<ISettlementService>()
+                .SingleInstance();
+
+            builder.RegisterType<SettlementTradeService>()
+                .As<ISettlementTradeService>()
+                .WithParameter(new NamedParameter("database", _database))
+                .WithParameter(new NamedParameter("tradesSpName", _tradesSpName))
+                .SingleInstance();
+
             builder.RegisterType<QuoteThresholdSettingsService>()
                 .As<IQuoteThresholdSettingsService>()
                 .SingleInstance();
@@ -176,6 +189,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .SingleInstance();
 
             builder.RegisterType<HedgingTimer>()
+                .AsSelf()
+                .SingleInstance();
+            
+            builder.RegisterType<SettlementsTimer>()
                 .AsSelf()
                 .SingleInstance();
         }

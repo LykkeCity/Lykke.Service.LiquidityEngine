@@ -21,7 +21,8 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="limit">The maximum number of trades.</param>
         /// <returns>A collection of external trades.</returns>
         [Get("/api/trades/external")]
-        Task<IReadOnlyCollection<ExternalTradeModel>> GetExternalTradesAsync(DateTime startDate, DateTime endDate, int limit);
+        Task<IReadOnlyCollection<ExternalTradeModel>> GetExternalTradesAsync(DateTime startDate, DateTime endDate,
+            int limit);
 
         /// <summary>
         /// Returns an external trade by id.
@@ -39,7 +40,8 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="limit">The maximum number of trades.</param>
         /// <returns>A collection of internal trades.</returns>
         [Get("/api/trades/internal")]
-        Task<IReadOnlyCollection<InternalTradeModel>> GetInternalTradesAsync(DateTime startDate, DateTime endDate, int limit);
+        Task<IReadOnlyCollection<InternalTradeModel>> GetInternalTradesAsync(DateTime startDate, DateTime endDate,
+            int limit);
 
         /// <summary>
         /// Returns an internal trade by id.
@@ -56,5 +58,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <returns>Last internal trade time.</returns>
         [Get("/api/trades/internal/{assetPairId}/time")]
         Task<LastInternalTradeTimeModel> GetLastInternalTradeTimeAsync(string assetPairId);
+
+        /// <summary>
+        /// Returns a collection of B2C2 settlement trades.
+        /// </summary>
+        /// <returns>A collection of settlement trades.</returns>
+        [Get("/api/trades/settlement")]
+        Task<IReadOnlyCollection<SettlementTradeModel>> GetSettlementTradesAsync();
     }
 }

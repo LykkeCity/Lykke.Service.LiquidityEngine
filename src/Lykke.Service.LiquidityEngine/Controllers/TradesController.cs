@@ -17,17 +17,20 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     public class TradesController : Controller, ITradesApi
     {
         private readonly ITradeService _tradeService;
+        private readonly ISettlementTradeService _settlementTradeService;
 
-        public TradesController(ITradeService tradeService)
+        public TradesController(ITradeService tradeService, ISettlementTradeService settlementTradeService)
         {
             _tradeService = tradeService;
+            _settlementTradeService = settlementTradeService;
         }
 
         /// <inheritdoc/>
         /// <response code="200">A collection of external trades.</response>
         [HttpGet("external")]
         [ProducesResponseType(typeof(IReadOnlyCollection<ExternalTradeModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<ExternalTradeModel>> GetExternalTradesAsync(DateTime startDate, DateTime endDate, int limit)
+        public async Task<IReadOnlyCollection<ExternalTradeModel>> GetExternalTradesAsync(DateTime startDate,
+            DateTime endDate, int limit)
         {
             IReadOnlyCollection<ExternalTrade> externalTrades =
                 await _tradeService.GetExternalTradesAsync(startDate, endDate, limit);
@@ -55,7 +58,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">A collection of internal trades.</response>
         [HttpGet("internal")]
         [ProducesResponseType(typeof(IReadOnlyCollection<InternalTradeModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<InternalTradeModel>> GetInternalTradesAsync(DateTime startDate, DateTime endDate, int limit)
+        public async Task<IReadOnlyCollection<InternalTradeModel>> GetInternalTradesAsync(DateTime startDate,
+            DateTime endDate, int limit)
         {
             IReadOnlyCollection<InternalTrade> internalTrades =
                 await _tradeService.GetInternalTradesAsync(startDate, endDate, limit);
@@ -83,8 +87,8 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">An internal trade.</response>
         /// <response code="404">Asset pair does not exist.</response>
         [HttpGet("internal/{assetPairId}/time")]
-        [ProducesResponseType(typeof(InternalTradeModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(InternalTradeModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.NotFound)]
         public Task<LastInternalTradeTimeModel> GetLastInternalTradeTimeAsync(string assetPairId)
         {
             DateTime lastInternalTradeTime = _tradeService.GetLastInternalTradeTime(assetPairId);
@@ -95,6 +99,18 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                     AssetPairId = assetPairId,
                     LastInternalTradeTime = lastInternalTradeTime
                 });
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">A collection of settlement trades.</response>
+        [HttpGet("settlement")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<SettlementTradeModel>), (int) HttpStatusCode.OK)]
+        public async Task<IReadOnlyCollection<SettlementTradeModel>> GetSettlementTradesAsync()
+        {
+            IReadOnlyCollection<SettlementTrade> settlementTrades =
+                await _settlementTradeService.GetAllAsync();
+
+            return Mapper.Map<SettlementTradeModel[]>(settlementTrades);
         }
     }
 }

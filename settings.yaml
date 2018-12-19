@@ -73,6 +73,13 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-Quotes-Queue
 
+  Dwh:
+    DatabaseName:
+      settings-key: LiquidityEngineService-DwhSettings-DatabaseName
+    StoredProcedures:
+      Trades:
+        settings-key: LiquidityEngineService-DwhSettings-StoredProcedures-Trades
+
 B2C2Client:
   Url:
     settings-key: B2C2AdapterUrl
@@ -90,6 +97,10 @@ BalancesServiceClient:
 ExchangeOperationsServiceClient:
   ServiceUrl:
     settings-key: ExchangeOperationsServiceUrl
+
+DwhServiceClient:
+  ServiceUrl:
+    settings-key: DwhServiceUrl
 
 MatchingEngineClient:
   IpEndpoint:
