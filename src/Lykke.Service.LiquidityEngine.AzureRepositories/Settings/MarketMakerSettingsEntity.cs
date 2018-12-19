@@ -10,6 +10,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
     public class MarketMakerSettingsEntity : AzureTableEntity
     {
         private decimal _limitOrderPriceMaxDeviation;
+        private decimal _limitOrderPriceMarkup;
 
         public MarketMakerSettingsEntity()
         {
@@ -29,6 +30,19 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_limitOrderPriceMaxDeviation != value)
                 {
                     _limitOrderPriceMaxDeviation = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public decimal LimitOrderPriceMarkup
+        {
+            get => _limitOrderPriceMarkup;
+            set
+            {
+                if (_limitOrderPriceMarkup != value)
+                {
+                    _limitOrderPriceMarkup = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }
