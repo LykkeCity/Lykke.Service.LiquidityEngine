@@ -104,6 +104,14 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .As<IQuoteThresholdSettingsRepository>()
                 .SingleInstance();
 
+            builder.Register(container => new ExternalTradeRepository(
+                    AzureTableStorage<ExternalTradeEntity>.Create(_connectionString,
+                        "ExternalTrades", container.Resolve<ILogFactory>()),
+                    AzureTableStorage<AzureIndex>.Create(_connectionString,
+                        "ExternalTradesIndices", container.Resolve<ILogFactory>())))
+                .Named<IExternalTradeRepository>("ExternalTradeRepositoryAzure")
+                .SingleInstance();
+
             builder.Register(container => new InternalTradeRepository(
                     AzureTableStorage<InternalTradeEntity>.Create(_connectionString,
                         "InternalTrades", container.Resolve<ILogFactory>()),
@@ -112,12 +120,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .Named<IInternalTradeRepository>("InternalTradeRepositoryAzure")
                 .SingleInstance();
 
-            builder.Register(container => new ExternalTradeRepository(
-                    AzureTableStorage<ExternalTradeEntity>.Create(_connectionString,
-                        "ExternalTrades", container.Resolve<ILogFactory>()),
-                    AzureTableStorage<AzureIndex>.Create(_connectionString,
-                        "ExternalTradesIndices", container.Resolve<ILogFactory>())))
-                .Named<IExternalTradeRepository>("ExternalTradeRepositoryAzure")
+            builder.Register(container => new SettlementTradeRepository(
+                    AzureTableStorage<SettlementTradeEntity>.Create(_connectionString,
+                        "SettlementTrades", container.Resolve<ILogFactory>())))
+                .As<ISettlementTradeRepository>()
                 .SingleInstance();
 
             builder.Register(container => new PositionRepository(

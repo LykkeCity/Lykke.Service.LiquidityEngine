@@ -70,6 +70,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
                 {
                     TimeSpan delay = await GetDelayAsync();
 
+                    if (delay == TimeSpan.Zero)
+                        delay = TimeSpan.FromMilliseconds(1000);
+                    
                     await Task.Delay(delay, cancellation);
                 }
                 catch (TaskCanceledException)

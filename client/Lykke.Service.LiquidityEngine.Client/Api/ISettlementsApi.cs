@@ -17,5 +17,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="model">The model which describes settlement.</param>
         [Post("/api/settlements")]
         Task SettlementAsync([Body] SettlementOperationModel model);
+        
+        /// <summary>
+        /// Execute fiat settlement.
+        /// </summary>
+        /// <param name="model">The model which describes fiat settlement.</param>
+        [Post("/api/settlements/fiat")]
+        Task SettlementAsync([Body] FiatSettlementOperationModel model);
     }
 }
