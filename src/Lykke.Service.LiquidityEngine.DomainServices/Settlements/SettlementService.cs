@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -122,7 +122,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settlements
             }
 
             settlementTrade.Complete();
-
+            
             string comment =
                 $"rebalance; {settlementTrade.Type} {settlementTrade.Volume} {settlementTrade.BaseAsset} for {settlementTrade.OppositeVolume} {settlementTrade.QuoteAsset} by price {settlementTrade.Price} ({settlementTrade.AssetPair})";
 
@@ -150,8 +150,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settlements
                 }
             };
 
-            await _settlementTradeService.UpdateAsync(settlementTrade);
-
             foreach (BalanceOperation balanceOperation in balanceOperations.OrderBy(o => o.Amount))
             {
                 if (balanceOperation.Amount > 0)
@@ -169,6 +167,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settlements
 
                 _log.InfoWithDetails("Settlement was executed", balanceOperation);
             }
+
+            await _settlementTradeService.UpdateAsync(settlementTrade);
         }
     }
 }
