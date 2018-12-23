@@ -116,6 +116,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 CloseDate = DateTime.UtcNow,
                 ClosePrice = externalTrade.Price,
                 PnL = decimal.Zero,
+                TradeAssetPairId = assetPairId,
+                TradeAvgPrice = externalTrade.Price,
                 CloseTradeId = externalTrade.Id
             };
         }
