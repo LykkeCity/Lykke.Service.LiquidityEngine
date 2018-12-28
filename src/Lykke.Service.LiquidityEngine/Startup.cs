@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Lykke.Logs.Loggers.LykkeSlack;
 using Lykke.Sdk;
 using Lykke.Service.LiquidityEngine.Settings;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using AutoMapper;
 using AutoMapper.Data;
+using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.LiquidityEngine
 {
@@ -43,6 +45,12 @@ namespace Lykke.Service.LiquidityEngine
                     logs.AzureTableName = "LiquidityEngineLog";
                     logs.AzureTableConnectionStringResolver =
                         settings => settings.LiquidityEngineService.Db.LogsConnectionString;
+
+                    logs.Extended = extendedLogs =>
+                    {
+                        extendedLogs.AddAdditionalSlackChannel("liquidity-market-maker-errors",
+                            channelOptions => { channelOptions.MinLogLevel = LogLevel.Warning; });
+                    };
                 };
             });
         }
