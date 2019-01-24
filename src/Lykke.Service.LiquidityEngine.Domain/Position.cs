@@ -48,7 +48,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public decimal ClosePrice { get; set; }
 
         /// <summary>
-        /// The realised profit and loss.
+        /// The realized profit and loss.
         /// </summary>
         public decimal PnL { get; set; }
 

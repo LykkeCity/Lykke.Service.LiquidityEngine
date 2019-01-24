@@ -24,6 +24,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly LykkeTradeSubscriberMonitor _lykkeTradeSubscriberMonitor;
         private readonly StorageMigrationService _storageMigrationService;
         private readonly ITradeService _tradeService;
+        private readonly IPnLStopLossService _pnLStopLossService;
 
         public StartupManager(
             LykkeBalancesTimer lykkeBalancesTimer,
@@ -37,7 +38,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             QuoteSubscriber[] quoteSubscribers,
             LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor,
             StorageMigrationService storageMigrationService,
-            ITradeService tradeService)
+            ITradeService tradeService,
+            IPnLStopLossService pnLStopLossService)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
             _externalBalancesTimer = externalBalancesTimer;
@@ -51,12 +53,13 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _lykkeTradeSubscriberMonitor = lykkeTradeSubscriberMonitor;
             _storageMigrationService = storageMigrationService;
             _tradeService = tradeService;
+            _pnLStopLossService = pnLStopLossService;
         }
 
         public async Task StartAsync()
         {
             _tradeService.Initialize();
-            
+
             await _storageMigrationService.MigrateStorageAsync();
 
             _b2C2QuoteSubscriber.Start();

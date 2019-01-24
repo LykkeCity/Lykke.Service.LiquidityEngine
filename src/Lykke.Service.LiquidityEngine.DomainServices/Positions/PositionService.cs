@@ -66,7 +66,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
             foreach (InternalTrade internalTrade in internalTrades)
             {
-                Instrument instrument = await _instrumentService.FundAsync(internalTrade.AssetPairId);
+                Instrument instrument = await _instrumentService.FindAsync(internalTrade.AssetPairId);
 
                 if (instrument == null)
                 {

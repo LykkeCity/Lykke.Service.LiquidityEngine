@@ -52,9 +52,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="priceAccuracy">The accuracy of price.</param>
         /// <param name="volumeAccuracy">The accuracy of volume.</param>
         /// <returns>A collection of limit orders.</returns>
-        public static IReadOnlyCollection<LimitOrder> CalculateLimitOrders(Quote quote1, Quote quote2,
-            InstrumentLevel[] levels, decimal baseAssetBalance, decimal quoteAssetBalance, int timeSinceLastTrade,
-            int halfLifePeriod, bool allowSmartMarkup, decimal markup, int priceAccuracy, int volumeAccuracy)
+        public static IReadOnlyCollection<LimitOrder> CalculateLimitOrders(
+            Quote quote1,
+            Quote quote2,
+            InstrumentLevel[] levels,
+            decimal baseAssetBalance,
+            decimal quoteAssetBalance,
+            int timeSinceLastTrade,
+            int halfLifePeriod,
+            bool allowSmartMarkup,
+            decimal markup,
+            int priceAccuracy,
+            int volumeAccuracy)
         {
             var limitOrders = new List<LimitOrder>();
 

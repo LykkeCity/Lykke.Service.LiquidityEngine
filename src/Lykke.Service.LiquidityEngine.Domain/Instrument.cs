@@ -26,7 +26,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public InstrumentMode Mode { get; set; }
 
         /// <summary>
-        /// The threshold of the instrument realised profit and loss.
+        /// The threshold of the instrument realized profit and loss.
         /// </summary>
         public decimal PnLThreshold { get; set; }
 

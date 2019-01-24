@@ -69,6 +69,9 @@ namespace Lykke.Service.LiquidityEngine.Client
         public ITradesApi Trades { get; }
 
         /// <inheritdoc/>
+        public IPnLStopLossesApi PnLStopLosses { get; }
+
+        /// <inheritdoc/>
         public ISettingsApi Settings { get; }
     }
 }

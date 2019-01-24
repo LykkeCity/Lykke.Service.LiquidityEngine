@@ -12,6 +12,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
+using Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
@@ -168,6 +169,18 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                     AzureTableStorage<DuplicateEntity>.Create(_lykkeTradesDeduplicatorConnectionString,
                         "LykkeTradesDeduplicator", container.Resolve<ILogFactory>())))
                 .As<IDeduplicator>()
+                .SingleInstance();
+
+            builder.Register(container => new PnLStopLossSettingsRepository(
+                    AzureTableStorage<PnLStopLossSettingsEntity>.Create(_connectionString,
+                        "PnLStopLossSettings", container.Resolve<ILogFactory>())))
+                .As<PnLStopLossSettingsRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new PnLStopLossEngineRepository(
+                    AzureTableStorage<PnLStopLossEngineEntity>.Create(_connectionString,
+                        "PnLStopLossEngines", container.Resolve<ILogFactory>())))
+                .As<PnLStopLossEngineRepository>()
                 .SingleInstance();
         }
     }

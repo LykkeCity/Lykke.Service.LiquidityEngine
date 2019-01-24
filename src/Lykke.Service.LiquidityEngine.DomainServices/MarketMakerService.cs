@@ -175,10 +175,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
 
             IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
-                quotes[0], quotes[1], instrument.Levels.ToArray(),
-                baseAssetBalance?.Amount ?? 0, quoteAssetBalance?.Amount ?? 0, (int) timeSinceLastTrade.TotalSeconds,
-                instrument.HalfLifePeriod, instrument.AllowSmartMarkup, marketMakerSettings.LimitOrderPriceMarkup,
-                assetPair.Accuracy, baseAsset.Accuracy);
+                quotes[0],
+                quotes[1],
+                instrument.Levels.ToArray(),
+                baseAssetBalance?.Amount ?? 0,
+                quoteAssetBalance?.Amount ?? 0,
+                (int) timeSinceLastTrade.TotalSeconds,
+                instrument.HalfLifePeriod,
+                instrument.AllowSmartMarkup,
+                marketMakerSettings.LimitOrderPriceMarkup,
+                assetPair.Accuracy,
+                baseAsset.Accuracy);
 
             await ValidateQuoteTimeoutAsync(limitOrders, quotes[0]);
 
