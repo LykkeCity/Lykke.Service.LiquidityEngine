@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Lykke.Service.LiquidityEngine.Domain.Handlers;
 
 namespace Lykke.Service.LiquidityEngine.Domain.Services
 {
-    public interface IPnLStopLossService
+    public interface IPnLStopLossService : IClosedPositionHandler
     {
         Task<IReadOnlyCollection<PnLStopLossEngine>> GetAllEnginesAsync();
 
@@ -20,5 +21,7 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         Task UpdateEngineModeAsync(string id, PnLStopLossEngineMode mode);
 
         Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId);
+
+        Task ExecuteAsync();
     }
 }

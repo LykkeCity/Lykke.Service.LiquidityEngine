@@ -57,23 +57,39 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
             if (_instrumentService.TryGetByAssetPairIdAsync(pnLStopLossSettings.AssetPairId) == null)
                 throw new InvalidOperationException($"Asset pair id is not found: '{pnLStopLossSettings.AssetPairId}'.");
 
-            // 1. If local for particular instrument then just create it
+            string assetPairId = pnLStopLossSettings.AssetPairId;
 
-            // 2. If global then create an engine for each instrument and add global settings to the DB
+            // if settings are local for particular instrument then just create it
+            if (!string.IsNullOrWhiteSpace(assetPairId))
+            {
+                _log.InfoWithDetails("Creating new pnl stop loss engine from local settings.", pnLStopLossSettings);
 
-            //IReadOnlyCollection<PnLStopLossSettings> pnLStopLosses = await GetAllAsync();
+                PnLStopLossEngine newEngine = PnLStopLossEngine.CreateFromLocalSettings(pnLStopLossSettings);
 
-            //pnLStopLossSettings.Id = Guid.NewGuid().ToString();
+                await CreateEngine(newEngine);
+            }
+            // if settings are global then create global settings in the DB and then create engines for each instrument
+            else
+            {
+                _log.InfoWithDetails("Creating new pnl stop loss engines from global settings.", pnLStopLossSettings);
 
-            //await _pnLStopLossSettingsRepository.InsertAsync(pnLStopLossSettings);
+                pnLStopLossSettings.Id = Guid.NewGuid().ToString();
 
-            //_cache.Set(pnLStopLosses);
+                await _pnLStopLossSettingsRepository.InsertAsync(pnLStopLossSettings);
 
-            //_log.InfoWithDetails("PnL stop loss created.", pnLStopLossSettings);
+                _settingsCache.Set(pnLStopLossSettings);
 
-            throw new NotImplementedException();
+                _log.InfoWithDetails("PnL stop loss global settings created.", pnLStopLossSettings);
 
-            _log.InfoWithDetails("PnL stop loss engines created.", pnLStopLossSettings);
+                IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
+
+                foreach (var instrument in instruments)
+                {
+                    PnLStopLossEngine newEngine = PnLStopLossEngine.CreateFromGlobalSettings(instrument.AssetPairId, pnLStopLossSettings);
+
+                    await CreateEngine(newEngine);
+                }
+            }
         }
 
         public async Task DeleteEngineAsync(string id)
@@ -103,16 +119,35 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
 
         public async Task ReapplyGlobalSettingsAsync(string id)
         {
-            // Find all asset pairs without passed settings and add it.
+            _log.InfoWithDetails("Start reapplying pnl stop loss global settings.", id);
 
-            throw new NotImplementedException();
+            PnLStopLossSettings globalSettings = await GetGlobalSettingsByIdAsync(id);
+
+            IReadOnlyCollection<PnLStopLossEngine> existedEngines = await GetAllEnginesAsync();
+
+            IReadOnlyCollection<string> existedAssetPairs =
+                existedEngines.Where(x => x.PnLStopLossGlobalSettingsId == id)
+                              .Select(x => x.AssetPairId)
+                              .ToList();
+
+            IReadOnlyCollection<string> allAssetPairs = (await _instrumentService.GetAllAsync())
+                .Select(x => x.AssetPairId).ToList();
+
+            IReadOnlyCollection<string> missedAssetPairIds = allAssetPairs.Except(existedAssetPairs).ToList();
+
+            foreach (var assetPairId in missedAssetPairIds)
+            {
+                PnLStopLossEngine newEngine = PnLStopLossEngine.CreateFromGlobalSettings(assetPairId, globalSettings);
+
+                await CreateEngine(newEngine);
+            }
 
             _log.InfoWithDetails("PnL stop loss global settings reapplied.", id);
         }
 
         public async Task DeleteGlobalSettingsAsync(string id)
         {
-            await GetSettingsByIdAsync(id);
+            await GetGlobalSettingsByIdAsync(id);
 
             await _pnLStopLossSettingsRepository.DeleteAsync(id);
 
@@ -128,8 +163,73 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
             if (pnLStopLossEngine.Mode == mode)
                 throw new InvalidOperationException($"Engine mode does not differ from existing: '{mode}'.");
 
-            pnLStopLossEngine.Mode = mode;
+            pnLStopLossEngine.ChangeMode(mode);
 
+            _pnLStopLossEngineRepository.UpdateAsync(pnLStopLossEngine).GetAwaiter().GetResult();
+
+            _enginesCache.Set(pnLStopLossEngine);
+
+            _log.InfoWithDetails("PnL stop loss engine updated.", pnLStopLossEngine);
+        }
+
+
+        public async Task ExecuteAsync()
+        {
+            IReadOnlyCollection<PnLStopLossEngine> allPnLStopLossEngines = await GetAllEnginesAsync();
+
+            foreach (var pnLStopLossEngine in allPnLStopLossEngines)
+                await RefreshEngine(pnLStopLossEngine);
+        }
+
+        public async Task HandleClosedPositionAsync(Position position)
+        {
+            if (position.PnL >= 0)
+                return;
+
+            _log.InfoWithDetails("Received position with negative PnL.", position);
+
+            IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetEnginesByAssetPairIdAsync(position.AssetPairId);
+
+            foreach (PnLStopLossEngine pnLStopLossEngine in pnLStopLossEngines)
+            {
+                pnLStopLossEngine.ApplyNewPosition(position);
+
+                await UpdateEngine(pnLStopLossEngine);
+            }
+        }
+
+        public async Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId)
+        {
+            IReadOnlyCollection<PnLStopLossEngine> engines = await GetAllEnginesAsync();
+
+            engines = engines.Where(x => x.AssetPairId == assetPairId
+                                         && x.Mode == PnLStopLossEngineMode.Active
+                                         && x.TotalNegativePnL <= x.PnLThreshold).ToList();
+
+            decimal totalMarkup = engines.Sum(x => x.Markup);
+
+            return totalMarkup;
+        }
+
+
+        private async Task RefreshEngine(PnLStopLossEngine pnLStopLossEngine)
+        {
+            pnLStopLossEngine.Refresh();
+
+            await UpdateEngine(pnLStopLossEngine);
+        }
+
+        private async Task CreateEngine(PnLStopLossEngine pnLStopLossEngine)
+        {
+            await _pnLStopLossEngineRepository.InsertAsync(pnLStopLossEngine);
+
+            _enginesCache.Set(pnLStopLossEngine);
+
+            _log.InfoWithDetails("PnL stop loss engine created.", pnLStopLossEngine);
+        }
+
+        private async Task UpdateEngine(PnLStopLossEngine pnLStopLossEngine)
+        {
             await _pnLStopLossEngineRepository.UpdateAsync(pnLStopLossEngine);
 
             _enginesCache.Set(pnLStopLossEngine);
@@ -137,37 +237,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
             _log.InfoWithDetails("PnL stop loss engine updated.", pnLStopLossEngine);
         }
 
-        public async Task HandleClosedPositionAsync(Position position)
-        {
-            // TODO: !!! May executes from many threads, must be lock'ed?
-
-            if (position.PnL >= 0)
-                return;
-
-            var pnLStopLossEngines = await GetEnginesByAssetPairIdAsync(position.AssetPairId);
-
-            //foreach (var engine in pnLStopLossEngines)
-            //    await ApplyNewPositionToEngine(engine, position);
-        }
-
-        //private Task ApplyNewPositionToEngine(PnLStopLossEngine pnLStopLossEngine, Position position)
-        //{
-
-        //}
-
-        public async Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId)
-        {
-            var engines = await GetAllEnginesAsync();
-
-            engines = engines.Where(x => x.Mode == PnLStopLossEngineMode.Active
-                                      && x.AssetPairId == assetPairId).ToList();
-
-            var totalMarkup = engines.Sum(x => x.Markup);
-
-            return totalMarkup;
-        }
-
-        private async Task<PnLStopLossSettings> GetSettingsByIdAsync(string id)
+        private async Task<PnLStopLossSettings> GetGlobalSettingsByIdAsync(string id)
         {
             IReadOnlyCollection<PnLStopLossSettings> pnLStopLossSettings = await GetAllGlobalSettingsAsync();
 

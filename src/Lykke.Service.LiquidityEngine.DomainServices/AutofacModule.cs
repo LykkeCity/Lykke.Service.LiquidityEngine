@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Features.AttributeFilters;
 using JetBrains.Annotations;
+using Lykke.Service.LiquidityEngine.Domain.Handlers;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.DomainServices.AssetSettings;
@@ -174,6 +175,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<PnLStopLossService>()
                 .As<IPnLStopLossService>()
+                .As<IClosedPositionHandler>()
                 .SingleInstance();
 
             RegisterTimers(builder);

@@ -22,7 +22,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLosses
         /// <summary>
         /// PnL stop loss settings identifier (for global setting only).
         /// </summary>
-        public string PnLStopLossSettingsId { get; set; }
+        public string PnLStopLossGlobalSettingsId { get; set; }
 
         /// <summary>
         /// Time interval for calculating loss.
