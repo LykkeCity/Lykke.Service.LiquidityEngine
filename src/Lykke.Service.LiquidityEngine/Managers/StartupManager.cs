@@ -17,6 +17,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly MarketMakerTimer _marketMakerTimer;
         private readonly HedgingTimer _hedgingTimer;
         private readonly SettlementsTimer _settlementsTimer;
+        private readonly PnLStopLossTimer _pnLStopLossTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
         private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
@@ -32,6 +33,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
             MarketMakerTimer marketMakerTimer,
             HedgingTimer hedgingTimer,
             SettlementsTimer settlementsTimer,
+            PnLStopLossTimer pnLStopLossTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
             B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
@@ -46,6 +48,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _marketMakerTimer = marketMakerTimer;
             _hedgingTimer = hedgingTimer;
             _settlementsTimer = settlementsTimer;
+            _pnLStopLossTimer = pnLStopLossTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
             _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
@@ -80,8 +83,12 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _hedgingTimer.Start();
             
             _settlementsTimer.Start();
-            
+
             _lykkeTradeSubscriberMonitor.Start();
+
+            await _pnLStopLossService.Initialize();
+
+            _pnLStopLossTimer.Start();
         }
     }
 }

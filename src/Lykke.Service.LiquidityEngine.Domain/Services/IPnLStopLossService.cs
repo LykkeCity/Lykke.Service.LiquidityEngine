@@ -20,8 +20,10 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 
         Task UpdateEngineModeAsync(string id, PnLStopLossEngineMode mode);
 
-        Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId);
+        Task Initialize();
 
         Task ExecuteAsync();
+
+        Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId);
     }
 }

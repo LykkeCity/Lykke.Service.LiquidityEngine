@@ -35,16 +35,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
             _log = logFactory.CreateLog(this);
         }
 
+        public async Task Initialize()
+        {
+            // _settingsCache
+
+            var pnLStopLossSettings = await _pnLStopLossSettingsRepository.GetAllAsync();
+
+            _settingsCache.Initialize(pnLStopLossSettings);
+
+            // _enginesCache
+
+            var pnLStopLossEngines = await _pnLStopLossEngineRepository.GetAllAsync();
+
+            _enginesCache.Initialize(pnLStopLossEngines);
+        }
+
         public async Task<IReadOnlyCollection<PnLStopLossEngine>> GetAllEnginesAsync()
         {
             IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = _enginesCache.GetAll();
-
-            if (pnLStopLossEngines == null)
-            {
-                pnLStopLossEngines = await _pnLStopLossEngineRepository.GetAllAsync();
-
-                _enginesCache.Initialize(pnLStopLossEngines);
-            }
 
             return pnLStopLossEngines;
         }
@@ -106,13 +114,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
         public async Task<IReadOnlyCollection<PnLStopLossSettings>> GetAllGlobalSettingsAsync()
         {
             IReadOnlyCollection<PnLStopLossSettings> pnLStopLossSettings = _settingsCache.GetAll();
-
-            if (pnLStopLossSettings == null)
-            {
-                pnLStopLossSettings = await _pnLStopLossSettingsRepository.GetAllAsync();
-
-                _settingsCache.Initialize(pnLStopLossSettings);
-            }
 
             return pnLStopLossSettings;
         }
