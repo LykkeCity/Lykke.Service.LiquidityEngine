@@ -202,6 +202,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<SettlementsTimer>()
                 .AsSelf()
                 .SingleInstance();
+
+            builder.RegisterType<PnLStopLossTimer>()
+                .AsSelf()
+                .SingleInstance();
         }
     }
 }

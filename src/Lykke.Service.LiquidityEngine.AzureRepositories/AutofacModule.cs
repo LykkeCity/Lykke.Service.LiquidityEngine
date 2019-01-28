@@ -174,13 +174,13 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             builder.Register(container => new PnLStopLossSettingsRepository(
                     AzureTableStorage<PnLStopLossSettingsEntity>.Create(_connectionString,
                         "PnLStopLossSettings", container.Resolve<ILogFactory>())))
-                .As<PnLStopLossSettingsRepository>()
+                .As<IPnLStopLossSettingsRepository>()
                 .SingleInstance();
 
             builder.Register(container => new PnLStopLossEngineRepository(
                     AzureTableStorage<PnLStopLossEngineEntity>.Create(_connectionString,
                         "PnLStopLossEngines", container.Resolve<ILogFactory>())))
-                .As<PnLStopLossEngineRepository>()
+                .As<IPnLStopLossEngineRepository>()
                 .SingleInstance();
         }
     }
