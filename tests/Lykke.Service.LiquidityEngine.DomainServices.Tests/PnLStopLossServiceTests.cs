@@ -68,6 +68,50 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         }
 
         [TestMethod]
+        public async Task PnL_Stop_Loss_First_Position_With_Exceeded_Threshold_Test()
+        {
+            // arrange
+
+            var pnLStopLossService = new PnLStopLossService(
+                _pnLStopLossSettingsRepository.Object,
+                _pnLStopLossEngineRepository.Object,
+                _instrumentService.Object,
+                LogFactory.Create()
+            );
+
+            await pnLStopLossService.Initialize();
+
+            var settings = new PnLStopLossSettings
+            {
+                AssetPairId = AssetPairId,
+                Interval = TimeSpan.FromSeconds(3),
+                Markup = 0.03m,
+                PnLThreshold = -100
+            };
+
+            await pnLStopLossService.CreateAsync(settings);
+
+            // act
+
+            var position = new Position
+            {
+                AssetPairId = AssetPairId,
+                PnL = -100
+            };
+            await pnLStopLossService.HandleClosedPositionAsync(position);
+
+            await pnLStopLossService.ExecuteAsync();
+
+            // assert 
+
+            var engine = (await pnLStopLossService.GetAllEnginesAsync()).Single();
+            Assert.AreEqual(PnLStopLossEngineMode.Active, engine.Mode);
+            Assert.AreEqual(-100m, engine.TotalNegativePnL);
+            var markup = await pnLStopLossService.GetTotalMarkupByAssetPairIdAsync(AssetPairId);
+            Assert.AreEqual(0.03m, markup);
+        }
+
+        [TestMethod]
         public async Task PnL_Stop_Loss_Test()
         {
             // arrange
@@ -98,31 +142,34 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 AssetPairId = AssetPairId,
                 PnL = -50
             };
-
             await pnLStopLossService.HandleClosedPositionAsync(position);
+
+            // assert that negative PnL in NOT enough
+            var engine = (await pnLStopLossService.GetAllEnginesAsync()).Single();
+            Assert.AreEqual(PnLStopLossEngineMode.Idle, engine.Mode);
+            Assert.AreEqual(-50m, engine.TotalNegativePnL);
+            var markup = await pnLStopLossService.GetTotalMarkupByAssetPairIdAsync(AssetPairId);
+            Assert.AreEqual(0m, markup);
 
             Thread.Sleep(2 * 1000);
 
+            // act
             position = new Position
             {
                 AssetPairId = AssetPairId,
                 PnL = -51
             };
-
             await pnLStopLossService.HandleClosedPositionAsync(position);
 
             Thread.Sleep(2 * 1000);
 
             await pnLStopLossService.ExecuteAsync();
 
-            // assert
-
-            var engine = (await pnLStopLossService.GetAllEnginesAsync()).Single();
-
+            // assert that negative PnL in enough
+            engine = (await pnLStopLossService.GetAllEnginesAsync()).Single();
+            Assert.AreEqual(PnLStopLossEngineMode.Active, engine.Mode);
             Assert.AreEqual(-101m, engine.TotalNegativePnL);
-
-            var markup = await pnLStopLossService.GetTotalMarkupByAssetPairIdAsync(AssetPairId);
-
+            markup = await pnLStopLossService.GetTotalMarkupByAssetPairIdAsync(AssetPairId);
             Assert.AreEqual(0.03m, markup);
 
             // wait until interval is up
@@ -132,13 +179,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             await pnLStopLossService.ExecuteAsync();
 
             // assert again that engine is off and markup is 0
-
             engine = (await pnLStopLossService.GetAllEnginesAsync()).Single();
-
+            Assert.AreEqual(PnLStopLossEngineMode.Idle, engine.Mode);
             Assert.AreEqual(0m, engine.TotalNegativePnL);
-
             markup = await pnLStopLossService.GetTotalMarkupByAssetPairIdAsync(AssetPairId);
-
             Assert.AreEqual(0m, markup);
         }
     }

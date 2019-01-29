@@ -48,7 +48,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="timeSinceLastTrade">The total seconds from last trade in order book.</param>
         /// <param name="halfLifePeriod">The half life period in seconds.</param>
         /// <param name="allowSmartMarkup">If <c>true</c> then smart markup for first level will be applied; otherwise default markup.</param>
-        /// <param name="markup">Common markup.</param>
+        /// <param name="commonMarkup">Common markup.</param>
+        /// <param name="pnLStopLossMarkup">Total markup from pnl stop loss settings.</param>
         /// <param name="priceAccuracy">The accuracy of price.</param>
         /// <param name="volumeAccuracy">The accuracy of volume.</param>
         /// <returns>A collection of limit orders.</returns>
@@ -61,7 +62,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             int timeSinceLastTrade,
             int halfLifePeriod,
             bool allowSmartMarkup,
-            decimal markup,
+            decimal commonMarkup,
+            decimal pnLStopLossMarkup,
             int priceAccuracy,
             int volumeAccuracy)
         {
@@ -108,10 +110,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }
 
             decimal sellFirstLevelPrice =
-                (sellRawPrice * (1 + sellFirstLevelMarkup + markup)).TruncateDecimalPlaces(priceAccuracy, true);
+                (sellRawPrice * (1 + sellFirstLevelMarkup + commonMarkup + pnLStopLossMarkup)).TruncateDecimalPlaces(priceAccuracy, true);
 
             decimal buyFirstLevelPrice =
-                (buyRawPrice * (1 - (buyFirstLevelMarkup + markup))).TruncateDecimalPlaces(priceAccuracy);
+                (buyRawPrice * (1 - (buyFirstLevelMarkup + commonMarkup + pnLStopLossMarkup))).TruncateDecimalPlaces(priceAccuracy);
 
             limitOrders.Add(LimitOrder.CreateSell(sellFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy)));
             limitOrders.Add(LimitOrder.CreateBuy(buyFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy)));
@@ -134,10 +136,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 buyRawPrice = (buyMarketPrice * sumVolume - prevBuyMarketPrice * prevSumVolume) / levels[i].Volume;
 
-                decimal sellPrice = (sellRawPrice * (1 + levels[i].Markup + markup))
+                decimal sellPrice = (sellRawPrice * (1 + levels[i].Markup + commonMarkup + pnLStopLossMarkup))
                     .TruncateDecimalPlaces(priceAccuracy, true);
 
-                decimal buyPrice = (buyRawPrice * (1 - (levels[i].Markup + markup)))
+                decimal buyPrice = (buyRawPrice * (1 - (levels[i].Markup + commonMarkup + pnLStopLossMarkup)))
                     .TruncateDecimalPlaces(priceAccuracy);
 
                 limitOrders.Add(LimitOrder.CreateSell(Math.Max(sellFirstLevelPrice, sellPrice),

@@ -34,6 +34,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IMarketMakerSettingsService _marketMakerSettingsService;
         private readonly ITradeService _tradeService;
         private readonly IAssetPairLinkService _assetPairLinkService;
+        private readonly IPnLStopLossService _pnLStopLossService;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -51,6 +52,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IMarketMakerSettingsService marketMakerSettingsService,
             ITradeService tradeService,
             IAssetPairLinkService assetPairLinkService,
+            IPnLStopLossService pnLStopLossService,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -67,6 +69,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _marketMakerSettingsService = marketMakerSettingsService;
             _tradeService = tradeService;
             _assetPairLinkService = assetPairLinkService;
+            _pnLStopLossService = pnLStopLossService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -174,6 +177,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
 
+            decimal pnLStopLossMarkup = await _pnLStopLossService.GetTotalMarkupByAssetPairIdAsync(assetPair.Id);
+
             IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
                 quotes[0],
                 quotes[1],
@@ -184,6 +189,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 instrument.HalfLifePeriod,
                 instrument.AllowSmartMarkup,
                 marketMakerSettings.LimitOrderPriceMarkup,
+                pnLStopLossMarkup,
                 assetPair.Accuracy,
                 baseAsset.Accuracy);
 

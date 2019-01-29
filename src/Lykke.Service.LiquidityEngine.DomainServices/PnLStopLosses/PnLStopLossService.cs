@@ -19,12 +19,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
         private readonly IPnLStopLossEngineRepository _pnLStopLossEngineRepository;
         private readonly InMemoryCache<PnLStopLossEngine> _enginesCache;
         private readonly IInstrumentService _instrumentService;
+        private readonly ICrossRateInstrumentService _crossRateInstrumentService;
         private readonly ILog _log;
 
         public PnLStopLossService(
             IPnLStopLossSettingsRepository pnLStopLossSettingsRepository,
             IPnLStopLossEngineRepository pnLStopLossEngineRepository,
             IInstrumentService instrumentService,
+            ICrossRateInstrumentService crossRateInstrumentService,
             ILogFactory logFactory)
         {
             _pnLStopLossSettingsRepository = pnLStopLossSettingsRepository;
@@ -32,6 +34,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
             _pnLStopLossEngineRepository = pnLStopLossEngineRepository;
             _enginesCache = new InMemoryCache<PnLStopLossEngine>(engine => engine.Id, false);
             _instrumentService = instrumentService;
+            _crossRateInstrumentService = crossRateInstrumentService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -189,11 +192,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses
 
             _log.InfoWithDetails("Received position with negative PnL.", position);
 
+            decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(position.AssetPairId,
+                position.PnL);
+
+            if (!pnlUsd.HasValue)
+            {
+                _log.Warning($"Can't convert quote asset to USD for '{position.AssetPairId}'. Skipped pnl stop loss calculation.");
+
+                return;
+            }
+
             IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetEnginesByAssetPairIdAsync(position.AssetPairId);
 
             foreach (PnLStopLossEngine pnLStopLossEngine in pnLStopLossEngines)
             {
-                pnLStopLossEngine.ApplyNewPosition(position);
+                pnLStopLossEngine.AddPnL(pnlUsd.Value);
 
                 await UpdateEngine(pnLStopLossEngine);
             }

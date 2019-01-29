@@ -45,7 +45,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// First time when negative PnL occured.
         /// </summary>
-        public DateTime FirstTime { get; set; }
+        public DateTime StartTime { get; set; }
 
         /// <summary>
         /// Last time when negative PnL occured.
@@ -68,7 +68,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Markup = pnLStopLossSettings.Markup,
                 PnLStopLossGlobalSettingsId = null,
                 TotalNegativePnL = 0,
-                FirstTime = default(DateTime),
+                StartTime = default(DateTime),
                 LastTime = default(DateTime),
                 Mode = PnLStopLossEngineMode.Idle
             };
@@ -85,18 +85,18 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 Markup = pnLStopLossSettings.Markup,
                 PnLStopLossGlobalSettingsId = pnLStopLossSettings.Id,
                 TotalNegativePnL = 0,
-                FirstTime = default(DateTime),
+                StartTime = default(DateTime),
                 LastTime = default(DateTime),
                 Mode = PnLStopLossEngineMode.Idle
             };
         }
 
-        public void ApplyNewPosition(Position position)
+        public void AddPnL(decimal positionNegativePnL)
         {
             if (TotalNegativePnL == 0)
-                FirstTime = DateTime.UtcNow;
+                StartTime = DateTime.UtcNow;
 
-            TotalNegativePnL += position.PnL;
+            TotalNegativePnL += positionNegativePnL;
 
             LastTime = DateTime.UtcNow;
 
@@ -105,19 +105,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
         public void Refresh()
         {
-            if (TotalNegativePnL == 0)
-                return;
-
             if (DateTime.UtcNow - LastTime > Interval)
                 Reset();
 
-            if (DateTime.UtcNow - FirstTime > Interval)
-            {
-                if (TotalNegativePnL < PnLThreshold)
-                    ChangeMode(PnLStopLossEngineMode.Active);
-                else
-                    Reset();
-            }
+            if (TotalNegativePnL <= PnLThreshold)
+                ChangeMode(PnLStopLossEngineMode.Active);
         }
 
         public void ChangeMode(PnLStopLossEngineMode mode)
@@ -128,7 +120,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public void Reset()
         {
             TotalNegativePnL = 0;
-            FirstTime = default(DateTime);
+            StartTime = default(DateTime);
             LastTime = default(DateTime);
             ChangeMode(PnLStopLossEngineMode.Idle);
         }

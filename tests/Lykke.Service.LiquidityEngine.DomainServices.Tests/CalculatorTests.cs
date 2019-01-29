@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common;
@@ -92,7 +92,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             // act
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders =
-                Calculator.CalculateLimitOrders(quote1, quote2, levels, 0, 0, 0, 0, false, 0, priceAccuracy,
+                Calculator.CalculateLimitOrders(quote1, quote2, levels, 0, 0, 0, 0, false, 0, 0, priceAccuracy,
                     volumeAccuracy);
 
             // assert
@@ -142,7 +142,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             // act
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders = Calculator.CalculateLimitOrders(quote1, quote2, levels,
-                baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, priceAccuracy,
+                baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, 0, priceAccuracy,
                 volumeAccuracy);
 
             // assert
@@ -192,7 +192,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             // act
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders = Calculator.CalculateLimitOrders(quote1, quote2, levels,
-                baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, priceAccuracy,
+                baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, 0, priceAccuracy,
                 volumeAccuracy);
 
             // assert
@@ -242,7 +242,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             // act
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders = Calculator.CalculateLimitOrders(quote1, quote2, levels,
-                baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, priceAccuracy,
+                baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, 0, priceAccuracy,
                 volumeAccuracy);
 
             // assert
