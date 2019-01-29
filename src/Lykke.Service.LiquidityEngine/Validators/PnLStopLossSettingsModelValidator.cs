@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using JetBrains.Annotations;
-using Lykke.Service.LiquidityEngine.Client.Models.PnLStopLosses;
+using Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossSettings;
 
 namespace Lykke.Service.LiquidityEngine.Validators
 {

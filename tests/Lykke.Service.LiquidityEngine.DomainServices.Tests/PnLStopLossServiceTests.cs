@@ -89,7 +89,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 PnLThreshold = -100
             };
 
-            await pnLStopLossService.CreateAsync(settings);
+            await pnLStopLossService.AddSettingsAsync(settings);
 
             // act
 
@@ -128,7 +128,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 PnLThreshold = -100
             };
 
-            await pnLStopLossService.CreateAsync(settings);
+            await pnLStopLossService.AddSettingsAsync(settings);
 
             // act
 

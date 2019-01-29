@@ -20,7 +20,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// PnL stop loss settings identifier (for global setting only).
         /// </summary>
-        public string PnLStopLossGlobalSettingsId { get; set; }
+        public string PnLStopLossSettingsId { get; set; }
 
         /// <summary>
         /// Time interval for calculating loss.
@@ -30,7 +30,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// PnL threshold.
         /// </summary>
-        public decimal PnLThreshold { get; set; }
+        public decimal Threshold { get; set; }
 
         /// <summary>
         /// Markup.
@@ -57,38 +57,22 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// </summary>
         public PnLStopLossEngineMode Mode { get; set; }
 
-        public static PnLStopLossEngine CreateFromLocalSettings(PnLStopLossSettings pnLStopLossSettings)
+        public PnLStopLossEngine()
         {
-            return new PnLStopLossEngine
-            {
-                Id = Guid.NewGuid().ToString(),
-                AssetPairId = pnLStopLossSettings.AssetPairId,
-                Interval = pnLStopLossSettings.Interval,
-                PnLThreshold = pnLStopLossSettings.PnLThreshold,
-                Markup = pnLStopLossSettings.Markup,
-                PnLStopLossGlobalSettingsId = null,
-                TotalNegativePnL = 0,
-                StartTime = default(DateTime),
-                LastTime = default(DateTime),
-                Mode = PnLStopLossEngineMode.Idle
-            };
         }
 
-        public static PnLStopLossEngine CreateFromGlobalSettings(string assetPairId, PnLStopLossSettings pnLStopLossSettings)
+        public PnLStopLossEngine(PnLStopLossSettings pnLStopLossSettings)
         {
-            return new PnLStopLossEngine
-            {
-                Id = Guid.NewGuid().ToString(),
-                AssetPairId = assetPairId,
-                Interval = pnLStopLossSettings.Interval,
-                PnLThreshold = pnLStopLossSettings.PnLThreshold,
-                Markup = pnLStopLossSettings.Markup,
-                PnLStopLossGlobalSettingsId = pnLStopLossSettings.Id,
-                TotalNegativePnL = 0,
-                StartTime = default(DateTime),
-                LastTime = default(DateTime),
-                Mode = PnLStopLossEngineMode.Idle
-            };
+            Id = Guid.NewGuid().ToString();
+            AssetPairId = pnLStopLossSettings.AssetPairId;
+            Interval = pnLStopLossSettings.Interval;
+            Threshold = pnLStopLossSettings.PnLThreshold;
+            Markup = pnLStopLossSettings.Markup;
+            PnLStopLossSettingsId = null;
+            TotalNegativePnL = 0;
+            StartTime = default(DateTime);
+            LastTime = default(DateTime);
+            Mode = PnLStopLossEngineMode.Idle;
         }
 
         public void AddPnL(decimal positionNegativePnL)
@@ -103,18 +87,26 @@ namespace Lykke.Service.LiquidityEngine.Domain
             Refresh();
         }
 
+        public void Update(PnLStopLossEngine pnLStopLossEngine)
+        {
+            Interval = pnLStopLossEngine.Interval;
+            Threshold = pnLStopLossEngine.Threshold;
+            Markup = pnLStopLossEngine.Markup;
+            TotalNegativePnL = 0;
+            StartTime = default(DateTime);
+            LastTime = default(DateTime);
+            Mode = PnLStopLossEngineMode.Idle;
+        }
+
         public void Refresh()
         {
             if (DateTime.UtcNow - LastTime > Interval)
                 Reset();
 
-            if (TotalNegativePnL <= PnLThreshold)
-                ChangeMode(PnLStopLossEngineMode.Active);
-        }
-
-        public void ChangeMode(PnLStopLossEngineMode mode)
-        {
-            Mode = mode;
+            if (TotalNegativePnL <= Threshold)
+            {
+                Mode = PnLStopLossEngineMode.Active;
+            }
         }
 
         public void Reset()
@@ -122,7 +114,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
             TotalNegativePnL = 0;
             StartTime = default(DateTime);
             LastTime = default(DateTime);
-            ChangeMode(PnLStopLossEngineMode.Idle);
+            Mode = PnLStopLossEngineMode.Idle;
         }
     }
 }

@@ -12,9 +12,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
     public class PnLStopLossEngineEntity : AzureTableEntity
     {
         private string _assetPairId;
-        private string _pnLStopLossGlobalGlobalSettingsId;
+        private string _pnLStopLossSettingsId;
         private TimeSpan _interval;
-        private decimal _pnLThreshold;
+        private decimal _threshold;
         private decimal _markup;
         private decimal _totalNegativePnL;
         private DateTime _startTime;
@@ -47,14 +47,14 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
             }
         }
 
-        public string PnLStopLossGlobalSettingsId
+        public string PnLStopLossSettingsId
         {
-            get => _pnLStopLossGlobalGlobalSettingsId;
+            get => _pnLStopLossSettingsId;
             set
             {
-                if (_pnLStopLossGlobalGlobalSettingsId != value)
+                if (_pnLStopLossSettingsId != value)
                 {
-                    _pnLStopLossGlobalGlobalSettingsId = value;
+                    _pnLStopLossSettingsId = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }
@@ -73,14 +73,14 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
             }
         }
 
-        public decimal PnLThreshold
+        public decimal Threshold
         {
-            get => _pnLThreshold;
+            get => _threshold;
             set
             {
-                if (_pnLThreshold != value)
+                if (_threshold != value)
                 {
-                    _pnLThreshold = value;
+                    _threshold = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }

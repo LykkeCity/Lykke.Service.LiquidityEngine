@@ -31,5 +31,18 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// Markup.
         /// </summary>
         public decimal Markup { get; set; }
+
+        public PnLStopLossSettings()
+        {
+        }
+
+        public PnLStopLossSettings(PnLStopLossSettings pnLStopLossSettings)
+        {
+            Id = Guid.NewGuid().ToString();
+            AssetPairId = pnLStopLossSettings.AssetPairId;
+            Interval = pnLStopLossSettings.Interval;
+            PnLThreshold = pnLStopLossSettings.PnLThreshold;
+            Markup = pnLStopLossSettings.Markup;
+        }
     }
 }

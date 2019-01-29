@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLosses
+namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossSettings
 {
     /// <summary>
     /// Represents a pnl stop loss settings.

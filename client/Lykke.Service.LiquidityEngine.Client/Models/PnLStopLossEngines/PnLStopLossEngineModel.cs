@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLosses
+namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossEngines
 {
     /// <summary>
     /// Represents a pnl stop loss engine.
@@ -22,7 +22,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLosses
         /// <summary>
         /// PnL stop loss settings identifier (for global setting only).
         /// </summary>
-        public string PnLStopLossGlobalSettingsId { get; set; }
+        public string PnLStopLossSettingsId { get; set; }
 
         /// <summary>
         /// Time interval for calculating loss.
@@ -32,7 +32,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLosses
         /// <summary>
         /// PnL threshold.
         /// </summary>
-        public decimal PnLThreshold { get; set; }
+        public decimal Threshold { get; set; }
 
         /// <summary>
         /// Markup.
