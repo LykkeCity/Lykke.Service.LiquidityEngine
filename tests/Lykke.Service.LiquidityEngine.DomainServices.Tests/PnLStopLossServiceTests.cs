@@ -27,6 +27,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IInstrumentService> _instrumentService =
             new Mock<IInstrumentService>();
 
+        private readonly Mock<ICrossRateInstrumentService> _crossRateInstrumentService =
+            new Mock<ICrossRateInstrumentService>();
+
         [TestInitialize]
         public void TestInitialize()
         {
@@ -65,6 +68,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                     AssetPairId = AssetPairId
                 }));
 
+            _crossRateInstrumentService.Setup(o => o.ConvertPriceAsync(It.IsAny<string>(), It.IsAny<decimal>()))
+                .Returns((string assetPairId, decimal price) => Task.FromResult(price as decimal?));
         }
 
         [TestMethod]
@@ -72,12 +77,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
 
-            var pnLStopLossService = new PnLStopLossService(
-                _pnLStopLossSettingsRepository.Object,
-                _pnLStopLossEngineRepository.Object,
-                _instrumentService.Object,
-                LogFactory.Create()
-            );
+            var pnLStopLossService = GetInstance();
 
             await pnLStopLossService.Initialize();
 
@@ -116,12 +116,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
 
-            var pnLStopLossService = new PnLStopLossService(
-                _pnLStopLossSettingsRepository.Object,
-                _pnLStopLossEngineRepository.Object,
-                _instrumentService.Object,
-                LogFactory.Create()
-                );
+            var pnLStopLossService = GetInstance();
 
             await pnLStopLossService.Initialize();
 
@@ -184,6 +179,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             Assert.AreEqual(0m, engine.TotalNegativePnL);
             markup = await pnLStopLossService.GetTotalMarkupByAssetPairIdAsync(AssetPairId);
             Assert.AreEqual(0m, markup);
+        }
+
+        private IPnLStopLossService GetInstance()
+        {
+            return new PnLStopLossService(
+                _pnLStopLossSettingsRepository.Object,
+                _pnLStopLossEngineRepository.Object,
+                _instrumentService.Object,
+                _crossRateInstrumentService.Object,
+                LogFactory.Create()
+            );
         }
     }
 }
