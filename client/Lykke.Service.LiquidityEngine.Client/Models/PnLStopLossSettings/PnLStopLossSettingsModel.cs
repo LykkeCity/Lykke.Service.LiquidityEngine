@@ -27,7 +27,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossSettings
         /// <summary>
         /// PnL threshold.
         /// </summary>
-        public decimal PnLThreshold { get; set; }
+        public decimal Threshold { get; set; }
 
         /// <summary>
         /// Markup.

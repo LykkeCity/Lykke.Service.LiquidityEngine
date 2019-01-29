@@ -66,7 +66,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
             Id = Guid.NewGuid().ToString();
             AssetPairId = pnLStopLossSettings.AssetPairId;
             Interval = pnLStopLossSettings.Interval;
-            Threshold = pnLStopLossSettings.PnLThreshold;
+            Threshold = pnLStopLossSettings.Threshold;
             Markup = pnLStopLossSettings.Markup;
             PnLStopLossSettingsId = null;
             TotalNegativePnL = 0;

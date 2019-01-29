@@ -12,7 +12,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
     {
         private string _assetPairId;
         private TimeSpan _interval;
-        private decimal _pnLThreshold;
+        private decimal _threshold;
         private decimal _markup;
 
         public PnLStopLossSettingsEntity()
@@ -53,14 +53,14 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
             }
         }
 
-        public decimal PnLThreshold
+        public decimal Threshold
         {
-            get => _pnLThreshold;
+            get => _threshold;
             set
             {
-                if (_pnLThreshold != value)
+                if (_threshold != value)
                 {
-                    _pnLThreshold = value;
+                    _threshold = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }

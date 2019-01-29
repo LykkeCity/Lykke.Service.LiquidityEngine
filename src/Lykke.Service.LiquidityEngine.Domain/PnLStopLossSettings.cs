@@ -25,7 +25,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// <summary>
         /// PnL threshold.
         /// </summary>
-        public decimal PnLThreshold { get; set; }
+        public decimal Threshold { get; set; }
 
         /// <summary>
         /// Markup.
@@ -41,7 +41,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
             Id = Guid.NewGuid().ToString();
             AssetPairId = pnLStopLossSettings.AssetPairId;
             Interval = pnLStopLossSettings.Interval;
-            PnLThreshold = pnLStopLossSettings.PnLThreshold;
+            Threshold = pnLStopLossSettings.Threshold;
             Markup = pnLStopLossSettings.Markup;
         }
     }

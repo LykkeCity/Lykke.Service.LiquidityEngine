@@ -86,7 +86,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 AssetPairId = AssetPairId,
                 Interval = TimeSpan.FromSeconds(3),
                 Markup = 0.03m,
-                PnLThreshold = -100
+                Threshold = -100
             };
 
             await pnLStopLossService.AddSettingsAsync(settings);
@@ -125,7 +125,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 AssetPairId = AssetPairId,
                 Interval = TimeSpan.FromSeconds(3),
                 Markup = 0.03m,
-                PnLThreshold = -100
+                Threshold = -100
             };
 
             await pnLStopLossService.AddSettingsAsync(settings);
