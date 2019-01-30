@@ -13,7 +13,8 @@ using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Logging;
 using Lykke.Service.LiquidityEngine.DomainServices.MarketMaker;
 using Lykke.Service.LiquidityEngine.DomainServices.OrderBooks;
-using Lykke.Service.LiquidityEngine.DomainServices.PnLStopLosses;
+using Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines;
+using Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings;
 using Lykke.Service.LiquidityEngine.DomainServices.Positions;
 using Lykke.Service.LiquidityEngine.DomainServices.Reports;
 using Lykke.Service.LiquidityEngine.DomainServices.Settings;
@@ -173,9 +174,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .As<IHedgeService>()
                 .SingleInstance();
 
-            builder.RegisterType<PnLStopLossService>()
-                .As<IPnLStopLossService>()
+            builder.RegisterType<PnLStopLossEngineService>()
+                .As<IPnLStopLossEngineService>()
                 .As<IClosedPositionHandler>()
+                .SingleInstance();
+
+            builder.RegisterType<PnLStopLossSettingsService>()
+                .As<IPnLStopLossSettingsService>()
                 .SingleInstance();
 
             RegisterTimers(builder);

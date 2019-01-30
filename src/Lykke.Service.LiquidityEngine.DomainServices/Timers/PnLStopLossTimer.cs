@@ -11,22 +11,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
     [UsedImplicitly]
     public class PnLStopLossTimer : Timer
     {
-        private readonly IPnLStopLossService _pnLStopLossService;
+        private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
         private readonly ITimersSettingsService _timersSettingsService;
 
         public PnLStopLossTimer(
-            IPnLStopLossService pnLStopLossService,
+            IPnLStopLossEngineService pnLStopLossEngineService,
             ITimersSettingsService timersSettingsService,
             ILogFactory logFactory)
         {
-            _pnLStopLossService = pnLStopLossService;
+            _pnLStopLossEngineService = pnLStopLossEngineService;
             _timersSettingsService = timersSettingsService;
             Log = logFactory.CreateLog(this);
         }
 
         protected override Task OnExecuteAsync(CancellationToken cancellation)
         {
-            return _pnLStopLossService.ExecuteAsync();
+            return _pnLStopLossEngineService.ExecuteAsync();
         }
 
         protected override async Task<TimeSpan> GetDelayAsync()

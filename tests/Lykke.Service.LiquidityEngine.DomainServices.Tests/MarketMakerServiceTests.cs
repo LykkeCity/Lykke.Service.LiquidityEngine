@@ -58,7 +58,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         
         private readonly Mock<IAssetPairLinkService> _assetPairLinkServiceMock = new Mock<IAssetPairLinkService>();
 
-        private readonly Mock<IPnLStopLossService> _pnLStopLossService = new Mock<IPnLStopLossService>();
+        private readonly Mock<IPnLStopLossEngineService> _pnLStopLossEngineService = new Mock<IPnLStopLossEngineService>();
 
         private readonly List<Instrument> _instruments = new List<Instrument>();
 
@@ -138,7 +138,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             _quoteTimeoutSettingsServiceMock.Setup(o => o.GetAsync())
                 .Returns(() => Task.FromResult(_quoteTimeoutSettings));
 
-            _pnLStopLossService.Setup(o => o.GetTotalMarkupByAssetPairIdAsync(It.IsAny<string>()))
+            _pnLStopLossEngineService.Setup(o => o.GetTotalMarkupByAssetPairIdAsync(It.IsAny<string>()))
                 .Returns(() => Task.FromResult(0m));
 
             _service = new MarketMakerService(
@@ -156,7 +156,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _marketMakerSettingsServiceMock.Object,
                 _tradeServiceMock.Object,
                 _assetPairLinkServiceMock.Object,
-                _pnLStopLossService.Object,
+                _pnLStopLossEngineService.Object,
                 EmptyLogFactory.Instance);
         }
 

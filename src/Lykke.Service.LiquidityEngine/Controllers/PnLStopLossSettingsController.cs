@@ -18,11 +18,11 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     [Route("/api/[controller]")]
     public class PnLStopLossSettingsController : Controller, IPnLStopLossSettingsApi
     {
-        private readonly IPnLStopLossService _pnLStopLossService;
+        private readonly IPnLStopLossSettingsService _pnLStopLossSettingsService;
 
-        public PnLStopLossSettingsController(IPnLStopLossService pnLStopLossService)
+        public PnLStopLossSettingsController(IPnLStopLossSettingsService pnLStopLossService)
         {
-            _pnLStopLossService = pnLStopLossService;
+            _pnLStopLossSettingsService = pnLStopLossService;
         }
 
         /// <inheritdoc/>
@@ -33,7 +33,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         {
             var stopLoss = Mapper.Map<PnLStopLossSettings>(pnLStopLossSettingsModel);
 
-            await _pnLStopLossService.AddSettingsAsync(stopLoss);
+            await _pnLStopLossSettingsService.AddAsync(stopLoss);
         }
 
         /// <inheritdoc/>
@@ -42,7 +42,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<PnLStopLossEngineModel>), (int)HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<PnLStopLossSettingsModel>> GetAllAsync()
         {
-            IReadOnlyCollection<PnLStopLossSettings> stopLossSettings = await _pnLStopLossService.GetAllSettingsAsync();
+            IReadOnlyCollection<PnLStopLossSettings> stopLossSettings = await _pnLStopLossSettingsService.GetAllAsync();
 
             return Mapper.Map<PnLStopLossSettingsModel[]>(stopLossSettings);
         }
@@ -57,7 +57,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         {
             try
             {
-                await _pnLStopLossService.RefreshSettingsAsync(id);
+                await _pnLStopLossSettingsService.RefreshAsync(id);
             }
             catch (EntityNotFoundException)
             {
@@ -76,7 +76,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         {
             try
             {
-                await _pnLStopLossService.DeleteSettingsAsync(id);
+                await _pnLStopLossSettingsService.DeleteAsync(id);
             }
             catch (EntityNotFoundException)
             {

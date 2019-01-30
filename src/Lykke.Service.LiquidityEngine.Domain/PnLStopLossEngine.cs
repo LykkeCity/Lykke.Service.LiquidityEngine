@@ -92,10 +92,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
             Interval = pnLStopLossEngine.Interval;
             Threshold = pnLStopLossEngine.Threshold;
             Markup = pnLStopLossEngine.Markup;
-            TotalNegativePnL = 0;
-            StartTime = default(DateTime);
-            LastTime = default(DateTime);
-            Mode = PnLStopLossEngineMode.Idle;
         }
 
         public void Refresh()

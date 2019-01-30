@@ -17,11 +17,11 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     [Route("/api/[controller]")]
     public class PnLStopLossEnginesController : Controller, IPnLStopLossEnginesApi
     {
-        private readonly IPnLStopLossService _pnLStopLossService;
+        private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
 
-        public PnLStopLossEnginesController(IPnLStopLossService pnLStopLossService)
+        public PnLStopLossEnginesController(IPnLStopLossEngineService pnLStopLossEngineService)
         {
-            _pnLStopLossService = pnLStopLossService;
+            _pnLStopLossEngineService = pnLStopLossEngineService;
         }
 
         /// <inheritdoc/>
@@ -30,7 +30,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<PnLStopLossEngineModel>), (int)HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<PnLStopLossEngineModel>> GetAllAsync()
         {
-            IReadOnlyCollection<PnLStopLossEngine> stopLosses = await _pnLStopLossService.GetAllEnginesAsync();
+            IReadOnlyCollection<PnLStopLossEngine> stopLosses = await _pnLStopLossEngineService.GetAllAsync();
 
             return Mapper.Map<PnLStopLossEngineModel[]>(stopLosses);
         }
@@ -46,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             {
                 var pnLStopLossEngine = Mapper.Map<PnLStopLossEngine>(pnLStopLossEngineModel);
 
-                await _pnLStopLossService.UpdateEngineAsync(pnLStopLossEngine);
+                await _pnLStopLossEngineService.UpdateAsync(pnLStopLossEngine);
             }
             catch (EntityNotFoundException)
             {
@@ -65,7 +65,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         {
             try
             {
-                await _pnLStopLossService.DeleteEngineAsync(id);
+                await _pnLStopLossEngineService.DeleteAsync(id);
             }
             catch (EntityNotFoundException)
             {
