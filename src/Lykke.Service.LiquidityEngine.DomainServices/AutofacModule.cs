@@ -208,7 +208,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .AsSelf()
                 .SingleInstance();
 
-            builder.RegisterType<PnLStopLossTimer>()
+            builder.RegisterType<PnLStopLossEngineTimer>()
                 .AsSelf()
                 .SingleInstance();
         }

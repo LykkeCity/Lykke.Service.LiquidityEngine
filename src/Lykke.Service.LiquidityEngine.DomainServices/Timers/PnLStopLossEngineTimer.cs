@@ -9,12 +9,12 @@ using Lykke.Service.LiquidityEngine.Domain.Services;
 namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
 {
     [UsedImplicitly]
-    public class PnLStopLossTimer : Timer
+    public class PnLStopLossEngineTimer : Timer
     {
         private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
         private readonly ITimersSettingsService _timersSettingsService;
 
-        public PnLStopLossTimer(
+        public PnLStopLossEngineTimer(
             IPnLStopLossEngineService pnLStopLossEngineService,
             ITimersSettingsService timersSettingsService,
             ILogFactory logFactory)
