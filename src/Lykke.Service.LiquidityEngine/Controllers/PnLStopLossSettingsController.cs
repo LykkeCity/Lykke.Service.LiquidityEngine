@@ -31,9 +31,16 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task AddAsync([FromBody] PnLStopLossSettingsModel pnLStopLossSettingsModel)
         {
-            var stopLoss = Mapper.Map<PnLStopLossSettings>(pnLStopLossSettingsModel);
+            try
+            {
+                var pnLStopLossSettings = Mapper.Map<PnLStopLossSettings>(pnLStopLossSettingsModel);
 
-            await _pnLStopLossSettingsService.AddAsync(stopLoss);
+                await _pnLStopLossSettingsService.AddAsync(pnLStopLossSettings);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
         }
 
         /// <inheritdoc/>

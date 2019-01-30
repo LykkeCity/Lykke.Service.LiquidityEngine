@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -27,21 +28,27 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<ICrossRateInstrumentService> _crossRateInstrumentService =
             new Mock<ICrossRateInstrumentService>();
 
+        private readonly ConcurrentDictionary<string, PnLStopLossEngine> _cache
+            = new ConcurrentDictionary<string,PnLStopLossEngine>();
+
         [TestInitialize]
         public void TestInitialize()
         {
             _pnLStopLossEngineRepository.Setup(o => o.GetAllAsync())
-                .Returns(() => Task.FromResult(new List<PnLStopLossEngine>() as IReadOnlyCollection<PnLStopLossEngine>));
+                .Returns(() => Task.FromResult(
+                    _cache.Values.ToList() as IReadOnlyCollection<PnLStopLossEngine>));
 
             _pnLStopLossEngineRepository.Setup(o => o.InsertAsync(It.IsAny<PnLStopLossEngine>()))
-                .Returns(() => Task.CompletedTask);
+                .Returns((PnLStopLossEngine engine) => 
+                    Task.FromResult(_cache[engine.Id] = engine));
 
             _pnLStopLossEngineRepository.Setup(o => o.UpdateAsync(It.IsAny<PnLStopLossEngine>()))
-                .Returns(() => Task.CompletedTask);
+                .Returns((PnLStopLossEngine engine) => 
+                    Task.FromResult(_cache[engine.Id] = engine));
 
             _pnLStopLossEngineRepository.Setup(o => o.DeleteAsync(It.IsAny<string>()))
-                .Returns(() => Task.CompletedTask);
-
+                .Returns((string id) => 
+                    Task.FromResult(_cache.Remove(id, out _)));
 
             _instrumentService.Setup(o => o.GetAllAsync())
                 .Returns(() => Task.FromResult(new List<Instrument> { new Instrument
@@ -170,8 +177,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _crossRateInstrumentService.Object,
                 LogFactory.Create()
             );
-
-            await result.Initialize();
 
             return result;
         }

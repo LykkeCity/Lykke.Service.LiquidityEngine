@@ -33,11 +33,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings
             _log = logFactory.CreateLog(this);
         }
 
-        public Task<IReadOnlyCollection<Domain.PnLStopLossSettings>> GetAllAsync()
+        public async Task<IReadOnlyCollection<Domain.PnLStopLossSettings>> GetAllAsync()
         {
             IReadOnlyCollection<Domain.PnLStopLossSettings> pnLStopLossSettings = _cache.GetAll();
 
-            return Task.FromResult(pnLStopLossSettings);
+            if (pnLStopLossSettings == null)
+                pnLStopLossSettings = await Initialize();
+
+            return pnLStopLossSettings;
         }
 
         public async Task AddAsync(Domain.PnLStopLossSettings pnLStopLossSettings)
@@ -108,11 +111,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings
             _log.InfoWithDetails("PnL stop loss settings deleted.", id);
         }
 
-        public async Task Initialize()
+        private async Task<IReadOnlyCollection<Domain.PnLStopLossSettings>> Initialize()
         {
             IReadOnlyCollection<Domain.PnLStopLossSettings> pnLStopLossSettings = await _pnLStopLossSettingsRepository.GetAllAsync();
 
             _cache.Initialize(pnLStopLossSettings);
+
+            return pnLStopLossSettings;
         }
 
         private async Task CreateEngine(string assetPairId, Domain.PnLStopLossSettings pnLStopLossSettings)

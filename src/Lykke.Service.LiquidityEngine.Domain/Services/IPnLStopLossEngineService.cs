@@ -14,7 +14,6 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 
         Task DeleteAsync(string id);
 
-        Task Initialize();
 
         Task ExecuteAsync();
 

@@ -12,7 +12,5 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         Task RefreshAsync(string id);
 
         Task DeleteAsync(string id);
-
-        Task Initialize();
     }
 }
