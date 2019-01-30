@@ -20,6 +20,13 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         Task<IReadOnlyCollection<PnLStopLossEngineModel>> GetAllAsync();
 
         /// <summary>
+        /// Add new pnl stop loss engine.
+        /// </summary>
+        /// <param name="pnLStopLossEngineModel">The model that describes pnl stop loss engine.</param>
+        [Post("/api/pnLStopLossEngines")]
+        Task AddAsync([Body] PnLStopLossEngineModel pnLStopLossEngineModel);
+
+        /// <summary>
         /// Updates pnl stop loss engine.
         /// </summary>
         /// <param name="pnLStopLossEngineModel"></param>

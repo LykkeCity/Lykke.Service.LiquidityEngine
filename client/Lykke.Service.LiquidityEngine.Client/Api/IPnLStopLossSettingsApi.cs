@@ -13,18 +13,18 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
     public interface IPnLStopLossSettingsApi
     {
         /// <summary>
-        /// Add new pnl stop loss settings.
-        /// </summary>
-        /// <param name="pnLStopLossSettingsModel">The model that describes pnl stop loss settings.</param>
-        [Post("/api/pnLStopLossSettings")]
-        Task AddAsync([Body] PnLStopLossSettingsModel pnLStopLossSettingsModel);
-
-        /// <summary>
         /// Returns a collection of pnl stop loss settings.
         /// </summary>
         /// <returns>Collection of pnl stop loss settings.</returns>
         [Get("/api/pnLStopLossSettings")]
         Task<IReadOnlyCollection<PnLStopLossSettingsModel>> GetAllAsync();
+
+        /// <summary>
+        /// Add new pnl stop loss settings.
+        /// </summary>
+        /// <param name="pnLStopLossSettingsModel">The model that describes pnl stop loss settings.</param>
+        [Post("/api/pnLStopLossSettings")]
+        Task AddAsync([Body] PnLStopLossSettingsModel pnLStopLossSettingsModel);
 
         /// <summary>
         /// Refreshes pnl stop loss settings.
