@@ -17,9 +17,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
         private decimal _threshold;
         private decimal _markup;
         private decimal _totalNegativePnL;
-        private DateTime _startTime;
-        private DateTime _lastTime;
-
+        private DateTime? _startTime;
+        private DateTime? _lastTime;
         private PnLStopLossEngineMode _mode;
 
         public PnLStopLossEngineEntity()
@@ -112,7 +111,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
             }
         }
 
-        public DateTime StartTime
+        public DateTime? StartTime
         {
             get => _startTime;
             set
@@ -125,7 +124,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
             }
         }
 
-        public DateTime LastTime
+        public DateTime? LastTime
         {
             get => _lastTime;
             set

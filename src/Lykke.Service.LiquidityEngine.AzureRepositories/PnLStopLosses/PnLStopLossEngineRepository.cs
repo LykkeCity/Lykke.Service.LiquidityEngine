@@ -38,7 +38,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
             var newEntity = new PnLStopLossEngineEntity(GetPartitionKey(), GetRowKey(pnLStopLossEngine.Id));
 
             Mapper.Map(pnLStopLossEngine, newEntity);
-
+            
             await _storage.InsertThrowConflictAsync(newEntity);
         }
 

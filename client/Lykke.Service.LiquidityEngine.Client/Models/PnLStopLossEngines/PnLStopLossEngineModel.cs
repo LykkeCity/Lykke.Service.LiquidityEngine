@@ -47,12 +47,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossEngines
         /// <summary>
         /// First time when negative PnL occured.
         /// </summary>
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
 
         /// <summary>
         /// Last time when negative PnL occured.
         /// </summary>
-        public DateTime LastTime { get; set; }
+        public DateTime? LastTime { get; set; }
 
         /// <summary>
         /// The mode of the pnl stop loss engine.
