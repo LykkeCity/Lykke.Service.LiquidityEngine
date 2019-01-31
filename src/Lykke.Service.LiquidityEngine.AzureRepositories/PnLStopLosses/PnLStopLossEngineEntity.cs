@@ -33,31 +33,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
 
         public string Id { get; set; }
 
-        public string AssetPairId
-        {
-            get => _assetPairId;
-            set
-            {
-                if (_assetPairId != value)
-                {
-                    _assetPairId = value;
-                    MarkValueTypePropertyAsDirty();
-                }
-            }
-        }
+        public string AssetPairId { get; set; }
 
-        public string PnLStopLossSettingsId
-        {
-            get => _pnLStopLossSettingsId;
-            set
-            {
-                if (_pnLStopLossSettingsId != value)
-                {
-                    _pnLStopLossSettingsId = value;
-                    MarkValueTypePropertyAsDirty();
-                }
-            }
-        }
+        public string PnLStopLossSettingsId { get; set; }
 
         public TimeSpan Interval
         {

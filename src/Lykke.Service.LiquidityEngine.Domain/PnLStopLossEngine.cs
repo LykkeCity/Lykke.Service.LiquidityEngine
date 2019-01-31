@@ -64,8 +64,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public PnLStopLossEngine(PnLStopLossSettings pnLStopLossSettings)
         {
             Initialize();
-
-            AssetPairId = pnLStopLossSettings.AssetPairId;
+            
             Interval = pnLStopLossSettings.Interval;
             Threshold = pnLStopLossSettings.Threshold;
             Markup = pnLStopLossSettings.Markup;

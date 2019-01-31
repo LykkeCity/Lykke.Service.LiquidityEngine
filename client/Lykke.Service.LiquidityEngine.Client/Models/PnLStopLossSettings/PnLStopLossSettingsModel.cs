@@ -15,11 +15,6 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossSettings
         public string Id { get; set; }
 
         /// <summary>
-        /// Asset pair identifier.
-        /// </summary>
-        public string AssetPairId { get; set; }
-
-        /// <summary>
         /// Time interval for calculating loss.
         /// </summary>
         public TimeSpan Interval { get; set; }

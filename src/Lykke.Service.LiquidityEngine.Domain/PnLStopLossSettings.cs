@@ -13,11 +13,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public string Id { get; set; }
 
         /// <summary>
-        /// Asset pair identifier.
-        /// </summary>
-        public string AssetPairId { get; set; }
-
-        /// <summary>
         /// Time interval for calculating loss.
         /// </summary>
         public TimeSpan Interval { get; set; }
@@ -39,7 +34,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
         public PnLStopLossSettings(PnLStopLossSettings pnLStopLossSettings)
         {
             Id = Guid.NewGuid().ToString();
-            AssetPairId = pnLStopLossSettings.AssetPairId;
             Interval = pnLStopLossSettings.Interval;
             Threshold = pnLStopLossSettings.Threshold;
             Markup = pnLStopLossSettings.Markup;

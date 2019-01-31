@@ -45,15 +45,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings
 
         public async Task AddAsync(Domain.PnLStopLossSettings pnLStopLossSettings)
         {
-            if (!string.IsNullOrWhiteSpace(pnLStopLossSettings.Id))
-                throw new InvalidOperationException("PnL stop loss settings already has an identifier.");
-
-            if (_instrumentService.TryGetByAssetPairIdAsync(pnLStopLossSettings.AssetPairId) == null)
-                throw new InvalidOperationException($"Asset pair id is not found: '{pnLStopLossSettings.AssetPairId}'.");
-
-            if (!string.IsNullOrWhiteSpace(pnLStopLossSettings.AssetPairId))
-                throw new InvalidOperationException("PnL stop loss settings can't contain asset pair id.");
-
             pnLStopLossSettings.Id = Guid.NewGuid().ToString();
 
             _log.InfoWithDetails("Creating pnl stop loss settings.", pnLStopLossSettings);
@@ -122,12 +113,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings
 
         private async Task CreateEngine(string assetPairId, Domain.PnLStopLossSettings pnLStopLossSettings)
         {
-            var currentPnLStopLossSettings = new Domain.PnLStopLossSettings(pnLStopLossSettings)
-            {
-                AssetPairId = assetPairId
-            };
+            PnLStopLossEngine newEngine = new PnLStopLossEngine(pnLStopLossSettings);
 
-            PnLStopLossEngine newEngine = new PnLStopLossEngine(currentPnLStopLossSettings);
+            newEngine.AssetPairId = assetPairId;
 
             await _pnLStopLossEngineService.AddAsync(newEngine);
         }

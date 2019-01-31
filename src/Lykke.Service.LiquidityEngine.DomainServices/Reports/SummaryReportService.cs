@@ -67,7 +67,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
         {
             IReadOnlyCollection<SummaryReport> summaryReports =
                 await _positionRepositoryPostgres.GetReportAsync(startDate, endDate);
-            
+
             return await ConvertToReportsAsync(summaryReports);
         }
 

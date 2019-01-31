@@ -67,6 +67,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
         public async Task UpdateAsync(PnLStopLossEngine pnLStopLossEngine)
         {
+            if (string.IsNullOrWhiteSpace(pnLStopLossEngine.Id))
+                throw new InvalidOperationException("PnL stop loss engine must have an identifier.");
+
             PnLStopLossEngine currentPnLStopLossEngine = await GetEngineByIdAsync(pnLStopLossEngine.Id);
 
             currentPnLStopLossEngine.Update(pnLStopLossEngine);

@@ -1,17 +1,17 @@
 ﻿using FluentValidation;
 using JetBrains.Annotations;
-using Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossSettings;
+using Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossEngines;
 
 namespace Lykke.Service.LiquidityEngine.Validators
 {
     [UsedImplicitly]
-    public class PnLStopLossSettingsModelValidator : AbstractValidator<PnLStopLossSettingsModel>
+    public class PnLStopLossEngineModelValidator : AbstractValidator<PnLStopLossEngineModel>
     {
-        public PnLStopLossSettingsModelValidator()
+        public PnLStopLossEngineModelValidator()
         {
-            RuleFor(o => o.Id)
-                .Empty()
-                .WithMessage("Id must be empty.");
+            RuleFor(o => o.AssetPairId)
+                .NotEmpty()
+                .WithMessage("Asset pair required.");
 
             RuleFor(o => o.Interval)
                 .NotEmpty()
