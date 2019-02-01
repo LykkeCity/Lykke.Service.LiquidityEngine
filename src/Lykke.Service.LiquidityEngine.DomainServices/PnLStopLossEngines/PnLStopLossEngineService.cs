@@ -81,6 +81,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             _log.InfoWithDetails("PnL stop loss engine updated.", currentPnLStopLossEngine);
         }
 
+        public async Task DisableAsync(string id)
+        {
+            var pnLStopLossEngine = await GetEngineByIdAsync(id);
+
+            pnLStopLossEngine.Disable();
+
+            await UpdateAsync(pnLStopLossEngine);
+        }
+
+        public async Task EnableAsync(string id)
+        {
+            var pnLStopLossEngine = await GetEngineByIdAsync(id);
+
+            pnLStopLossEngine.Enable();
+
+            await UpdateAsync(pnLStopLossEngine);
+        }
+
         public async Task DeleteAsync(string id)
         {
             await GetEngineByIdAsync(id);
@@ -129,13 +147,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             _log.InfoWithDetails("Received position with negative PnL.", position);
 
-            IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetEnginesByAssetPairIdAsync(position.AssetPairId);
+            IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetEnabledEnginesByAssetPairIdAsync(position.AssetPairId);
 
             if (!pnLStopLossEngines.Any())
                 return;
 
-            decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(position.AssetPairId,
-                position.PnL);
+            decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(position.AssetPairId, position.PnL);
 
             if (!pnlUsd.HasValue)
             {
@@ -146,7 +163,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             foreach (PnLStopLossEngine pnLStopLossEngine in pnLStopLossEngines)
             {
-                pnLStopLossEngine.AddPnL(pnlUsd.Value);
+                pnLStopLossEngine.AddNegativePnL(pnlUsd.Value);
 
                 await UpdateAsync(pnLStopLossEngine);
             }
@@ -158,16 +175,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
         private async Task Refresh(PnLStopLossEngine pnLStopLossEngine)
         {
-            pnLStopLossEngine.Refresh();
+            var isUpdated = pnLStopLossEngine.Refresh();
 
-            await UpdateAsync(pnLStopLossEngine);
+            if (isUpdated)
+                await UpdateAsync(pnLStopLossEngine);
         }
 
-        private async Task<IReadOnlyCollection<PnLStopLossEngine>> GetEnginesByAssetPairIdAsync(string assetPairId)
+        private async Task<IReadOnlyCollection<PnLStopLossEngine>> GetEnabledEnginesByAssetPairIdAsync(string assetPairId)
         {
             IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetAllAsync();
 
-            pnLStopLossEngines = pnLStopLossEngines.Where(x => x.AssetPairId == assetPairId).ToList();
+            pnLStopLossEngines = pnLStopLossEngines
+                .Where(x => x.AssetPairId == assetPairId)
+                .Where(x => x.Mode != PnLStopLossEngineMode.Disabled)
+                .ToList();
 
             return pnLStopLossEngines;
         }

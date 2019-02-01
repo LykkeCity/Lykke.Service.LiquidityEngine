@@ -18,7 +18,7 @@ namespace Lykke.Service.LiquidityEngine.Validators
                 .WithMessage("Interval required.");
 
             RuleFor(o => o.Threshold)
-                .LessThanOrEqualTo(0)
+                .GreaterThanOrEqualTo(0)
                 .WithMessage("Threshold should be greater than or equal to zero.");
 
             RuleFor(o => o.Markup)
