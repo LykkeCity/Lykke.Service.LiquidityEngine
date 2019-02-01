@@ -34,6 +34,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IMarketMakerSettingsService _marketMakerSettingsService;
         private readonly ITradeService _tradeService;
         private readonly IAssetPairLinkService _assetPairLinkService;
+        private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -51,6 +52,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IMarketMakerSettingsService marketMakerSettingsService,
             ITradeService tradeService,
             IAssetPairLinkService assetPairLinkService,
+            IPnLStopLossEngineService pnLStopLossEngineService,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -67,6 +69,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _marketMakerSettingsService = marketMakerSettingsService;
             _tradeService = tradeService;
             _assetPairLinkService = assetPairLinkService;
+            _pnLStopLossEngineService = pnLStopLossEngineService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -174,11 +177,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
 
+            decimal pnLStopLossMarkup = await _pnLStopLossEngineService.GetTotalMarkupByAssetPairIdAsync(assetPair.Id);
+
             IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
-                quotes[0], quotes[1], instrument.Levels.ToArray(),
-                baseAssetBalance?.Amount ?? 0, quoteAssetBalance?.Amount ?? 0, (int) timeSinceLastTrade.TotalSeconds,
-                instrument.HalfLifePeriod, instrument.AllowSmartMarkup, marketMakerSettings.LimitOrderPriceMarkup,
-                assetPair.Accuracy, baseAsset.Accuracy);
+                quotes[0],
+                quotes[1],
+                instrument.Levels.ToArray(),
+                baseAssetBalance?.Amount ?? 0,
+                quoteAssetBalance?.Amount ?? 0,
+                (int) timeSinceLastTrade.TotalSeconds,
+                instrument.HalfLifePeriod,
+                instrument.AllowSmartMarkup,
+                marketMakerSettings.LimitOrderPriceMarkup,
+                pnLStopLossMarkup,
+                assetPair.Accuracy,
+                baseAsset.Accuracy);
 
             await ValidateQuoteTimeoutAsync(limitOrders, quotes[0]);
 

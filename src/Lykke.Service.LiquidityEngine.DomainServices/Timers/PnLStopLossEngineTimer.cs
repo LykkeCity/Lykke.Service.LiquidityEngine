@@ -9,31 +9,31 @@ using Lykke.Service.LiquidityEngine.Domain.Services;
 namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
 {
     [UsedImplicitly]
-    public class HedgingTimer : Timer
+    public class PnLStopLossEngineTimer : Timer
     {
-        private readonly IHedgeService _hedgeService;
+        private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
         private readonly ITimersSettingsService _timersSettingsService;
 
-        public HedgingTimer(
-            IHedgeService hedgeService,
+        public PnLStopLossEngineTimer(
+            IPnLStopLossEngineService pnLStopLossEngineService,
             ITimersSettingsService timersSettingsService,
             ILogFactory logFactory)
         {
-            _hedgeService = hedgeService;
+            _pnLStopLossEngineService = pnLStopLossEngineService;
             _timersSettingsService = timersSettingsService;
             Log = logFactory.CreateLog(this);
         }
 
         protected override Task OnExecuteAsync(CancellationToken cancellation)
         {
-            return _hedgeService.ExecuteAsync();
+            return _pnLStopLossEngineService.ExecuteAsync();
         }
 
         protected override async Task<TimeSpan> GetDelayAsync()
         {
             TimersSettings timersSettings = await _timersSettingsService.GetAsync();
 
-            return timersSettings.Hedging;
+            return timersSettings.PnLStopLoss;
         }
     }
 }

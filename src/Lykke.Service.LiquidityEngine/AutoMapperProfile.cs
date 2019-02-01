@@ -7,6 +7,8 @@ using Lykke.Service.LiquidityEngine.Client.Models.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 using Lykke.Service.LiquidityEngine.Client.Models.MarketMaker;
 using Lykke.Service.LiquidityEngine.Client.Models.OrderBooks;
+using Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossEngines;
+using Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossSettings;
 using Lykke.Service.LiquidityEngine.Client.Models.Positions;
 using Lykke.Service.LiquidityEngine.Client.Models.Quotes;
 using Lykke.Service.LiquidityEngine.Client.Models.Reports;
@@ -81,6 +83,12 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<CrossRateInstrument, CrossRateInstrumentModel>(MemberList.Source);
             CreateMap<CrossRateInstrumentModel, CrossRateInstrument>(MemberList.Destination);
+
+            CreateMap<PnLStopLossSettings, PnLStopLossSettingsModel>(MemberList.Source);
+            CreateMap<PnLStopLossSettingsModel, PnLStopLossSettings>(MemberList.Destination);
+
+            CreateMap<PnLStopLossEngine, PnLStopLossEngineModel>(MemberList.Source);
+            CreateMap<PnLStopLossEngineModel, PnLStopLossEngine>(MemberList.Destination);
         }
     }
 }

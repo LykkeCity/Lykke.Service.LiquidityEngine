@@ -7,6 +7,7 @@ using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
+using Lykke.Service.LiquidityEngine.Domain.Handlers;
 using Lykke.Service.LiquidityEngine.Domain.Repositories;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.Utils;
@@ -22,6 +23,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
         private readonly IInstrumentService _instrumentService;
         private readonly IQuoteService _quoteService;
         private readonly ITradeService _tradeService;
+        private readonly IClosedPositionHandler[] _closedPositionHandlers;
         private readonly ILog _log;
 
         public PositionService(
@@ -32,6 +34,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             IInstrumentService instrumentService,
             IQuoteService quoteService,
             ITradeService tradeService,
+            IClosedPositionHandler[] closedPositionHandlers,
             ILogFactory logFactory)
         {
             _positionRepository = positionRepository;
@@ -41,6 +44,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             _instrumentService = instrumentService;
             _quoteService = quoteService;
             _tradeService = tradeService;
+            _closedPositionHandlers = closedPositionHandlers;
             _log = logFactory.CreateLog(this);
         }
 
@@ -66,7 +70,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
             foreach (InternalTrade internalTrade in internalTrades)
             {
-                Instrument instrument = await _instrumentService.FundAsync(internalTrade.AssetPairId);
+                Instrument instrument = await _instrumentService.FindAsync(internalTrade.AssetPairId);
 
                 if (instrument == null)
                 {
@@ -156,6 +160,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                 }
 
                 await _summaryReportService.RegisterClosePositionAsync(position);
+
+                foreach (var closedPositionHandler in _closedPositionHandlers)
+                    await closedPositionHandler.HandleClosedPositionAsync(position);
 
                 _log.InfoWithDetails("Position closed", position);
             }

@@ -7,6 +7,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
+using Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Reports;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Settings;
@@ -84,6 +85,12 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
 
             CreateMap<SystemVersion, SystemVersionEntity>(MemberList.Source);
             CreateMap<SystemVersionEntity, SystemVersion>(MemberList.Destination);
+
+            CreateMap<PnLStopLossSettings, PnLStopLossSettingsEntity>(MemberList.Source);
+            CreateMap<PnLStopLossSettingsEntity, PnLStopLossSettings>(MemberList.Destination);
+
+            CreateMap<PnLStopLossEngine, PnLStopLossEngineEntity>(MemberList.Source);
+            CreateMap<PnLStopLossEngineEntity, PnLStopLossEngine>(MemberList.Destination);
         }
     }
 }
