@@ -37,14 +37,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// Disable pnl stop loss engine.
         /// </summary>
         /// <param name="id">PnL stop loss engine id.</param>
-        [Put("/api/pnLStopLossEngines/disable/{id}")]
+        [Put("/api/pnLStopLossEngines/{id}/disable")]
         Task DisableAsync(string id);
 
         /// <summary>
         /// Enable pnl stop loss engine.
         /// </summary>
         /// <param name="id">PnL stop loss engine id.</param>
-        [Put("/api/pnLStopLossEngines/enable/{id}")]
+        [Put("/api/pnLStopLossEngines/{id}/enable")]
         Task EnableAsync(string id);
 
         /// <summary>
