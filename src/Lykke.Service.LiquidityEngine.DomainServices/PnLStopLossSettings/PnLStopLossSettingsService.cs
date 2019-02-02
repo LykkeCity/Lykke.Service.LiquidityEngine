@@ -122,6 +122,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings
 
             newEngine.AssetPairId = assetPairId;
 
+            newEngine.PnLStopLossSettingsId = pnLStopLossSettings.Id;
+
             await _pnLStopLossEngineService.AddAsync(newEngine);
         }
 
