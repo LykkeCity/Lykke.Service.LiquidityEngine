@@ -133,7 +133,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
 
         /// <inheritdoc/>
         /// <response code="200">Collection of asset pair total markups.</response>
-        [HttpGet]
+        [HttpGet("assetPairMarkups")]
         [ProducesResponseType(typeof(IReadOnlyCollection<AssetPairMarkupModel>), (int)HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<AssetPairMarkupModel>> GetAssetPairMarkupsAsync()
         {
