@@ -18,12 +18,12 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
 
             var pnLStopLossEngine = new PnLStopLossEngine
             {
+                Id = Guid.NewGuid().ToString(),
+                Mode = PnLStopLossEngineMode.Idle,
                 Interval = interval,
                 Threshold = threshold,
                 Markup = markup
             };
-
-            pnLStopLossEngine.Initialize();
 
             // act
 
@@ -53,12 +53,12 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
 
             var pnLStopLossEngine = new PnLStopLossEngine
             {
+                Id = Guid.NewGuid().ToString(),
+                Mode = PnLStopLossEngineMode.Idle,
                 Interval = interval,
                 Threshold = threshold,
                 Markup = markup
             };
-
-            pnLStopLossEngine.Initialize();
 
             // act
 
@@ -90,12 +90,12 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
 
             var pnLStopLossEngine = new PnLStopLossEngine
             {
+                Id = Guid.NewGuid().ToString(),
+                Mode = PnLStopLossEngineMode.Idle,
                 Interval = interval,
                 Threshold = threshold,
                 Markup = markup
             };
-
-            pnLStopLossEngine.Initialize();
 
             // act
 
@@ -127,12 +127,12 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
 
             var pnLStopLossEngine = new PnLStopLossEngine
             {
+                Id = Guid.NewGuid().ToString(),
+                Mode = PnLStopLossEngineMode.Idle,
                 Interval = interval,
                 Threshold = threshold,
                 Markup = markup
             };
-
-            pnLStopLossEngine.Initialize();
 
             // act
 
@@ -181,12 +181,12 @@ namespace Lykke.Service.LiquidityEngine.Domain.Tests
 
             var pnLStopLossEngine = new PnLStopLossEngine
             {
+                Id = Guid.NewGuid().ToString(),
+                Mode = PnLStopLossEngineMode.Idle,
                 Interval = interval,
                 Threshold = threshold,
                 Markup = markup
             };
-
-            pnLStopLossEngine.Initialize();
 
             // act
 

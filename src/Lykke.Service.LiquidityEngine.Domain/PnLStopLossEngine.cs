@@ -63,8 +63,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
         public PnLStopLossEngine(PnLStopLossSettings pnLStopLossSettings)
         {
-            Initialize();
-            
             Interval = pnLStopLossSettings.Interval;
             Threshold = pnLStopLossSettings.Threshold;
             Markup = pnLStopLossSettings.Markup;
@@ -72,12 +70,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
             TotalNegativePnL = 0;
             StartTime = null;
             LastTime = null;
-        }
-
-        public void Initialize()
-        {
-            Id = Guid.NewGuid().ToString();
-
             Mode = PnLStopLossEngineMode.Idle;
         }
 

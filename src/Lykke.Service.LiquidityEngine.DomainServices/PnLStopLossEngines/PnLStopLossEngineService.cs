@@ -54,7 +54,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             if (string.IsNullOrWhiteSpace(pnLStopLossEngine.AssetPairId))
                 throw new InvalidOperationException("PnL stop loss engine must contain asset pair id.");
 
-            pnLStopLossEngine.Initialize();
+            pnLStopLossEngine.Id = Guid.NewGuid().ToString();
+
+            pnLStopLossEngine.Mode = PnLStopLossEngineMode.Idle;
 
             _log.InfoWithDetails("Creating pnl stop loss engine.", pnLStopLossEngine);
 
