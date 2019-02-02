@@ -38,14 +38,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// </summary>
         /// <param name="id">PnL stop loss engine id.</param>
         [Put("/api/pnLStopLossEngines/{id}/disable")]
-        Task DisableAsync(string id);
+        Task DisableAsync([Query] string id);
 
         /// <summary>
         /// Enable pnl stop loss engine.
         /// </summary>
         /// <param name="id">PnL stop loss engine id.</param>
         [Put("/api/pnLStopLossEngines/{id}/enable")]
-        Task EnableAsync(string id);
+        Task EnableAsync([Query] string id);
 
         /// <summary>
         /// Deletes pnl stop loss engine by id.
@@ -53,5 +53,12 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <param name="id">Identifier.</param>
         [Delete("/api/pnLStopLossEngines/{id}")]
         Task DeleteAsync(string id);
+
+        /// <summary>
+        /// Returns a collection of total markups for every asset pair.
+        /// </summary>
+        /// <returns>Collection of total markups for every asset pair.</returns>
+        [Get("/api/pnLStopLossEngines/assetPairMarkups")]
+        Task<IReadOnlyCollection<AssetPairMarkupModel>> GetAssetPairMarkupsAsync();
     }
 }

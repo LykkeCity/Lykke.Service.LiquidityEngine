@@ -30,7 +30,6 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<PnLStopLossEngineModel>), (int)HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<PnLStopLossEngineModel>> GetAllAsync()
         {
-
             IReadOnlyCollection<PnLStopLossEngine> stopLossEngines = await _pnLStopLossEngineService.GetAllAsync();
 
             return Mapper.Map<PnLStopLossEngineModel[]>(stopLossEngines);
@@ -130,6 +129,17 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             {
                 throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
             }
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">Collection of asset pair total markups.</response>
+        [HttpGet]
+        [ProducesResponseType(typeof(IReadOnlyCollection<AssetPairMarkupModel>), (int)HttpStatusCode.OK)]
+        public async Task<IReadOnlyCollection<AssetPairMarkupModel>> GetAssetPairMarkupsAsync()
+        {
+            IReadOnlyCollection<AssetPairMarkup> stopLossEngines = await _pnLStopLossEngineService.GetTotalMarkups();
+
+            return Mapper.Map<AssetPairMarkupModel[]>(stopLossEngines);
         }
     }
 }

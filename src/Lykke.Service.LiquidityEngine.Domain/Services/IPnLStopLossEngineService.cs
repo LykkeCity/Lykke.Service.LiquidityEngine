@@ -22,5 +22,7 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         Task ExecuteAsync();
 
         Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId);
+
+        Task<IReadOnlyCollection<AssetPairMarkup>> GetTotalMarkups();
     }
 }
