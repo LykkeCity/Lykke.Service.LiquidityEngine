@@ -75,7 +75,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <inheritdoc/>
         /// <response code="200">The pnl stop loss engine successfully disabled.</response>
         /// <response code="404">PnL stop loss engine does not exist.</response>
-        [HttpPut("{id}/disable")]
+        [HttpPut("disable/{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
         public async Task DisableAsync(string id)
@@ -93,7 +93,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <inheritdoc/>
         /// <response code="200">The pnl stop loss engine successfully enabled.</response>
         /// <response code="404">PnL stop loss engine does not exist.</response>
-        [HttpPut("{id}/enable")]
+        [HttpPut("enable/{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
         public async Task EnableAsync(string id)
