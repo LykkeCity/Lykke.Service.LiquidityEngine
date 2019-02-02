@@ -51,7 +51,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             if (!string.IsNullOrWhiteSpace(pnLStopLossEngine.Id))
                 throw new InvalidOperationException("PnL stop loss engine already has an identifier.");
 
-            if (_instrumentService.TryGetByAssetPairIdAsync(pnLStopLossEngine.AssetPairId) == null)
+            if (await _instrumentService.TryGetByAssetPairIdAsync(pnLStopLossEngine.AssetPairId) == null)
                 throw new InvalidOperationException($"Asset pair id is not found: '{pnLStopLossEngine.AssetPairId}'.");
 
             if (string.IsNullOrWhiteSpace(pnLStopLossEngine.AssetPairId))
@@ -134,16 +134,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
 
+            IReadOnlyCollection<Instrument> assetPairs = await _instrumentService.GetAllAsync();
+
             IReadOnlyCollection<PnLStopLossEngine> engines = (await GetAllAsync())
                 .Where(x => x.Mode == PnLStopLossEngineMode.Active
                          && x.TotalNegativePnL <= x.Threshold).ToList();
 
-            foreach (var engine in engines)
+            foreach (var assetPair in assetPairs)
             {
+                IReadOnlyCollection<PnLStopLossEngine> assetPairEngines = engines.Where(x => x.AssetPairId == assetPair.AssetPairId).ToList();
+                decimal sum = assetPairEngines.Sum(x => x.Markup);
+
                 result.Add(new AssetPairMarkup
                 {
-                    AssetPairId = engine.AssetPairId,
-                    TotalMarkup = marketMakerSettings.LimitOrderPriceMarkup + engine.Markup
+                    AssetPairId = assetPair.AssetPairId,
+                    TotalMarkup = marketMakerSettings.LimitOrderPriceMarkup + sum
                 });
             }
 
