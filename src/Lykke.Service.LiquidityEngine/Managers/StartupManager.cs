@@ -5,6 +5,7 @@ using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
 using Lykke.Service.LiquidityEngine.Migration;
 using Lykke.Service.LiquidityEngine.Rabbit;
+using Lykke.Service.LiquidityEngine.Rabbit.Publishers;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 
 namespace Lykke.Service.LiquidityEngine.Managers
@@ -17,11 +18,14 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly MarketMakerTimer _marketMakerTimer;
         private readonly HedgingTimer _hedgingTimer;
         private readonly SettlementsTimer _settlementsTimer;
+        private readonly InternalTraderTimer _internalTraderTimer;
         private readonly PnLStopLossEngineTimer _pnLStopLossEngineTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
         private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
+        private readonly InternalQuotePublisher _internalQuotePublisher;
+        private readonly InternalOrderBookPublisher _internalOrderBookPublisher;
         private readonly LykkeTradeSubscriberMonitor _lykkeTradeSubscriberMonitor;
         private readonly StorageMigrationService _storageMigrationService;
         private readonly ITradeService _tradeService;
@@ -32,11 +36,14 @@ namespace Lykke.Service.LiquidityEngine.Managers
             MarketMakerTimer marketMakerTimer,
             HedgingTimer hedgingTimer,
             SettlementsTimer settlementsTimer,
+            InternalTraderTimer internalTraderTimer,
             PnLStopLossEngineTimer pnLStopLossEngineTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
             B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
             QuoteSubscriber[] quoteSubscribers,
+            InternalQuotePublisher internalQuotePublisher,
+            InternalOrderBookPublisher internalOrderBookPublisher,
             LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor,
             StorageMigrationService storageMigrationService,
             ITradeService tradeService)
@@ -46,11 +53,14 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _marketMakerTimer = marketMakerTimer;
             _hedgingTimer = hedgingTimer;
             _settlementsTimer = settlementsTimer;
+            _internalTraderTimer = internalTraderTimer;
             _pnLStopLossEngineTimer = pnLStopLossEngineTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
             _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
             _quoteSubscribers = quoteSubscribers;
+            _internalQuotePublisher = internalQuotePublisher;
+            _internalOrderBookPublisher = internalOrderBookPublisher;
             _lykkeTradeSubscriberMonitor = lykkeTradeSubscriberMonitor;
             _storageMigrationService = storageMigrationService;
             _tradeService = tradeService;
@@ -58,6 +68,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
 
         public async Task StartAsync()
         {
+            _internalQuotePublisher.Start();
+
+            _internalOrderBookPublisher.Start();
+
             _tradeService.Initialize();
 
             await _storageMigrationService.MigrateStorageAsync();
@@ -78,8 +92,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _marketMakerTimer.Start();
 
             _hedgingTimer.Start();
-            
+
             _settlementsTimer.Start();
+
+            _internalTraderTimer.Start();
 
             _lykkeTradeSubscriberMonitor.Start();
 

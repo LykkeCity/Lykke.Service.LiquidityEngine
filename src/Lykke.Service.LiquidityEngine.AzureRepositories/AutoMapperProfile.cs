@@ -6,6 +6,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
+using Lykke.Service.LiquidityEngine.AzureRepositories.InternalOrders;
 using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
 using Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
@@ -36,6 +37,9 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .ForSourceMember(src => src.CrossInstruments, opt => opt.DoNotValidate());
             CreateMap<InstrumentEntity, Instrument>(MemberList.Destination)
                 .ForMember(src => src.CrossInstruments, opt => opt.Ignore());
+
+            CreateMap<InternalOrder, InternalOrderEntity>(MemberList.Source);
+            CreateMap<InternalOrderEntity, InternalOrder>(MemberList.Destination);
 
             CreateMap<TimersSettings, TimersSettingsEntity>(MemberList.Source);
             CreateMap<TimersSettingsEntity, TimersSettings>(MemberList.Destination);

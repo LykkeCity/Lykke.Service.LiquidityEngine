@@ -92,5 +92,10 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Positions
         /// The identifier of the trade that closed position.
         /// </summary>
         public string CloseTradeId { get; set; }
+
+        /// <summary>
+        /// Indicates than position created by internal trade. 
+        /// </summary>
+        public bool IsInternal { get; set; }
     }
 }

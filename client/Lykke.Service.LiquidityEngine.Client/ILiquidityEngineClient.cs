@@ -40,6 +40,11 @@ namespace Lykke.Service.LiquidityEngine.Client
         IInstrumentsApi Instruments { get; }
 
         /// <summary>
+        /// Internal orders API.
+        /// </summary>
+        IInternalOrdersApi InternalOrders { get; }
+
+        /// <summary>
         /// Market Maker API.
         /// </summary>
         IMarketMakerApi MarketMaker { get; }

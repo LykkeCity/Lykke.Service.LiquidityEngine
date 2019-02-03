@@ -10,6 +10,7 @@ using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
+using Lykke.Service.LiquidityEngine.DomainServices.InternalTrader;
 using Lykke.Service.LiquidityEngine.DomainServices.Logging;
 using Lykke.Service.LiquidityEngine.DomainServices.MarketMaker;
 using Lykke.Service.LiquidityEngine.DomainServices.OrderBooks;
@@ -80,6 +81,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<InstrumentService>()
                 .As<IInstrumentService>()
+                .SingleInstance();
+
+            builder.RegisterType<InternalOrderService>()
+                .As<IInternalOrderService>()
+                .SingleInstance();
+
+            builder.RegisterType<InternalTraderService>()
+                .As<IInternalTraderService>()
                 .SingleInstance();
 
             builder.RegisterType<RemainingVolumeService>()
@@ -203,7 +212,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             builder.RegisterType<HedgingTimer>()
                 .AsSelf()
                 .SingleInstance();
-            
+
             builder.RegisterType<SettlementsTimer>()
                 .AsSelf()
                 .SingleInstance();

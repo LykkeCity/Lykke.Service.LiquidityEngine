@@ -11,6 +11,7 @@ using Lykke.B2c2Client.Models.Rest;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
+using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Polly;
@@ -39,19 +40,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
         public Task<IReadOnlyCollection<Balance>> GetBalancesAsync()
             => ExecuteGetBalancesAsync();
 
-        public Task<decimal> GetSellPriceAsync(string assetPairId, decimal volume)
-            => GetPriceAsync(assetPairId, volume, Side.Sell);
-
-        public Task<decimal> GetBuyPriceAsync(string assetPairId, decimal volume)
-            => GetPriceAsync(assetPairId, volume, Side.Buy);
-
         public Task<ExternalTrade> ExecuteSellLimitOrderAsync(string assetPairId, decimal volume)
-            => ExecuteLimitOrderAsync(assetPairId, volume, Side.Sell);
+            => ExecuteLimitOrderAsync(assetPairId, volume, null, Side.Sell);
 
         public Task<ExternalTrade> ExecuteBuyLimitOrderAsync(string assetPairId, decimal volume)
-            => ExecuteLimitOrderAsync(assetPairId, volume, Side.Buy);
+            => ExecuteLimitOrderAsync(assetPairId, volume, null, Side.Buy);
 
-        private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, Side side)
+        public Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, decimal price,
+            LimitOrderType limitOrderType)
+            => ExecuteLimitOrderAsync(assetPairId, volume, price,
+                limitOrderType == LimitOrderType.Sell ? Side.Sell : Side.Buy);
+
+        private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, decimal? price,
+            Side side)
         {
             string instrument = await GetInstrumentAsync(assetPairId);
 
@@ -66,6 +67,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 response = await _client.RequestForQuoteAsync(request);
 
                 _log.InfoWithDetails("Get quote response", response);
+
+                if (price.HasValue)
+                {
+                    if (side == Side.Sell && price.Value > response.Price)
+                        throw new NotEnoughLiquidityException();
+
+                    if (side == Side.Buy && price.Value < response.Price)
+                        throw new NotEnoughLiquidityException();
+                }
 
                 var tradeRequest = new TradeRequest(response);
 
@@ -91,24 +101,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             };
         }
 
-        private async Task<decimal> GetPriceAsync(string assetPairId, decimal volume, Side side)
-        {
-            string instrument = await GetInstrumentAsync(assetPairId);
-
-            var request = new RequestForQuoteRequest(instrument, side, volume);
-
-            return await WrapAsync(async () =>
-            {
-                _log.InfoWithDetails("Get quote request", request);
-
-                RequestForQuoteResponse response = await _client.RequestForQuoteAsync(request);
-
-                _log.InfoWithDetails("Get quote response", response);
-
-                return response.Price;
-            });
-        }
-
         private Task<IReadOnlyCollection<Balance>> ExecuteGetBalancesAsync()
         {
             return WrapAsync<IReadOnlyCollection<Balance>>(async () =>
@@ -130,7 +122,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
         }
 
-        private Task<T> WrapAsync<T>(Func<Task<T>> action)
+        private static Task<T> WrapAsync<T>(Func<Task<T>> action)
         {
             return Policy
                 .Handle<B2c2RestException>(exception =>
@@ -140,10 +132,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
                     Error error = exception.ErrorResponse.Errors.FirstOrDefault();
 
-                    if (error != null && error.Code == ErrorCode.PriceNotValid)
-                        return true;
-
-                    return false;
+                    return error != null && error.Code == ErrorCode.PriceNotValid;
                 })
                 .WaitAndRetryAsync(DefaultRetriesCount, attempt => TimeSpan.FromMilliseconds(500 * attempt))
                 .ExecuteAsync(async () => await action());

@@ -27,20 +27,28 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
 
             if (timersSettings == null)
             {
-                timersSettings = await _timersSettingsRepository.GetAsync();
+                timersSettings = await _timersSettingsRepository.GetAsync() ?? new TimersSettings();
 
-                if (timersSettings == null)
-                {
-                    timersSettings = new TimersSettings
-                    {
-                        MarketMaker = TimeSpan.FromSeconds(5),
-                        Hedging = TimeSpan.FromSeconds(1),
-                        LykkeBalances = TimeSpan.FromSeconds(1),
-                        ExternalBalances = TimeSpan.FromSeconds(1),
-                        Settlements = TimeSpan.FromSeconds(5),
-                        PnLStopLoss = TimeSpan.FromSeconds(1)
-                    };
-                }
+                if (timersSettings.MarketMaker == TimeSpan.Zero)
+                    timersSettings.MarketMaker = TimeSpan.FromSeconds(5);
+
+                if (timersSettings.Hedging == TimeSpan.Zero)
+                    timersSettings.Hedging = TimeSpan.FromSeconds(1);
+
+                if (timersSettings.LykkeBalances == TimeSpan.Zero)
+                    timersSettings.LykkeBalances = TimeSpan.FromSeconds(1);
+
+                if (timersSettings.ExternalBalances == TimeSpan.Zero)
+                    timersSettings.ExternalBalances = TimeSpan.FromSeconds(1);
+
+                if (timersSettings.Settlements == TimeSpan.Zero)
+                    timersSettings.Settlements = TimeSpan.FromSeconds(5);
+
+                if (timersSettings.InternalTrader == TimeSpan.Zero)
+                    timersSettings.InternalTrader = TimeSpan.FromSeconds(5);
+                
+                if (timersSettings.PnLStopLoss == TimeSpan.Zero)
+                    timersSettings.PnLStopLoss = TimeSpan.FromSeconds(1);
 
                 _cache.Initialize(new[] {timersSettings});
             }

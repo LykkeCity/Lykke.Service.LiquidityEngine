@@ -47,7 +47,8 @@ namespace Lykke.Service.LiquidityEngine.PostgresRepositories
                 .ForMember(dest => dest.ExternalTradeId,
                     opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.CloseTradeId)
                         ? Guid.Parse(src.CloseTradeId)
-                        : default(Guid?)));
+                        : default(Guid?)))
+                .ForSourceMember(src => src.IsInternal, opt => opt.DoNotValidate());
             CreateMap<PositionEntity, Position>(MemberList.Destination)
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString("D")))
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Timestamp))
@@ -58,7 +59,8 @@ namespace Lykke.Service.LiquidityEngine.PostgresRepositories
                 .ForMember(dest => dest.CloseTradeId,
                     opt => opt.MapFrom(src => src.ExternalTradeId != null
                         ? src.ExternalTradeId.Value.ToString("D")
-                        : null));
+                        : null))
+                .ForMember(src => src.IsInternal, opt => opt.Ignore());
         }
     }
 }

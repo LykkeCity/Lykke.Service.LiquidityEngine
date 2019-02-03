@@ -31,6 +31,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The timer interval of B2C2 settlements operations.
         /// </summary>
         public TimeSpan Settlements { get; set; }
+        
+        /// <summary>
+        /// The timer interval of internal trader.
+        /// </summary>
+        public TimeSpan InternalTrader { get; set; }
 
         /// <summary>
         /// The timer interval of pnl stop loss algorithm.

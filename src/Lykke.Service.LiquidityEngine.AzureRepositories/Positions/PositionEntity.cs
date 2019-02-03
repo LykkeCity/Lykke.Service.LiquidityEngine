@@ -19,6 +19,7 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
         private decimal _closePrice;
         private decimal _pnL;
         private decimal _tradeAvgPrice;
+        private bool _isInternal;
 
         public PositionEntity()
         {
@@ -149,5 +150,18 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Positions
         public string Trades { get; set; }
 
         public string CloseTradeId { get; set; }
+
+        public bool IsInternal
+        {
+            get => _isInternal;
+            set
+            {
+                if (_isInternal != value)
+                {
+                    _isInternal = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
     }
 }

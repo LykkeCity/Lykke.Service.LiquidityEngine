@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using AutoMapper;
 using AutoMapper.Data;
+using Lykke.Common.InternalExchange.Client.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.LiquidityEngine
@@ -25,6 +26,11 @@ namespace Lykke.Service.LiquidityEngine
         {
             return services.BuildServiceProvider<AppSettings>(options =>
             {
+                options.ConfigureFluentValidation = configuration =>
+                {
+                    configuration.RegisterValidatorsFromAssemblyContaining<CreateOrderRequest>();
+                };
+                
                 options.Extend = (serviceCollection, settings) =>
                 {
                     Mapper.Initialize(cfg =>

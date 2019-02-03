@@ -41,6 +41,22 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-LykkeTrades-Queue
 
+    Publishers:
+      InternalQuotes:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: MarketMakerTickPricesExchange
+      InternalOrderBooks:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: MarketMakerOrderBooksExchange
+
       B2C2Quotes:
         ConnectionString:
           settings-key: RawPriceRabbitMq
