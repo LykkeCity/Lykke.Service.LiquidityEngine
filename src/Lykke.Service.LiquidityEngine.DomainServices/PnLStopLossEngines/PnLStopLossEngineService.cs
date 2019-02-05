@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -177,11 +178,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(position.AssetPairId, position.PnL);
 
-            if (!pnlUsd.HasValue)
+            if (!pnlUsd.HasValue || pnlUsd.Value == 0)
             {
-                _log.Warning($"Can't convert quote asset to USD for '{position.AssetPairId}'. Skipped pnl stop loss calculation.");
+                string pnlUsdStr = pnlUsd.HasValue ? pnlUsd.Value.ToString(CultureInfo.InvariantCulture) : "null";
+                _log.Warning($"PnL converted to USD is '{pnlUsdStr}' for '{position.AssetPairId}'. No cross instrument or quote.");
 
-                return;
+                pnlUsd = pnlUsd ?? 0;
             }
 
             foreach (PnLStopLossEngine pnLStopLossEngine in pnLStopLossEngines)
