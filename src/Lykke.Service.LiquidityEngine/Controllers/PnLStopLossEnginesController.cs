@@ -30,7 +30,6 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         [ProducesResponseType(typeof(IReadOnlyCollection<PnLStopLossEngineModel>), (int)HttpStatusCode.OK)]
         public async Task<IReadOnlyCollection<PnLStopLossEngineModel>> GetAllAsync()
         {
-
             IReadOnlyCollection<PnLStopLossEngine> stopLossEngines = await _pnLStopLossEngineService.GetAllAsync();
 
             return Mapper.Map<PnLStopLossEngineModel[]>(stopLossEngines);
@@ -74,6 +73,42 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         }
 
         /// <inheritdoc/>
+        /// <response code="200">The pnl stop loss engine successfully disabled.</response>
+        /// <response code="404">PnL stop loss engine does not exist.</response>
+        [HttpPut("{id}/disable")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+        public async Task DisableAsync(string id)
+        {
+            try
+            {
+                await _pnLStopLossEngineService.DisableAsync(id);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "PnL stop loss engine does not exist.");
+            }
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">The pnl stop loss engine successfully enabled.</response>
+        /// <response code="404">PnL stop loss engine does not exist.</response>
+        [HttpPut("{id}/enable")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+        public async Task EnableAsync(string id)
+        {
+            try
+            {
+                await _pnLStopLossEngineService.EnableAsync(id);
+            }
+            catch (EntityNotFoundException)
+            {
+                throw new ValidationApiException(HttpStatusCode.NotFound, "PnL stop loss engine does not exist.");
+            }
+        }
+
+        /// <inheritdoc/>
         /// <response code="204">The pnl stop loss engine successfully deleted.</response>
         /// <response code="400">An error occurred while deleting pnl stop loss engine.</response>
         /// <response code="404">Stop loss engine does not exist.</response>
@@ -94,6 +129,17 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             {
                 throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
             }
+        }
+
+        /// <inheritdoc/>
+        /// <response code="200">Collection of asset pair total markups.</response>
+        [HttpGet("assetPairMarkups")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<AssetPairMarkupModel>), (int)HttpStatusCode.OK)]
+        public async Task<IReadOnlyCollection<AssetPairMarkupModel>> GetAssetPairMarkupsAsync()
+        {
+            IReadOnlyCollection<AssetPairMarkup> stopLossEngines = await _pnLStopLossEngineService.GetTotalMarkups();
+
+            return Mapper.Map<AssetPairMarkupModel[]>(stopLossEngines);
         }
     }
 }

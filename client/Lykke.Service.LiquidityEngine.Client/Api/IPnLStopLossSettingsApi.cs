@@ -29,14 +29,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// <summary>
         /// Refreshes pnl stop loss settings.
         /// </summary>
-        /// <param name="id">Settings id.</param>
+        /// <param name="id">PnL stop loss settings id.</param>
         [Put("/api/pnLStopLossSettings/{id}/refresh")]
         Task RefreshAsync(string id);
 
         /// <summary>
         /// Deletes pnl stop loss settings by id.
         /// </summary>
-        /// <param name="id">Identifier of the settings.</param>
+        /// <param name="id">Identifier of the pnl stop loss settings.</param>
         [Delete("/api/pnLStopLossSettings/{id}")]
         Task DeleteAsync(string id);
     }

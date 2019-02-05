@@ -18,18 +18,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
         private readonly InMemoryCache<PnLStopLossEngine> _cache;
         private readonly IInstrumentService _instrumentService;
         private readonly ICrossRateInstrumentService _crossRateInstrumentService;
+        private readonly IMarketMakerSettingsService _marketMakerSettingsService;
         private readonly ILog _log;
 
         public PnLStopLossEngineService(
             IPnLStopLossEngineRepository pnLStopLossEngineRepository,
             IInstrumentService instrumentService,
             ICrossRateInstrumentService crossRateInstrumentService,
+            IMarketMakerSettingsService marketMakerSettingsService,
             ILogFactory logFactory)
         {
             _pnLStopLossEngineRepository = pnLStopLossEngineRepository;
             _cache = new InMemoryCache<PnLStopLossEngine>(engine => engine.Id, false);
             _instrumentService = instrumentService;
             _crossRateInstrumentService = crossRateInstrumentService;
+            _marketMakerSettingsService = marketMakerSettingsService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -48,13 +51,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             if (!string.IsNullOrWhiteSpace(pnLStopLossEngine.Id))
                 throw new InvalidOperationException("PnL stop loss engine already has an identifier.");
 
-            if (_instrumentService.TryGetByAssetPairIdAsync(pnLStopLossEngine.AssetPairId) == null)
+            if (await _instrumentService.TryGetByAssetPairIdAsync(pnLStopLossEngine.AssetPairId) == null)
                 throw new InvalidOperationException($"Asset pair id is not found: '{pnLStopLossEngine.AssetPairId}'.");
 
             if (string.IsNullOrWhiteSpace(pnLStopLossEngine.AssetPairId))
                 throw new InvalidOperationException("PnL stop loss engine must contain asset pair id.");
 
-            pnLStopLossEngine.Initialize();
+            pnLStopLossEngine.Id = Guid.NewGuid().ToString();
+
+            pnLStopLossEngine.Mode = PnLStopLossEngineMode.Idle;
 
             _log.InfoWithDetails("Creating pnl stop loss engine.", pnLStopLossEngine);
 
@@ -81,6 +86,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             _log.InfoWithDetails("PnL stop loss engine updated.", currentPnLStopLossEngine);
         }
 
+        public async Task DisableAsync(string id)
+        {
+            var pnLStopLossEngine = await GetEngineByIdAsync(id);
+
+            pnLStopLossEngine.Disable();
+
+            await UpdateAsync(pnLStopLossEngine);
+        }
+
+        public async Task EnableAsync(string id)
+        {
+            var pnLStopLossEngine = await GetEngineByIdAsync(id);
+
+            pnLStopLossEngine.Enable();
+
+            await UpdateAsync(pnLStopLossEngine);
+        }
+
         public async Task DeleteAsync(string id)
         {
             await GetEngineByIdAsync(id);
@@ -90,15 +113,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             _cache.Remove(id);
 
             _log.InfoWithDetails("PnL stop loss engine deleted.", id);
-        }
-
-        private async Task<IReadOnlyCollection<PnLStopLossEngine>> Initialize()
-        {
-            IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await _pnLStopLossEngineRepository.GetAllAsync();
-
-            _cache.Initialize(pnLStopLossEngines);
-
-            return pnLStopLossEngines;
         }
 
         public async Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId)
@@ -112,6 +126,33 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             decimal totalMarkup = engines.Sum(x => x.Markup);
 
             return totalMarkup;
+        }
+
+        public async Task<IReadOnlyCollection<AssetPairMarkup>> GetTotalMarkups()
+        {
+            var result = new List<AssetPairMarkup>();
+
+            MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
+
+            IReadOnlyCollection<Instrument> assetPairs = await _instrumentService.GetAllAsync();
+
+            IReadOnlyCollection<PnLStopLossEngine> engines = (await GetAllAsync())
+                .Where(x => x.Mode == PnLStopLossEngineMode.Active
+                         && x.TotalNegativePnL <= x.Threshold).ToList();
+
+            foreach (var assetPair in assetPairs)
+            {
+                IReadOnlyCollection<PnLStopLossEngine> assetPairEngines = engines.Where(x => x.AssetPairId == assetPair.AssetPairId).ToList();
+                decimal sum = assetPairEngines.Sum(x => x.Markup);
+
+                result.Add(new AssetPairMarkup
+                {
+                    AssetPairId = assetPair.AssetPairId,
+                    TotalMarkup = marketMakerSettings.LimitOrderPriceMarkup + sum
+                });
+            }
+
+            return result;
         }
 
         public async Task ExecuteAsync()
@@ -129,13 +170,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             _log.InfoWithDetails("Received position with negative PnL.", position);
 
-            IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetEnginesByAssetPairIdAsync(position.AssetPairId);
+            IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetEnabledEnginesByAssetPairIdAsync(position.AssetPairId);
 
             if (!pnLStopLossEngines.Any())
                 return;
 
-            decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(position.AssetPairId,
-                position.PnL);
+            decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(position.AssetPairId, position.PnL);
 
             if (!pnlUsd.HasValue)
             {
@@ -146,7 +186,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             foreach (PnLStopLossEngine pnLStopLossEngine in pnLStopLossEngines)
             {
-                pnLStopLossEngine.AddPnL(pnlUsd.Value);
+                pnLStopLossEngine.AddNegativePnL(pnlUsd.Value);
 
                 await UpdateAsync(pnLStopLossEngine);
             }
@@ -156,18 +196,31 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
                                      $"{string.Join(", ", pnLStopLossEngines.Select(x => x.AssetPairId).ToList())}.", position);
         }
 
-        private async Task Refresh(PnLStopLossEngine pnLStopLossEngine)
+        private async Task<IReadOnlyCollection<PnLStopLossEngine>> Initialize()
         {
-            pnLStopLossEngine.Refresh();
+            IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await _pnLStopLossEngineRepository.GetAllAsync();
 
-            await UpdateAsync(pnLStopLossEngine);
+            _cache.Initialize(pnLStopLossEngines);
+
+            return pnLStopLossEngines;
         }
 
-        private async Task<IReadOnlyCollection<PnLStopLossEngine>> GetEnginesByAssetPairIdAsync(string assetPairId)
+        private async Task Refresh(PnLStopLossEngine pnLStopLossEngine)
+        {
+            var isUpdated = pnLStopLossEngine.Refresh();
+
+            if (isUpdated)
+                await UpdateAsync(pnLStopLossEngine);
+        }
+
+        private async Task<IReadOnlyCollection<PnLStopLossEngine>> GetEnabledEnginesByAssetPairIdAsync(string assetPairId)
         {
             IReadOnlyCollection<PnLStopLossEngine> pnLStopLossEngines = await GetAllAsync();
 
-            pnLStopLossEngines = pnLStopLossEngines.Where(x => x.AssetPairId == assetPairId).ToList();
+            pnLStopLossEngines = pnLStopLossEngines
+                .Where(x => x.AssetPairId == assetPairId)
+                .Where(x => x.Mode != PnLStopLossEngineMode.Disabled)
+                .ToList();
 
             return pnLStopLossEngines;
         }

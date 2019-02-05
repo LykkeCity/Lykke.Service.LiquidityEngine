@@ -15,9 +15,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Lykke.Service.LiquidityEngine.DomainServices\Lykke.Service.LiquidityEngine.DomainServices.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Lykke.Logs, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\..\..\Users\Al\.nuget\packages\lykke.logs\6.0.0\lib\netstandard2.0\Lykke.Logs.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>

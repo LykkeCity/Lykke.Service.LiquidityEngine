@@ -89,6 +89,9 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<PnLStopLossEngine, PnLStopLossEngineModel>(MemberList.Source);
             CreateMap<PnLStopLossEngineModel, PnLStopLossEngine>(MemberList.Destination);
+
+            CreateMap<AssetPairMarkup, AssetPairMarkupModel>(MemberList.Source);
+            CreateMap<AssetPairMarkupModel, AssetPairMarkup>(MemberList.Destination);
         }
     }
 }

@@ -12,11 +12,17 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 
         Task UpdateAsync(PnLStopLossEngine pnLStopLossEngine);
 
+        Task EnableAsync(string id);
+
+        Task DisableAsync(string id);
+
         Task DeleteAsync(string id);
 
 
         Task ExecuteAsync();
 
         Task<decimal> GetTotalMarkupByAssetPairIdAsync(string assetPairId);
+
+        Task<IReadOnlyCollection<AssetPairMarkup>> GetTotalMarkups();
     }
 }

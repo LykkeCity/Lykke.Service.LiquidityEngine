@@ -99,7 +99,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings
 
             _cache.Remove(id);
 
-            _log.InfoWithDetails("PnL stop loss settings deleted.", id);
+            var pnLStopLossEngines = (await _pnLStopLossEngineService.GetAllAsync()).Where(x => x.PnLStopLossSettingsId == id).ToList();
+
+            foreach (var pnLStopLossEngine in pnLStopLossEngines)
+                await _pnLStopLossEngineService.DeleteAsync(pnLStopLossEngine.Id);
+
+            _log.InfoWithDetails($"PnL stop loss settings deleted with {pnLStopLossEngines.Count} engines.", id);
         }
 
         private async Task<IReadOnlyCollection<Domain.PnLStopLossSettings>> Initialize()
@@ -116,6 +121,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings
             PnLStopLossEngine newEngine = new PnLStopLossEngine(pnLStopLossSettings);
 
             newEngine.AssetPairId = assetPairId;
+
+            newEngine.PnLStopLossSettingsId = pnLStopLossSettings.Id;
 
             await _pnLStopLossEngineService.AddAsync(newEngine);
         }

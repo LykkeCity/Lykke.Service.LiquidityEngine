@@ -63,8 +63,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
         public PnLStopLossEngine(PnLStopLossSettings pnLStopLossSettings)
         {
-            Initialize();
-            
             Interval = pnLStopLossSettings.Interval;
             Threshold = pnLStopLossSettings.Threshold;
             Markup = pnLStopLossSettings.Markup;
@@ -72,16 +70,10 @@ namespace Lykke.Service.LiquidityEngine.Domain
             TotalNegativePnL = 0;
             StartTime = null;
             LastTime = null;
-        }
-
-        public void Initialize()
-        {
-            Id = Guid.NewGuid().ToString();
-
             Mode = PnLStopLossEngineMode.Idle;
         }
 
-        public void AddPnL(decimal positionNegativePnL)
+        public bool AddNegativePnL(decimal positionNegativePnL)
         {
             if (TotalNegativePnL == 0)
                 StartTime = DateTime.UtcNow;
@@ -90,7 +82,19 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
             LastTime = DateTime.UtcNow;
 
-            Refresh();
+            return Refresh();
+        }
+
+        public void Disable()
+        {
+            Reset();
+
+            Mode = PnLStopLossEngineMode.Disabled;
+        }
+
+        public void Enable()
+        {
+            Mode = PnLStopLossEngineMode.Idle;
         }
 
         public void Update(PnLStopLossEngine pnLStopLossEngine)
@@ -100,18 +104,24 @@ namespace Lykke.Service.LiquidityEngine.Domain
             Markup = pnLStopLossEngine.Markup;
         }
 
-        public void Refresh()
+        public bool Refresh()
         {
             if (StartTime == null)
-                return;
+                return false;
 
-            if (DateTime.UtcNow - LastTime > Interval)
+            if (LastTimeExpired || StartTimeExpired && !ThresholdExceeded)
+            {
                 Reset();
+                return true;
+            }
 
-            if (TotalNegativePnL <= Threshold)
+            if (ThresholdExceeded && Mode != PnLStopLossEngineMode.Active)
             {
                 Mode = PnLStopLossEngineMode.Active;
+                return true;
             }
+
+            return false;
         }
 
         public void Reset()
@@ -121,5 +131,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
             LastTime = null;
             Mode = PnLStopLossEngineMode.Idle;
         }
+
+        private bool ThresholdExceeded => TotalNegativePnL <= Threshold * -1;
+
+        private bool StartTimeExpired => DateTime.UtcNow - StartTime > Interval;
+
+        private bool LastTimeExpired => DateTime.UtcNow - LastTime > Interval;
     }
 }
