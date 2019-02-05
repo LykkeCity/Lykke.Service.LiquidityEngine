@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -179,9 +180,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             if (!pnlUsd.HasValue || pnlUsd.Value == 0)
             {
-                _log.Warning($"PnL converted to USD is '{pnlUsd}' for '{position.AssetPairId}'. No cross instrument or quotes.");
+                string pnlUsdStr = pnlUsd.HasValue ? pnlUsd.Value.ToString(CultureInfo.InvariantCulture) : "null";
+                _log.Warning($"PnL converted to USD is '{pnlUsdStr}' for '{position.AssetPairId}'. No cross instrument or quotes.");
 
-                pnlUsd = 0;
+                pnlUsd = pnlUsd ?? 0;
             }
 
             foreach (PnLStopLossEngine pnLStopLossEngine in pnLStopLossEngines)
