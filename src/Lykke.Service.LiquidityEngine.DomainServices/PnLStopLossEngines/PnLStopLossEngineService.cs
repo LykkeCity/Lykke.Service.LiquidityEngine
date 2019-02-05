@@ -181,7 +181,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
             if (!pnlUsd.HasValue || pnlUsd.Value == 0)
             {
                 string pnlUsdStr = pnlUsd.HasValue ? pnlUsd.Value.ToString(CultureInfo.InvariantCulture) : "null";
-                _log.Warning($"PnL converted to USD is '{pnlUsdStr}' for '{position.AssetPairId}'. No cross instrument or quotes.");
+                _log.Warning($"PnL converted to USD is '{pnlUsdStr}' for '{position.AssetPairId}'. No cross instrument or quote.");
 
                 pnlUsd = pnlUsd ?? 0;
             }
