@@ -177,11 +177,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
 
             decimal? pnlUsd = await _crossRateInstrumentService.ConvertPriceAsync(position.AssetPairId, position.PnL);
 
-            if (!pnlUsd.HasValue)
+            if (!pnlUsd.HasValue || pnlUsd.Value == 0)
             {
-                _log.Warning($"Can't convert quote asset to USD for '{position.AssetPairId}'. Skipped pnl stop loss calculation.");
+                _log.Warning($"PnL converted to USD is '{pnlUsd}' for '{position.AssetPairId}'. No cross instrument or quotes.");
 
-                return;
+                pnlUsd = 0;
             }
 
             foreach (PnLStopLossEngine pnLStopLossEngine in pnLStopLossEngines)
