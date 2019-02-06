@@ -197,15 +197,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private void RegisterTimers(ContainerBuilder builder)
         {
-            builder.RegisterType<LykkeBalancesTimer>()
-                .AsSelf()
-                .SingleInstance();
-
             builder.RegisterType<ExternalBalancesTimer>()
-                .AsSelf()
-                .SingleInstance();
-
-            builder.RegisterType<MarketMakerTimer>()
                 .AsSelf()
                 .SingleInstance();
 
@@ -213,11 +205,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .AsSelf()
                 .SingleInstance();
 
-            builder.RegisterType<SettlementsTimer>()
+            builder.RegisterType<InternalTraderTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<LykkeBalancesTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<MarketMakerTimer>()
                 .AsSelf()
                 .SingleInstance();
 
             builder.RegisterType<PnLStopLossEngineTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<SettlementsTimer>()
                 .AsSelf()
                 .SingleInstance();
         }

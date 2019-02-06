@@ -71,7 +71,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
 
-            var pnLStopLossEngineService = await GetInstance();
+            var pnLStopLossEngineService = GetInstance();
 
             var engine = new PnLStopLossEngine
             {
@@ -106,7 +106,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         {
             // arrange
 
-            var pnLStopLossEngineService = await GetInstance();
+            var pnLStopLossEngineService = GetInstance();
 
             var engine = new PnLStopLossEngine
             {
@@ -169,7 +169,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             Assert.AreEqual(0m, markup);
         }
 
-        private async Task<IPnLStopLossEngineService> GetInstance()
+        private IPnLStopLossEngineService GetInstance()
         {
             var result = new PnLStopLossEngineService(
                 _pnLStopLossEngineRepository.Object,

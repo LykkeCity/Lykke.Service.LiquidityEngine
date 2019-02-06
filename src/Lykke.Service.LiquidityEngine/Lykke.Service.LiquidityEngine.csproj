@@ -21,6 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lykke.Common.ExchangeAdapter" Version="3.7.0" />
+    <PackageReference Include="Lykke.Common.ExchangeAdapter.Server" Version="4.4.1" />
     <PackageReference Include="Lykke.Sdk" Version="5.7.0" />
     <PackageReference Include="Lykke.RabbitMqBroker" Version="7.6.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.3" />
