@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using AutoMapper;
 using AutoMapper.Data;
+using Lykke.Common.InternalExchange.Client.Models;
+using Lykke.Service.LiquidityEngine.Swagger;
 using Microsoft.Extensions.Logging;
 
 namespace Lykke.Service.LiquidityEngine
@@ -25,6 +27,11 @@ namespace Lykke.Service.LiquidityEngine
         {
             return services.BuildServiceProvider<AppSettings>(options =>
             {
+                options.ConfigureFluentValidation = configuration =>
+                {
+                    configuration.RegisterValidatorsFromAssemblyContaining<CreateOrderRequest>();
+                };
+
                 options.Extend = (serviceCollection, settings) =>
                 {
                     Mapper.Initialize(cfg =>
@@ -36,6 +43,12 @@ namespace Lykke.Service.LiquidityEngine
                     });
 
                     Mapper.AssertConfigurationIsValid();
+                };
+
+                options.Swagger = swagger =>
+                {
+                    swagger.OperationFilter<ApiKeyHeaderFilter>();
+                    swagger.CustomSchemaIds(o => o.FullName);
                 };
 
                 options.SwaggerOptions = _swaggerOptions;

@@ -11,6 +11,7 @@ using Lykke.Service.LiquidityEngine.AzureRepositories.BalanceOperations;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Credits;
 using Lykke.Service.LiquidityEngine.AzureRepositories.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Instruments;
+using Lykke.Service.LiquidityEngine.AzureRepositories.InternalOrders;
 using Lykke.Service.LiquidityEngine.AzureRepositories.MarketMaker;
 using Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses;
 using Lykke.Service.LiquidityEngine.AzureRepositories.Positions;
@@ -79,6 +80,14 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                     AzureTableStorage<InstrumentEntity>.Create(_connectionString,
                         "Instruments", container.Resolve<ILogFactory>())))
                 .As<IInstrumentRepository>()
+                .SingleInstance();
+
+            builder.Register(container => new InternalOrderRepository(
+                    AzureTableStorage<InternalOrderEntity>.Create(_connectionString,
+                        "InternalOrders", container.Resolve<ILogFactory>()),
+                    AzureTableStorage<AzureIndex>.Create(_connectionString,
+                        "InternalOrdersIndices", container.Resolve<ILogFactory>())))
+                .As<IInternalOrderRepository>()
                 .SingleInstance();
 
             builder.Register(container => new MarketMakerSettingsRepository(

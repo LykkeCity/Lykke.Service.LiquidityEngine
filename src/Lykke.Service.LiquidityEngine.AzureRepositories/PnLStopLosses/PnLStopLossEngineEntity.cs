@@ -11,8 +11,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.PnLStopLosses
     [ValueTypeMergingStrategy(ValueTypeMergingStrategy.UpdateIfDirty)]
     public class PnLStopLossEngineEntity : AzureTableEntity
     {
-        private string _assetPairId;
-        private string _pnLStopLossSettingsId;
         private TimeSpan _interval;
         private decimal _threshold;
         private decimal _markup;

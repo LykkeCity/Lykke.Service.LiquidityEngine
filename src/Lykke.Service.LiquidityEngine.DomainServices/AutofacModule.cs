@@ -10,6 +10,7 @@ using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
+using Lykke.Service.LiquidityEngine.DomainServices.InternalTrader;
 using Lykke.Service.LiquidityEngine.DomainServices.Logging;
 using Lykke.Service.LiquidityEngine.DomainServices.MarketMaker;
 using Lykke.Service.LiquidityEngine.DomainServices.OrderBooks;
@@ -80,6 +81,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<InstrumentService>()
                 .As<IInstrumentService>()
+                .SingleInstance();
+
+            builder.RegisterType<InternalOrderService>()
+                .As<IInternalOrderService>()
+                .SingleInstance();
+
+            builder.RegisterType<InternalTraderService>()
+                .As<IInternalTraderService>()
                 .SingleInstance();
 
             builder.RegisterType<RemainingVolumeService>()
@@ -188,11 +197,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private void RegisterTimers(ContainerBuilder builder)
         {
-            builder.RegisterType<LykkeBalancesTimer>()
+            builder.RegisterType<ExternalBalancesTimer>()
                 .AsSelf()
                 .SingleInstance();
 
-            builder.RegisterType<ExternalBalancesTimer>()
+            builder.RegisterType<HedgingTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<InternalTraderTimer>()
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<LykkeBalancesTimer>()
                 .AsSelf()
                 .SingleInstance();
 
@@ -200,15 +217,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .AsSelf()
                 .SingleInstance();
 
-            builder.RegisterType<HedgingTimer>()
-                .AsSelf()
-                .SingleInstance();
-            
-            builder.RegisterType<SettlementsTimer>()
+            builder.RegisterType<PnLStopLossEngineTimer>()
                 .AsSelf()
                 .SingleInstance();
 
-            builder.RegisterType<PnLStopLossEngineTimer>()
+            builder.RegisterType<SettlementsTimer>()
                 .AsSelf()
                 .SingleInstance();
         }

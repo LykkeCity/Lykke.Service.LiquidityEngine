@@ -10,6 +10,7 @@ using Lykke.MatchingEngine.Connector.Models.Api;
 using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.ExchangeOperations.Client.AutorestClient.Models;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.Extensions;
@@ -147,7 +148,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             _log.InfoWithDetails("Cash in response", result);
 
             if (result.Code != 0)
-                throw new Exception($"Unexpected cash in response status '{result.Code}'");
+                throw new BalanceOperationException("Unexpected cash in response status", result.Code);
 
             return result.TransactionId;
         }
@@ -174,7 +175,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             _log.InfoWithDetails("Cash out response", result);
 
             if (result.Code != 0)
-                throw new InvalidOperationException($"Unexpected cash out response status '{result.Code}'");
+            {
+                if(result.Code == BalanceOperationException.NotEnoughFundsCode)
+                    throw new NotEnoughFundsException();
+                
+                throw new BalanceOperationException("Unexpected cash out response status", result.Code);
+            }
 
             return result.TransactionId;
         }

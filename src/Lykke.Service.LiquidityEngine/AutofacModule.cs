@@ -9,10 +9,12 @@ using Lykke.Service.Assets.Client;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.Dwh.Client;
 using Lykke.Service.ExchangeOperations.Client;
+using Lykke.Service.LiquidityEngine.Domain.Publishers;
 using Lykke.Service.LiquidityEngine.Managers;
 using Lykke.Service.LiquidityEngine.Migration;
 using Lykke.Service.LiquidityEngine.Migration.Operations;
 using Lykke.Service.LiquidityEngine.Rabbit;
+using Lykke.Service.LiquidityEngine.Rabbit.Publishers;
 using Lykke.Service.LiquidityEngine.Rabbit.Subscribers;
 using Lykke.Service.LiquidityEngine.Settings;
 using Lykke.Service.LiquidityEngine.Settings.Clients.MatchingEngine;
@@ -89,6 +91,22 @@ namespace Lykke.Service.LiquidityEngine
 
         private void RegisterRabbit(ContainerBuilder builder)
         {
+            builder.RegisterType<InternalQuotePublisher>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers
+                    .InternalQuotes))
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Name))
+                .AsSelf()
+                .As<IInternalQuotePublisher>()
+                .SingleInstance();
+
+            builder.RegisterType<InternalOrderBookPublisher>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers
+                    .InternalOrderBooks))
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Name))
+                .AsSelf()
+                .As<IInternalOrderBookPublisher>()
+                .SingleInstance();
+
             builder.RegisterType<LykkeTradeSubscriberMonitor>()
                 .AsSelf()
                 .SingleInstance();

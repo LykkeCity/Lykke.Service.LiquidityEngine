@@ -38,6 +38,10 @@ namespace Lykke.Service.LiquidityEngine.Controllers
             {
                 throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
             }
+            catch (BalanceOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
         }
 
         /// <inheritdoc/>
@@ -54,6 +58,10 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                 await _settlementService.ExecuteAsync(model.SettlementTradeId, model.UserId);
             }
             catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
+            catch (BalanceOperationException exception)
             {
                 throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
             }

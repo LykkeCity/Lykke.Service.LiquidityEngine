@@ -5,6 +5,7 @@ using Lykke.Common.Api.Contract.Responses;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.LiquidityEngine.Client.Api;
 using Lykke.Service.LiquidityEngine.Client.Models.Credits;
+using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +34,10 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                 await _creditService.UpdateAsync(model.AssetId, model.Amount, model.Comment, model.UserId);
             }
             catch (InvalidOperationException exception)
+            {
+                throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
+            }
+            catch (BalanceOperationException exception)
             {
                 throw new ValidationApiException(HttpStatusCode.BadRequest, exception.Message);
             }

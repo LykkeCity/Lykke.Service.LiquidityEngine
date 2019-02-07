@@ -73,6 +73,22 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-Quotes-Queue
 
+    Publishers:
+      InternalQuotes:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Publishers-TickPrice-Exchange
+      InternalOrderBooks:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Publishers-OrderBook-Exchange
+
   Dwh:
     DatabaseName:
       settings-key: LiquidityEngineService-DwhSettings-DatabaseName

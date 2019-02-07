@@ -7,12 +7,11 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<IReadOnlyCollection<Balance>> GetBalancesAsync();
 
-        Task<decimal> GetSellPriceAsync(string assetPair, decimal volume);
-        
-        Task<decimal> GetBuyPriceAsync(string assetPair, decimal volume);
-
         Task<ExternalTrade> ExecuteSellLimitOrderAsync(string assetPairId, decimal volume);
 
         Task<ExternalTrade> ExecuteBuyLimitOrderAsync(string assetPairId, decimal volume);
+
+        Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, decimal price,
+            LimitOrderType limitOrderType);
     }
 }

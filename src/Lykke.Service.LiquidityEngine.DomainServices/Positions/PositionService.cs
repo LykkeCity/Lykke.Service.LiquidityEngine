@@ -137,6 +137,29 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             }
         }
 
+        public async Task CloseAsync(InternalOrder internalOrder, ExternalTrade externalTrade)
+        {
+            await _tradeService.RegisterAsync(externalTrade);
+            
+            Position position = Position.Create(internalOrder, externalTrade);
+            
+            await _positionRepository.InsertAsync(position);
+
+            try
+            {
+                await _positionRepositoryPostgres.InsertAsync(position);
+            }
+            catch (Exception exception)
+            {
+                _log.ErrorWithDetails(exception, "An error occurred while updating position in the postgres DB",
+                    position);
+            }
+
+            await _summaryReportService.RegisterClosePositionAsync(position);
+
+            _log.InfoWithDetails("Position closed", position);
+        }
+        
         public async Task CloseAsync(IReadOnlyCollection<Position> positions, ExternalTrade externalTrade)
         {
             await _tradeService.RegisterAsync(externalTrade);

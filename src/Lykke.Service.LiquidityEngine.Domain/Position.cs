@@ -87,6 +87,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// </summary>
         public string CloseTradeId { get; set; }
 
+        /// <summary>
+        /// Indicates than position created by internal trade. 
+        /// </summary>
+        public bool IsInternal { get; set; }
+
         public void Close(ExternalTrade externalTrade)
         {
             CloseDate = DateTime.UtcNow;
@@ -118,7 +123,32 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 PnL = decimal.Zero,
                 TradeAssetPairId = assetPairId,
                 TradeAvgPrice = externalTrade.Price,
-                CloseTradeId = externalTrade.Id
+                CloseTradeId = externalTrade.Id,
+                IsInternal = false
+            };
+        }
+        
+        public static Position Create(InternalOrder internalOrder, ExternalTrade externalTrade)
+        {
+            PositionType positionType = externalTrade.Type == TradeType.Sell
+                ? PositionType.Long
+                : PositionType.Short;
+
+            return new Position
+            {
+                Id = Guid.NewGuid().ToString("D"),
+                AssetPairId = internalOrder.AssetPairId,
+                Type = positionType,
+                Date = DateTime.UtcNow,
+                Price = externalTrade.Price,
+                Volume = externalTrade.Volume,
+                CloseDate = DateTime.UtcNow,
+                ClosePrice = externalTrade.Price,
+                PnL = decimal.Zero,
+                TradeAssetPairId = internalOrder.AssetPairId,
+                TradeAvgPrice = externalTrade.Price,
+                CloseTradeId = externalTrade.Id,
+                IsInternal = true
             };
         }
 
@@ -154,7 +184,8 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 CrossAsk = crossAsk,
                 CrossBid = crossBid,
                 TradeAssetPairId = tradeAssetPairId,
-                TradeAvgPrice = avgPrice
+                TradeAvgPrice = avgPrice,
+                IsInternal = true
             };
         }
     }

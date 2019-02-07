@@ -15,6 +15,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 
         Task OpenAsync(IReadOnlyCollection<InternalTrade> internalTrades);
 
+        Task CloseAsync(InternalOrder internalOrder, ExternalTrade externalTrade);
+
         Task CloseAsync(IReadOnlyCollection<Position> positions, ExternalTrade externalTrade);
 
         Task CloseRemainingVolumeAsync(string assetPairId, ExternalTrade externalTrade);
