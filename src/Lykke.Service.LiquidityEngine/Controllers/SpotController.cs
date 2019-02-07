@@ -98,6 +98,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                 throw new ValidationApiException(HttpStatusCode.NotFound, "Order not found");
 
             if (internalOrder.Status != InternalOrderStatus.Cancelled &&
+                internalOrder.Status != InternalOrderStatus.Rejected &&
                 internalOrder.Status != InternalOrderStatus.Completed)
                 throw new ValidationApiException(HttpStatusCode.BadRequest, "Can not cancel order");
 
