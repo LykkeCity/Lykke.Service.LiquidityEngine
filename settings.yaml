@@ -80,14 +80,14 @@ LiquidityEngineService:
           types:
           - RabbitMq
         Exchange:
-          settings-key: MarketMakerTickPricesExchange
+          settings-key: LiquidityEngineService-Rabbit-Publishers-TickPrice-Exchange
       InternalOrderBooks:
         ConnectionString:
           settings-key: RawPriceRabbitMq
           types:
           - RabbitMq
         Exchange:
-          settings-key: MarketMakerOrderBooksExchange
+          settings-key: LiquidityEngineService-Rabbit-Publishers-OrderBook-Exchange
 
   Dwh:
     DatabaseName:
