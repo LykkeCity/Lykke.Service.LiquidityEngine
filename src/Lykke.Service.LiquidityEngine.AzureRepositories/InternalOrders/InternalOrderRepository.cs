@@ -91,11 +91,11 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.InternalOrders
             if (index == null)
                 throw new EntityNotFoundException();
 
-            await _storage.MergeAsync(index.PrimaryPartitionKey, index.PrimaryRowKey, entity =>
-            {
-                Mapper.Map(internalOrder, entity);
-                return entity;
-            });
+            InternalOrderEntity entity = await _storage.GetDataAsync(index);
+            
+            Mapper.Map(internalOrder, entity);
+            
+            await _storage.InsertOrReplaceAsync(entity);
         }
 
         private static string GetPartitionKey(DateTime time)

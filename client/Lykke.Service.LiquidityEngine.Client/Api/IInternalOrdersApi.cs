@@ -14,6 +14,14 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
     public interface IInternalOrdersApi
     {
         /// <summary>
+        /// Returns an internal order by identifier.
+        /// </summary>
+        /// <param name="internalOrderId">The identifier of the internal order.</param>
+        /// <returns>An internal order.</returns>
+        [Get("/api/InternalOrders/{internalOrderId}")]
+        Task<InternalOrderModel> GetByIdAsync(string internalOrderId);
+
+        /// <summary>
         /// Returns a collection of internal orders.
         /// </summary>
         /// <returns>A collection of internal orders.</returns>

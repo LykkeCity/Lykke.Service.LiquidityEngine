@@ -368,36 +368,29 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
             if (internalOrder.ExecutedVolume == null || internalOrder.ExecutedPrice == null)
                 throw new InvalidOperationException("The executed volume and price not specified");
 
+            if (internalOrder.Type != LimitOrderType.Buy)
+                return true;
+
             Instrument instrument = await _instrumentService.TryGetByAssetPairIdAsync(internalOrder.AssetPairId);
 
             AssetPair assetPair = await _assetsServiceWithCache.TryGetAssetPairAsync(instrument.AssetPairId);
 
-            Asset asset;
-            decimal amount;
-            string comment =
-                $"Liquidity engine transfer remaining funds according internal trade. OrderId: {internalOrder.Id}";
+            Asset asset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.QuotingAssetId);
 
-            if (internalOrder.Type == LimitOrderType.Sell)
-            {
-                asset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.QuotingAssetId);
+            decimal originalAmount = internalOrder.Volume * internalOrder.Price;
 
-                decimal originalAmount = internalOrder.Volume * internalOrder.Price;
-                decimal executedAmount = (internalOrder.ExecutedVolume.Value * internalOrder.ExecutedPrice.Value)
-                    .TruncateDecimalPlaces(asset.Accuracy, true);
+            decimal executedAmount = (internalOrder.ExecutedVolume.Value * internalOrder.ExecutedPrice.Value)
+                .TruncateDecimalPlaces(asset.Accuracy, true);
 
-                amount = originalAmount - executedAmount;
-                comment += $"; Asset: {assetPair.BaseAssetId}; Price: {internalOrder.Price}";
-            }
-            else
-            {
-                asset = await _assetsServiceWithCache.TryGetAssetAsync(assetPair.BaseAssetId);
-                amount = internalOrder.Volume - internalOrder.ExecutedVolume.Value;
-            }
+            decimal amount = originalAmount - executedAmount;
 
             amount = Math.Round(amount, asset.Accuracy);
-            
+
             if (amount > 0)
             {
+                string comment =
+                    $"Liquidity engine transfer remaining funds according internal trade. OrderId: {internalOrder.Id}; Asset: {assetPair.BaseAssetId}; Price: {internalOrder.Price}";
+
                 string walletId = await _settingsService.GetWalletIdAsync();
 
                 try
@@ -413,9 +406,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
                     return false;
                 }
-
-                internalOrder.Status = InternalOrderStatus.Transferred;
-                await _internalOrderRepository.UpdateAsync(internalOrder);
             }
 
             return true;

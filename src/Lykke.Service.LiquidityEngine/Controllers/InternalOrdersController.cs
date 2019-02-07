@@ -22,6 +22,17 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         }
 
         /// <inheritdoc/>
+        /// <response code="200">An internal order.</response>
+        [HttpGet("{internalOrderId}")]
+        [ProducesResponseType(typeof(InternalOrderModel), (int) HttpStatusCode.OK)]
+        public async Task<InternalOrderModel> GetByIdAsync(string internalOrderId)
+        {
+            InternalOrder internalOrder = await _internalOrderService.GetByIdAsync(internalOrderId);
+
+            return Mapper.Map<InternalOrderModel>(internalOrder);
+        }
+
+        /// <inheritdoc/>
         /// <response code="200">A collection of internal orders.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IReadOnlyCollection<InternalOrderModel>), (int) HttpStatusCode.OK)]
