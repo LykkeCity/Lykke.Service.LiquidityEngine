@@ -60,7 +60,8 @@ namespace Lykke.Service.LiquidityEngine
                 .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.CreatedDate))
                 .ForMember(dest => dest.AvgExecutionPrice, opt => opt.MapFrom(src => src.ExecutedPrice ?? 0))
                 .ForMember(dest => dest.ExecutedVolume, opt => opt.MapFrom(src => src.ExecutedVolume ?? 0))
-                .ForMember(dest => dest.RemainingAmount, opt => opt.Ignore())
+                .ForMember(dest => dest.RemainingAmount,
+                    opt => opt.MapFrom(src => src.Volume - (src.ExecutedVolume ?? 0)))
                 .ForMember(dest => dest.TradeType, opt => opt.MapFrom(src => ToSpotModel(src.Type)))
                 .ForMember(dest => dest.ExecutionStatus, opt => opt.MapFrom(src => ToSpotModel(src.Status)));
 
