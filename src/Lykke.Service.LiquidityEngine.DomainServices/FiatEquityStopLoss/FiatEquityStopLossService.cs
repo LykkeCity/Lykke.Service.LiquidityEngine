@@ -66,7 +66,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             decimal markupFrom = marketMakerSettings.FiatEquityMarkupFrom;
             decimal markupTo = marketMakerSettings.FiatEquityMarkupTo;
 
-            if (thresholdFrom <= thresholdTo)
+            if (thresholdFrom >= thresholdTo)
                 return 0;
 
             decimal markup =  CalculateMarkup(fiatEquity, thresholdFrom, thresholdTo, markupFrom, markupTo);
