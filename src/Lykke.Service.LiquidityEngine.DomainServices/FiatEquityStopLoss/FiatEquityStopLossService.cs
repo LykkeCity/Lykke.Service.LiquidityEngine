@@ -44,10 +44,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
 
             Domain.AssetSettings quoteAssetSettings = await _assetSettingsService.GetByLykkeIdAsync(lykkeAssetPair.QuotingAssetId);
 
+            if (quoteAssetSettings == null)
+            {
+                _log.WarningWithDetails("Can't find asset settings while calculating fiat equity.", lykkeAssetPair.QuotingAssetId);
+
+                return 0;
+            }
+
             if (quoteAssetSettings.IsCrypto)
                 return 0;
 
             decimal fiatEquity = GetFiatEquity();
+
+            if (fiatEquity >=0)
+                return 0;
 
             MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
 
@@ -56,7 +66,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             decimal markupFrom = marketMakerSettings.FiatEquityMarkupFrom;
             decimal markupTo = marketMakerSettings.FiatEquityMarkupTo;
 
-            return CalculateMarkup(fiatEquity, thresholdFrom, thresholdTo, markupFrom, markupTo);
+            if (thresholdFrom <= thresholdTo)
+                return 0;
+
+            decimal markup =  CalculateMarkup(fiatEquity, thresholdFrom, thresholdTo, markupFrom, markupTo);
+
+            return markup;
         }
 
         public static decimal CalculateMarkup(decimal fiatEquity, decimal thresholdFrom, decimal thresholdTo, decimal markupFrom, decimal markupTo)

@@ -30,6 +30,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMessages
             {
                 var messages = await _fiatEquityStopLossService.GetMessages(assetPairId);
 
+                if (!messages.Any())
+                    continue;
+
                 result.Add(new Domain.InstrumentMessages
                 {
                     AssetPairId = assetPairId,
