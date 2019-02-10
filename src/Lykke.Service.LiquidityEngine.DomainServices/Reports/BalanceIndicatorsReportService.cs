@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lykke.Service.LiquidityEngine.Domain;
@@ -29,22 +29,27 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
 
             decimal riskExposure = 0;
             decimal equity = 0;
+            decimal fiatEquity = 0;
 
             foreach (Balance balance in externalBalances)
             {
                 decimal amountInUsd;
+                bool isFiat = false;
 
                 if (balance.AssetId == AssetConsts.UsdAssetId)
                 {
                     amountInUsd = balance.Amount;
+                    isFiat = true;
                 }
                 else
                 {
-
                     Domain.AssetSettings assetSettings = await _assetSettingsService.GetByIdAsync(balance.AssetId);
 
                     if (assetSettings == null)
                         continue;
+
+                    if (!assetSettings.IsCrypto)
+                        isFiat = true;
 
                     Quote quote = await _quoteService
                         .GetAsync(assetSettings.QuoteSource, assetSettings.ExternalAssetPairId);
@@ -60,11 +65,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Reports
                     riskExposure += Math.Abs(amountInUsd);
 
                 equity += amountInUsd;
+
+                if (isFiat)
+                    fiatEquity += amountInUsd;
             }
 
             return new BalanceIndicatorsReport
             {
                 Equity = equity,
+                FiatEquity = fiatEquity,
                 RiskExposure = riskExposure
             };
         }

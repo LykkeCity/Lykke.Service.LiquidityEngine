@@ -90,6 +90,11 @@ namespace Lykke.Service.LiquidityEngine.Client
         IPnLStopLossEnginesApi PnLStopLossEngines { get; }
 
         /// <summary>
+        /// Instrument messages API.
+        /// </summary>
+        IInstrumentMessagesApi InstrumentMessagesApi { get; }
+
+        /// <summary>
         /// Settings API.
         /// </summary>
         ISettingsApi Settings { get; }

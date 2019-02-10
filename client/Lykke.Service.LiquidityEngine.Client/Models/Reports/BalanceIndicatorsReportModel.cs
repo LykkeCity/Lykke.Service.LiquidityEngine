@@ -14,6 +14,11 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Reports
         public decimal Equity { get; set; }
 
         /// <summary>
+        /// The fiat equity indicator.
+        /// </summary>
+        public decimal FiatEquity { get; set; }
+
+        /// <summary>
         /// The risk exposure indicator.
         /// </summary>
         public decimal RiskExposure { get; set; }

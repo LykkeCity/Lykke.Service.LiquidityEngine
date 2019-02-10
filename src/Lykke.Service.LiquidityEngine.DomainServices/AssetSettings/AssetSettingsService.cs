@@ -70,6 +70,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.AssetSettings
             return assetSettings.SingleOrDefault(o => o.AssetId == assetId);
         }
 
+        public async Task<Domain.AssetSettings> GetByLykkeIdAsync(string lykkeAssetId)
+        {
+            IReadOnlyCollection<Domain.AssetSettings> assetSettings = await GetAllAsync();
+
+            return assetSettings.SingleOrDefault(o => o.LykkeAssetId == lykkeAssetId);
+        }
+
         public async Task AddAsync(Domain.AssetSettings assetSettings)
         {
             Domain.AssetSettings existingAssetSettings = (await GetAllAsync())

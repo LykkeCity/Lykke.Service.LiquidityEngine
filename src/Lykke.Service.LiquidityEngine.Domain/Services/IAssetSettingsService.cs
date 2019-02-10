@@ -8,7 +8,9 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
         Task<IReadOnlyCollection<AssetSettings>> GetAllAsync();
         
         Task<AssetSettings> GetByIdAsync(string assetId);
-        
+
+        Task<Domain.AssetSettings> GetByLykkeIdAsync(string lykkeAssetId);
+
         Task AddAsync(AssetSettings assetSettings);
         
         Task UpdateAsync(AssetSettings assetSettings);

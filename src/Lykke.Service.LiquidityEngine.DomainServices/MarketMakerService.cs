@@ -35,6 +35,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly ITradeService _tradeService;
         private readonly IAssetPairLinkService _assetPairLinkService;
         private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
+        private readonly IFiatEquityStopLossService _fiatEquityStopLossService;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -53,6 +54,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             ITradeService tradeService,
             IAssetPairLinkService assetPairLinkService,
             IPnLStopLossEngineService pnLStopLossEngineService,
+            IFiatEquityStopLossService fiatEquityStopLossService,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -70,6 +72,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _tradeService = tradeService;
             _assetPairLinkService = assetPairLinkService;
             _pnLStopLossEngineService = pnLStopLossEngineService;
+            _fiatEquityStopLossService = fiatEquityStopLossService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -179,6 +182,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             decimal pnLStopLossMarkup = await _pnLStopLossEngineService.GetTotalMarkupByAssetPairIdAsync(assetPair.Id);
 
+            decimal fiatEquityMarkup = await _fiatEquityStopLossService.GetFiatEquityMarkup(assetPair.Id);
+
+            // If FiatMarkup > 0 then apply FiatMarkup for ask prices only.
+
             IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
                 quotes[0],
                 quotes[1],
@@ -190,6 +197,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 instrument.AllowSmartMarkup,
                 marketMakerSettings.LimitOrderPriceMarkup,
                 pnLStopLossMarkup,
+                fiatEquityMarkup,
                 assetPair.Accuracy,
                 baseAsset.Accuracy);
 
