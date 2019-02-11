@@ -28,7 +28,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMessages
 
             foreach (var assetPairId in assetPairIds)
             {
-                var messages = await _fiatEquityStopLossService.GetMessages(assetPairId);
+                var messages = await _fiatEquityStopLossService.GetMessagesAsync(assetPairId);
 
                 if (!messages.Any())
                     continue;

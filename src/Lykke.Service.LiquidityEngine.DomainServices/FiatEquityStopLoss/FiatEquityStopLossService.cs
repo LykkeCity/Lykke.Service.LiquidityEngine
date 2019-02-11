@@ -88,8 +88,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
 
             decimal result = markupFrom + (markupTo - markupFrom) * (-fiatEquity - thresholdFrom) / (thresholdTo - thresholdFrom);
 
-            result = Math.Round(result, 2);
-
             return result;
         }
 
@@ -117,7 +115,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             return result;
         }
 
-        public async Task<IReadOnlyCollection<string>> GetMessages(string assetPairId)
+        public async Task<IReadOnlyCollection<string>> GetMessagesAsync(string assetPairId)
         {
             decimal markup = await GetFiatEquityMarkup(assetPairId);
 
