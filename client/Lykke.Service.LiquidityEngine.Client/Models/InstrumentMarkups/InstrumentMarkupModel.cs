@@ -1,9 +1,9 @@
-﻿namespace Lykke.Service.LiquidityEngine.Domain
+﻿namespace Lykke.Service.LiquidityEngine.Client.Models.InstrumentMarkups
 {
     /// <summary>
-    /// Represents asset pair markup.
+    /// Represents instrument markups.
     /// </summary>
-    public class AssetPairMarkup
+    public class InstrumentMarkupModel
     {
         /// <summary>
         /// The identifier of asset pair.
@@ -16,12 +16,12 @@
         public decimal TotalMarkup { get; set; }
 
         /// <summary>
-        /// Total asks markups, without level markups.
+        /// Total ask markup, without level markups.
         /// </summary>
         public decimal TotalAskMarkup { get; set; }
 
         /// <summary>
-        /// Total bids markups, without level markups.
+        /// Total bid markup, without level markups.
         /// </summary>
         public decimal TotalBidMarkup { get; set; }
     }

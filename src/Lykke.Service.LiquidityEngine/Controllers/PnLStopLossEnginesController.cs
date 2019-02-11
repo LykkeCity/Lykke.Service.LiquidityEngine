@@ -135,6 +135,7 @@ namespace Lykke.Service.LiquidityEngine.Controllers
         /// <response code="200">Collection of asset pair total markups.</response>
         [HttpGet("assetPairMarkups")]
         [ProducesResponseType(typeof(IReadOnlyCollection<AssetPairMarkupModel>), (int)HttpStatusCode.OK)]
+        [Obsolete("Use IInstrumentMarkupsApi instead.")]
         public async Task<IReadOnlyCollection<AssetPairMarkupModel>> GetAssetPairMarkupsAsync()
         {
             IReadOnlyCollection<AssetPairMarkup> stopLossEngines = await _pnLStopLossEngineService.GetTotalMarkups();

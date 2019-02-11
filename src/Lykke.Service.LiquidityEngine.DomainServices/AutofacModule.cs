@@ -10,6 +10,7 @@ using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
 using Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss;
+using Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups;
 using Lykke.Service.LiquidityEngine.DomainServices.InstrumentMessages;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.InternalTrader;
@@ -200,6 +201,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<InstrumentMessagesService>()
                 .As<IInstrumentMessagesService>()
+                .SingleInstance();
+
+            builder.RegisterType<InstrumentMarkupService>()
+                .As<IInstrumentMarkupService>()
                 .SingleInstance();
 
             RegisterTimers(builder);

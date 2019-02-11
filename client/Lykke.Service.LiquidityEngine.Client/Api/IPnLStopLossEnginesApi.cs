@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossEngines;
@@ -59,6 +60,7 @@ namespace Lykke.Service.LiquidityEngine.Client.Api
         /// </summary>
         /// <returns>Collection of total markups for every asset pair.</returns>
         [Get("/api/pnLStopLossEngines/assetPairMarkups")]
+        [Obsolete("Use IInstrumentMarkupsApi instead.")]
         Task<IReadOnlyCollection<AssetPairMarkupModel>> GetAssetPairMarkupsAsync();
     }
 }

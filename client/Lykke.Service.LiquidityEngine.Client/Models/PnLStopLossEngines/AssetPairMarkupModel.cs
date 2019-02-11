@@ -1,8 +1,11 @@
-﻿namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossEngines
+﻿using System;
+
+namespace Lykke.Service.LiquidityEngine.Client.Models.PnLStopLossEngines
 {
     /// <summary>
     /// Represents asset pair markup.
     /// </summary>
+    [Obsolete("Use 'Markups.AssetPairMarkupModel' instead.")]
     public class AssetPairMarkupModel
     {
         /// <summary>

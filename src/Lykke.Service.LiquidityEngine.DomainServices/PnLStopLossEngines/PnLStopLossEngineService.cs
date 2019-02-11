@@ -19,21 +19,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
         private readonly InMemoryCache<PnLStopLossEngine> _cache;
         private readonly IInstrumentService _instrumentService;
         private readonly ICrossRateInstrumentService _crossRateInstrumentService;
-        private readonly IMarketMakerSettingsService _marketMakerSettingsService;
         private readonly ILog _log;
 
         public PnLStopLossEngineService(
             IPnLStopLossEngineRepository pnLStopLossEngineRepository,
             IInstrumentService instrumentService,
             ICrossRateInstrumentService crossRateInstrumentService,
-            IMarketMakerSettingsService marketMakerSettingsService,
             ILogFactory logFactory)
         {
             _pnLStopLossEngineRepository = pnLStopLossEngineRepository;
             _cache = new InMemoryCache<PnLStopLossEngine>(engine => engine.Id, false);
             _instrumentService = instrumentService;
             _crossRateInstrumentService = crossRateInstrumentService;
-            _marketMakerSettingsService = marketMakerSettingsService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -132,9 +129,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
         public async Task<IReadOnlyCollection<AssetPairMarkup>> GetTotalMarkups()
         {
             var result = new List<AssetPairMarkup>();
-
-            MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
-
+            
             IReadOnlyCollection<Instrument> assetPairs = await _instrumentService.GetAllAsync();
 
             IReadOnlyCollection<PnLStopLossEngine> engines = (await GetAllAsync())
@@ -149,7 +144,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines
                 result.Add(new AssetPairMarkup
                 {
                     AssetPairId = assetPair.AssetPairId,
-                    TotalMarkup = marketMakerSettings.LimitOrderPriceMarkup + sum
+                    TotalMarkup = sum,
+                    TotalAskMarkup = sum,
+                    TotalBidMarkup = sum
                 });
             }
 
