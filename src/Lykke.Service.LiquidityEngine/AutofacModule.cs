@@ -86,7 +86,7 @@ namespace Lykke.Service.LiquidityEngine
 
             var endPoint = new IPEndPoint(address, matchingEngineClientSettings.IpEndpoint.Port);
 
-            builder.RegisgterMeClient(endPoint);
+            builder.RegisterMeClient(endPoint);
         }
 
         private void RegisterRabbit(ContainerBuilder builder)
