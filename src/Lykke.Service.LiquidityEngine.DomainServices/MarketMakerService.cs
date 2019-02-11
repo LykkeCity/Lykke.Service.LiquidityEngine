@@ -84,7 +84,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .Where(o => o.Mode == InstrumentMode.Idle || o.Mode == InstrumentMode.Active)
                 .ToArray();
 
-            await Task.WhenAll(activeInstruments.Select(ProcessInstrumentAsync));
+            foreach (Instrument instrument in activeInstruments)
+                await ProcessInstrumentAsync(instrument);
         }
 
         private async Task ProcessInstrumentAsync(Instrument instrument)
