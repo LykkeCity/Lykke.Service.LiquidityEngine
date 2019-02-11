@@ -60,6 +60,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly Mock<IPnLStopLossEngineService> _pnLStopLossEngineService = new Mock<IPnLStopLossEngineService>();
 
+        private readonly Mock<IFiatEquityStopLossService> _fiatEquityStopLossService = new Mock<IFiatEquityStopLossService>();
+
         private readonly List<Instrument> _instruments = new List<Instrument>();
 
         private readonly List<Balance> _balances = new List<Balance>();
@@ -157,6 +159,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _tradeServiceMock.Object,
                 _assetPairLinkServiceMock.Object,
                 _pnLStopLossEngineService.Object,
+                _fiatEquityStopLossService.Object,
                 EmptyLogFactory.Instance);
         }
 

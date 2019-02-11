@@ -6,6 +6,7 @@ using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.Client.Models.AssetSettings;
 using Lykke.Service.LiquidityEngine.Client.Models.Audit;
 using Lykke.Service.LiquidityEngine.Client.Models.CrossRateInstruments;
+using Lykke.Service.LiquidityEngine.Client.Models.InstrumentMessages;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 using Lykke.Service.LiquidityEngine.Client.Models.InternalOrders;
 using Lykke.Service.LiquidityEngine.Client.Models.MarketMaker;
@@ -117,6 +118,9 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<AssetPairMarkup, AssetPairMarkupModel>(MemberList.Source);
             CreateMap<AssetPairMarkupModel, AssetPairMarkup>(MemberList.Destination);
+
+            CreateMap<InstrumentMessages, InstrumentMessagesModel>(MemberList.Source);
+            CreateMap<InstrumentMessagesModel, InstrumentMessages>(MemberList.Destination);
         }
 
         private static OrderStatus ToModel(Domain.InternalOrderStatus internalOrderStatus)

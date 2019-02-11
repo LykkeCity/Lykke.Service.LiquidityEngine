@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Lykke.AzureStorage.Tables;
 using Lykke.AzureStorage.Tables.Entity.Annotation;
 using Lykke.AzureStorage.Tables.Entity.ValueTypesMerging;
@@ -11,6 +11,10 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
     {
         private decimal _limitOrderPriceMaxDeviation;
         private decimal _limitOrderPriceMarkup;
+        private decimal _fiatEquityThresholdFrom;
+        private decimal _fiatEquityThresholdTo;
+        private decimal _fiatEquityMarkupFrom;
+        private decimal _fiatEquityMarkupTo;
 
         public MarketMakerSettingsEntity()
         {
@@ -43,6 +47,58 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_limitOrderPriceMarkup != value)
                 {
                     _limitOrderPriceMarkup = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public decimal FiatEquityThresholdFrom
+        {
+            get => _fiatEquityThresholdFrom;
+            set
+            {
+                if (_fiatEquityThresholdFrom != value)
+                {
+                    _fiatEquityThresholdFrom = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public decimal FiatEquityThresholdTo
+        {
+            get => _fiatEquityThresholdTo;
+            set
+            {
+                if (_fiatEquityThresholdTo != value)
+                {
+                    _fiatEquityThresholdTo = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public decimal FiatEquityMarkupFrom
+        {
+            get => _fiatEquityMarkupFrom;
+            set
+            {
+                if (_fiatEquityMarkupFrom != value)
+                {
+                    _fiatEquityMarkupFrom = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public decimal FiatEquityMarkupTo
+        {
+            get => _fiatEquityMarkupTo;
+            set
+            {
+                if (_fiatEquityMarkupTo != value)
+                {
+                    _fiatEquityMarkupTo = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }

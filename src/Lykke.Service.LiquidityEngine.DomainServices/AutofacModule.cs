@@ -9,6 +9,8 @@ using Lykke.Service.LiquidityEngine.DomainServices.Audit;
 using Lykke.Service.LiquidityEngine.DomainServices.Balances;
 using Lykke.Service.LiquidityEngine.DomainServices.CrossRateInstruments;
 using Lykke.Service.LiquidityEngine.DomainServices.Exchanges;
+using Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss;
+using Lykke.Service.LiquidityEngine.DomainServices.InstrumentMessages;
 using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.InternalTrader;
 using Lykke.Service.LiquidityEngine.DomainServices.Logging;
@@ -190,6 +192,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<PnLStopLossSettingsService>()
                 .As<IPnLStopLossSettingsService>()
+                .SingleInstance();
+
+            builder.RegisterType<FiatEquityStopLossService>()
+                .As<IFiatEquityStopLossService>()
+                .SingleInstance();
+
+            builder.RegisterType<InstrumentMessagesService>()
+                .As<IInstrumentMessagesService>()
                 .SingleInstance();
 
             RegisterTimers(builder);

@@ -1,4 +1,4 @@
-namespace Lykke.Service.LiquidityEngine.Domain
+﻿namespace Lykke.Service.LiquidityEngine.Domain
 {
     /// <summary>
     /// Represents a current balance indicators report.
@@ -9,6 +9,11 @@ namespace Lykke.Service.LiquidityEngine.Domain
         /// The equity indicator.
         /// </summary>
         public decimal Equity { get; set; }
+
+        /// <summary>
+        /// The fiat equity indicator.
+        /// </summary>
+        public decimal FiatEquity { get; set; }
 
         /// <summary>
         /// The risk exposure indicator.
