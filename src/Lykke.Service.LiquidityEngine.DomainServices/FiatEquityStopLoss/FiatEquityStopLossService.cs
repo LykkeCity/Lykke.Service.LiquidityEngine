@@ -91,7 +91,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             return result;
         }
 
-        public async Task<IReadOnlyCollection<AssetPairMarkup>> GetMarkups()
+        public async Task<IReadOnlyCollection<AssetPairMarkup>> GetMarkupsAsync()
         {
             var result = new List<AssetPairMarkup>();
 

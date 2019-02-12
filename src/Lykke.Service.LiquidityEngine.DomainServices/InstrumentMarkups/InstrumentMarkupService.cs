@@ -33,7 +33,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
 
             IReadOnlyCollection<AssetPairMarkup> pnLStopLossMarkups = await _pnLStopLossEngineService.GetTotalMarkups();
 
-            IReadOnlyCollection<AssetPairMarkup> fiatStopLossMarkups = await _fiatEquityStopLossService.GetMarkups();
+            IReadOnlyCollection<AssetPairMarkup> fiatStopLossMarkups = await _fiatEquityStopLossService.GetMarkupsAsync();
 
             var assetPairs = (await _instrumentService.GetAllAsync()).Select(x => x.AssetPairId).ToList();
 
