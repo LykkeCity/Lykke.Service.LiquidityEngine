@@ -41,6 +41,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
             {
                 AssetPairMarkup assetPairMarkup = new AssetPairMarkup();
 
+                assetPairMarkup.AssetPairId = assetPairId;
+
                 // Global
                 assetPairMarkup.TotalMarkup += globalMarkup;
                 assetPairMarkup.TotalAskMarkup += globalMarkup;
