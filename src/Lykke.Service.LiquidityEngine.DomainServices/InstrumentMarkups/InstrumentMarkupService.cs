@@ -60,7 +60,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
                 if (fiatEquityStopLossMarkup != null)
                 {
                     // Can be applied to asks only
-                    assetPairMarkup.TotalAskMarkup += fiatEquityStopLossMarkup.TotalAskMarkup;
+                    if (assetPairMarkup.TotalAskMarkup == decimal.MinusOne)
+                        assetPairMarkup.TotalAskMarkup = decimal.MinusOne;
+                    else
+                        assetPairMarkup.TotalAskMarkup += fiatEquityStopLossMarkup.TotalAskMarkup;
                 }
 
                 result.Add(assetPairMarkup);
