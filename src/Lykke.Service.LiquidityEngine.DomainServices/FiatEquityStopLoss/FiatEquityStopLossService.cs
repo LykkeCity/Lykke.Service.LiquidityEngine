@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
@@ -17,6 +18,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
         private readonly IAssetSettingsService _assetSettingsService;
         private readonly IMarketMakerSettingsService _marketMakerSettingsService;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IInstrumentService _instrumentService;
         private readonly ILog _log;
 
         private readonly object _sync = new object();
@@ -29,12 +31,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             IAssetSettingsService assetSettingsService,
             IMarketMakerSettingsService marketMakerSettingsService,
             IAssetsServiceWithCache assetsServiceWithCache,
+            IInstrumentService instrumentService,
             ILogFactory logFactory)
         {
             _balanceIndicatorsReportService = balanceIndicatorsReportService;
             _assetSettingsService = assetSettingsService;
             _marketMakerSettingsService = marketMakerSettingsService;
             _assetsServiceWithCache = assetsServiceWithCache;
+            _instrumentService = instrumentService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -82,11 +86,36 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             if (fiatEquity <= -thresholdTo)
                 return decimal.MinusOne;
 
-            return markupFrom + (markupTo - markupFrom) * (-fiatEquity - thresholdFrom) / (thresholdTo - thresholdFrom);
+            decimal result = markupFrom + (markupTo - markupFrom) * (-fiatEquity - thresholdFrom) / (thresholdTo - thresholdFrom);
+
+            return result;
         }
 
+        public async Task<IReadOnlyCollection<AssetPairMarkup>> GetMarkupsAsync()
+        {
+            var result = new List<AssetPairMarkup>();
 
-        public async Task<IReadOnlyCollection<string>> GetMessages(string assetPairId)
+            var instruments = await _instrumentService.GetAllAsync();
+
+            var assetPairIds = instruments.Select(x => x.AssetPairId).ToList();
+
+            foreach (var assetPairId in assetPairIds)
+            {
+                decimal fiatMarkups = await GetFiatEquityMarkup(assetPairId);
+
+                result.Add(new AssetPairMarkup
+                {
+                    AssetPairId = assetPairId,
+                    TotalMarkup = 0,
+                    TotalAskMarkup = fiatMarkups,
+                    TotalBidMarkup = 0
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<IReadOnlyCollection<string>> GetMessagesAsync(string assetPairId)
         {
             decimal markup = await GetFiatEquityMarkup(assetPairId);
 
@@ -99,7 +128,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             if (markup > 0)
                 return new List<string> { "fiat ask markup" };
 
-            _log.WarningWithDetails($"Fiat equity markup has wrong value.", markup);
+            _log.WarningWithDetails("Fiat equity markup has wrong value.", markup);
 
             return new List<string>();
         }

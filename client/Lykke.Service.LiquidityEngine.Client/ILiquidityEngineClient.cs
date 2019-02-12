@@ -95,6 +95,11 @@ namespace Lykke.Service.LiquidityEngine.Client
         IInstrumentMessagesApi InstrumentMessagesApi { get; }
 
         /// <summary>
+        /// Instrument markups API.
+        /// </summary>
+        IInstrumentMarkupsApi InstrumentMarkupsApi { get; }
+
+        /// <summary>
         /// Settings API.
         /// </summary>
         ISettingsApi Settings { get; }

@@ -6,6 +6,7 @@ using Lykke.Service.LiquidityEngine.Client.Models.AssetPairLinks;
 using Lykke.Service.LiquidityEngine.Client.Models.AssetSettings;
 using Lykke.Service.LiquidityEngine.Client.Models.Audit;
 using Lykke.Service.LiquidityEngine.Client.Models.CrossRateInstruments;
+using Lykke.Service.LiquidityEngine.Client.Models.InstrumentMarkups;
 using Lykke.Service.LiquidityEngine.Client.Models.InstrumentMessages;
 using Lykke.Service.LiquidityEngine.Client.Models.Instruments;
 using Lykke.Service.LiquidityEngine.Client.Models.InternalOrders;
@@ -116,11 +117,14 @@ namespace Lykke.Service.LiquidityEngine
             CreateMap<PnLStopLossEngine, PnLStopLossEngineModel>(MemberList.Source);
             CreateMap<PnLStopLossEngineModel, PnLStopLossEngine>(MemberList.Destination);
 
-            CreateMap<AssetPairMarkup, AssetPairMarkupModel>(MemberList.Source);
-            CreateMap<AssetPairMarkupModel, AssetPairMarkup>(MemberList.Destination);
+            CreateMap<AssetPairMarkup, AssetPairMarkupModel>(MemberList.Destination);
+            CreateMap<AssetPairMarkupModel, AssetPairMarkup>(MemberList.Source);
 
             CreateMap<InstrumentMessages, InstrumentMessagesModel>(MemberList.Source);
             CreateMap<InstrumentMessagesModel, InstrumentMessages>(MemberList.Destination);
+
+            CreateMap<AssetPairMarkup, InstrumentMarkupModel>(MemberList.Source);
+            CreateMap<InstrumentMarkupModel, AssetPairMarkup>(MemberList.Destination);
         }
 
         private static OrderStatus ToModel(Domain.InternalOrderStatus internalOrderStatus)

@@ -27,10 +27,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
         private readonly Mock<ICrossRateInstrumentService> _crossRateInstrumentService =
             new Mock<ICrossRateInstrumentService>();
-
-        private readonly Mock<IMarketMakerSettingsService> _marketMakerSettingsService =
-            new Mock<IMarketMakerSettingsService>();
-
+        
         private readonly ConcurrentDictionary<string, PnLStopLossEngine> _cache
             = new ConcurrentDictionary<string,PnLStopLossEngine>();
 
@@ -182,7 +179,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _pnLStopLossEngineRepository.Object,
                 _instrumentService.Object,
                 _crossRateInstrumentService.Object,
-                _marketMakerSettingsService.Object,
                 LogFactory.Create()
             );
 

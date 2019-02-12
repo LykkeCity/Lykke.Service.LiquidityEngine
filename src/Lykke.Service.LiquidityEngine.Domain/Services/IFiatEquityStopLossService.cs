@@ -7,6 +7,8 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
     {
         Task<decimal> GetFiatEquityMarkup(string assetPairId);
 
-        Task<IReadOnlyCollection<string>> GetMessages(string assetPairId);
+        Task<IReadOnlyCollection<string>> GetMessagesAsync(string assetPairId);
+
+        Task<IReadOnlyCollection<AssetPairMarkup>> GetMarkupsAsync();
     }
 }
