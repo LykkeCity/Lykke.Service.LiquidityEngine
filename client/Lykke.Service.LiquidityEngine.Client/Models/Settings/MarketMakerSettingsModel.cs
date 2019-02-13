@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 
 namespace Lykke.Service.LiquidityEngine.Client.Models.Settings
 {
@@ -37,5 +38,15 @@ namespace Lykke.Service.LiquidityEngine.Client.Models.Settings
         /// Markup for <see cref="FiatEquityThresholdTo"/>.
         /// </summary>
         public decimal FiatEquityMarkupTo { get; set; }
+
+        /// <summary>
+        /// No fresh quotes interval
+        /// </summary>
+        public TimeSpan NoFreshQuotesInterval { get; set; }
+
+        /// <summary>
+        /// No fresh quotes markup
+        /// </summary>
+        public decimal NoFreshQuotesMarkup { get; set; }
     }
 }

@@ -8,13 +8,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMessages
     public class InstrumentMessagesService : IInstrumentMessagesService
     {
         private readonly IFiatEquityStopLossService _fiatEquityStopLossService;
+        private readonly INoFreshQuotesStopLossService _noFreshQuotesStopLossService;
         private readonly IInstrumentService _instrumentService;
 
         public InstrumentMessagesService(
             IFiatEquityStopLossService fiatEquityStopLossService,
+            INoFreshQuotesStopLossService noFreshQuotesStopLossService,
             IInstrumentService instrumentService)
         {
             _fiatEquityStopLossService = fiatEquityStopLossService;
+            _noFreshQuotesStopLossService = noFreshQuotesStopLossService;
             _instrumentService = instrumentService;
         }
 
@@ -28,15 +31,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMessages
 
             foreach (var assetPairId in assetPairIds)
             {
-                var messages = await _fiatEquityStopLossService.GetMessagesAsync(assetPairId);
+                var fiatEquityStopLossMessages = await _fiatEquityStopLossService.GetMessagesAsync(assetPairId);
 
-                if (!messages.Any())
+                var noFreshQuotesStopLossMessages = await _noFreshQuotesStopLossService.GetMessagesAsync(assetPairId);
+
+                if (!fiatEquityStopLossMessages.Any() && !noFreshQuotesStopLossMessages.Any())
                     continue;
+
+                List<string> instrumentMessages = new List<string>();
+
+                instrumentMessages.AddRange(fiatEquityStopLossMessages);
+
+                instrumentMessages.AddRange(noFreshQuotesStopLossMessages);
 
                 result.Add(new Domain.InstrumentMessages
                 {
                     AssetPairId = assetPairId,
-                    Messages = messages
+                    Messages = instrumentMessages
                 });
             }
 

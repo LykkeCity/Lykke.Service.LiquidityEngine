@@ -11,17 +11,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
         private readonly IMarketMakerSettingsService _marketMakerSettingsService;
         private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
         private readonly IFiatEquityStopLossService _fiatEquityStopLossService;
+        private readonly INoFreshQuotesStopLossService _noFreshQuotesStopLossService;
         private readonly IInstrumentService _instrumentService;
 
         public InstrumentMarkupService(
             IMarketMakerSettingsService marketMakerSettingsService,
             IPnLStopLossEngineService pnLStopLossEngineService,
             IFiatEquityStopLossService fiatEquityStopLossService,
+            INoFreshQuotesStopLossService noFreshQuotesStopLossService,
             IInstrumentService instrumentService)
         {
             _marketMakerSettingsService = marketMakerSettingsService;
             _pnLStopLossEngineService = pnLStopLossEngineService;
             _fiatEquityStopLossService = fiatEquityStopLossService;
+            _noFreshQuotesStopLossService = noFreshQuotesStopLossService;
             _instrumentService = instrumentService;
         }
 
@@ -34,6 +37,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
             IReadOnlyCollection<AssetPairMarkup> pnLStopLossMarkups = await _pnLStopLossEngineService.GetTotalMarkups();
 
             IReadOnlyCollection<AssetPairMarkup> fiatEquityStopLossMarkups = await _fiatEquityStopLossService.GetMarkupsAsync();
+
+            IReadOnlyCollection<AssetPairMarkup> noFreshQuotesStopLossMarkups = await _noFreshQuotesStopLossService.GetMarkupsAsync();
 
             var assetPairs = (await _instrumentService.GetAllAsync()).Select(x => x.AssetPairId).ToList();
 
@@ -66,6 +71,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
                         assetPairMarkup.TotalAskMarkup = decimal.MinusOne;
                     else
                         assetPairMarkup.TotalAskMarkup += fiatEquityStopLossMarkup.TotalAskMarkup;
+                }
+
+                // No Fresh Quotes Stop Loss Markups
+                AssetPairMarkup noFreshQuotesStopLossMarkup = noFreshQuotesStopLossMarkups.SingleOrDefault(x => x.AssetPairId == assetPairId);
+                if (noFreshQuotesStopLossMarkup != null)
+                {
+                    assetPairMarkup.TotalMarkup += noFreshQuotesStopLossMarkup.TotalMarkup;
+                    assetPairMarkup.TotalAskMarkup += noFreshQuotesStopLossMarkup.TotalAskMarkup;
+                    assetPairMarkup.TotalBidMarkup += noFreshQuotesStopLossMarkup.TotalBidMarkup;
                 }
 
                 result.Add(assetPairMarkup);

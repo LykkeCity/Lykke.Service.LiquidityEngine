@@ -48,9 +48,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="timeSinceLastTrade">The total seconds from last trade in order book.</param>
         /// <param name="halfLifePeriod">The half life period in seconds.</param>
         /// <param name="allowSmartMarkup">If <c>true</c> then smart markup for first level will be applied; otherwise default markup.</param>
-        /// <param name="commonMarkup">Common markup.</param>
+        /// <param name="globalMarkup">Global markup.</param>
         /// <param name="pnLStopLossMarkup">Total pnl stop loss markup.</param>
-        /// <param name="fiatEquityStopLossMarkup">Fiat equity markup.</param>
+        /// <param name="fiatEquityStopLossMarkup">Fiat equity stop loss markup.</param>
+        /// <param name="noFreshQuotesStopLossMarkup">No fresh quotes stop loss markup.</param>
         /// <param name="priceAccuracy">The accuracy of price.</param>
         /// <param name="volumeAccuracy">The accuracy of volume.</param>
         /// <returns>A collection of limit orders.</returns>
@@ -63,9 +64,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             int timeSinceLastTrade,
             int halfLifePeriod,
             bool allowSmartMarkup,
-            decimal commonMarkup,
+            decimal globalMarkup,
             decimal pnLStopLossMarkup,
             decimal fiatEquityStopLossMarkup,
+            decimal noFreshQuotesStopLossMarkup,
             int priceAccuracy,
             int volumeAccuracy)
         {
@@ -111,14 +113,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     buyFirstLevelMarkup = smartMarkup;
             }
 
+            decimal commonMarkup = globalMarkup + pnLStopLossMarkup + noFreshQuotesStopLossMarkup;
+
             decimal sellFirstLevelPrice =
-                (sellRawPrice * (1 + sellFirstLevelMarkup + commonMarkup + pnLStopLossMarkup))
+                (sellRawPrice * (1 + sellFirstLevelMarkup + commonMarkup))
                 .TruncateDecimalPlaces(priceAccuracy, true);
 
             limitOrders.Add(LimitOrder.CreateSell(sellFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy)));
 
             decimal buyFirstLevelPrice =
-                (buyRawPrice * (1 - (buyFirstLevelMarkup + commonMarkup + pnLStopLossMarkup + fiatEquityStopLossMarkup)))
+                (buyRawPrice * (1 - (buyFirstLevelMarkup + commonMarkup + fiatEquityStopLossMarkup)))
                 .TruncateDecimalPlaces(priceAccuracy);
 
             if (fiatEquityStopLossMarkup != decimal.MinusOne) // don't create buy orders if 'FiatEquityThresholdTo' exceeded
@@ -142,7 +146,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 buyRawPrice = (buyMarketPrice * sumVolume - prevBuyMarketPrice * prevSumVolume) / levels[i].Volume;
 
-                decimal sellPrice = (sellRawPrice * (1 + levels[i].Markup + commonMarkup + pnLStopLossMarkup))
+                decimal sellPrice = (sellRawPrice * (1 + levels[i].Markup + commonMarkup))
                     .TruncateDecimalPlaces(priceAccuracy, true);
 
                 limitOrders.Add(LimitOrder.CreateSell(Math.Max(sellFirstLevelPrice, sellPrice),
@@ -151,7 +155,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 if (fiatEquityStopLossMarkup == decimal.MinusOne) // don't create buy orders if 'FiatEquityThresholdTo' exceeded
                     continue;
 
-                decimal buyPrice = (buyRawPrice * (1 - (levels[i].Markup + commonMarkup + pnLStopLossMarkup + fiatEquityStopLossMarkup)))
+                decimal buyPrice = (buyRawPrice * (1 - (levels[i].Markup + commonMarkup + fiatEquityStopLossMarkup)))
                     .TruncateDecimalPlaces(priceAccuracy);
 
                 limitOrders.Add(LimitOrder.CreateBuy(Math.Min(buyFirstLevelPrice, buyPrice),
