@@ -70,9 +70,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
         {
             var result = new List<AssetPairMarkup>();
 
-            var instruments = await _instrumentService.GetAllAsync();
+            IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
 
-            var assetPairIds = instruments.Select(x => x.AssetPairId).ToList();
+            IReadOnlyCollection<string> assetPairIds = instruments.Select(x => x.AssetPairId).ToList();
 
             foreach (var assetPairId in assetPairIds)
             {
