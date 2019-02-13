@@ -43,7 +43,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
             Quote quote = await _quoteService.GetAsync(ExchangeNames.B2C2, assetPairId);
 
             if (quote == null)
-                return 0;
+                return noFreshQuotesMarkup;
 
             if (DateTime.UtcNow - quote.Time > noFreshQuotesInterval)
                 return noFreshQuotesMarkup;
