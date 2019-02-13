@@ -33,7 +33,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
 
             IReadOnlyCollection<AssetPairMarkup> pnLStopLossMarkups = await _pnLStopLossEngineService.GetTotalMarkups();
 
-            IReadOnlyCollection<AssetPairMarkup> fiatStopLossMarkups = await _fiatEquityStopLossService.GetMarkupsAsync();
+            IReadOnlyCollection<AssetPairMarkup> fiatEquityStopLossMarkups = await _fiatEquityStopLossService.GetMarkupsAsync();
 
             var assetPairs = (await _instrumentService.GetAllAsync()).Select(x => x.AssetPairId).ToList();
 
@@ -58,11 +58,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InstrumentMarkups
                 }
 
                 // Fiat Equity Stop Loss Markups
-                AssetPairMarkup fiatEquityStopLossMarkup = fiatStopLossMarkups.SingleOrDefault(x => x.AssetPairId == assetPairId);
+                AssetPairMarkup fiatEquityStopLossMarkup = fiatEquityStopLossMarkups.SingleOrDefault(x => x.AssetPairId == assetPairId);
                 if (fiatEquityStopLossMarkup != null)
                 {
                     // Can be applied to asks only
-                    if (assetPairMarkup.TotalAskMarkup == decimal.MinusOne)
+                    if (fiatEquityStopLossMarkup.TotalAskMarkup == decimal.MinusOne)
                         assetPairMarkup.TotalAskMarkup = decimal.MinusOne;
                     else
                         assetPairMarkup.TotalAskMarkup += fiatEquityStopLossMarkup.TotalAskMarkup;

@@ -101,13 +101,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
 
             foreach (var assetPairId in assetPairIds)
             {
-                decimal fiatMarkups = await GetFiatEquityMarkup(assetPairId);
+                decimal fiatEquityMarkups = await GetFiatEquityMarkup(assetPairId);
 
                 result.Add(new AssetPairMarkup
                 {
                     AssetPairId = assetPairId,
                     TotalMarkup = 0,
-                    TotalAskMarkup = fiatMarkups,
+                    TotalAskMarkup = fiatEquityMarkups,
                     TotalBidMarkup = 0
                 });
             }
