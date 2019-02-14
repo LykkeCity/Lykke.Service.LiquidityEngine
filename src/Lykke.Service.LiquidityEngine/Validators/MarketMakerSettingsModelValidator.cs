@@ -23,16 +23,16 @@ namespace Lykke.Service.LiquidityEngine.Validators
 
             RuleFor(o => o.FiatEquityMarkupTo)
                 .InclusiveBetween(0, 1)
-                .GreaterThan(o => o.FiatEquityMarkupFrom)
+                .GreaterThanOrEqualTo(o => o.FiatEquityMarkupFrom)
                 .WithMessage("Value should be greater than or equal to 0 and less than or equal to 1");
 
             RuleFor(o => o.FiatEquityThresholdFrom)
-                .GreaterThan(0)
+                .GreaterThanOrEqualTo(0)
                 .WithMessage("Value should be greater than or equal to 0");
 
             RuleFor(o => o.FiatEquityThresholdTo)
-                .GreaterThan(0)
-                .GreaterThan(o => o.FiatEquityThresholdFrom)
+                .GreaterThanOrEqualTo(0)
+                .GreaterThanOrEqualTo(o => o.FiatEquityThresholdFrom)
                 .WithMessage("Value should be greater than or equal to 0");
 
             RuleFor(o => o.NoFreshQuotesMarkup)
