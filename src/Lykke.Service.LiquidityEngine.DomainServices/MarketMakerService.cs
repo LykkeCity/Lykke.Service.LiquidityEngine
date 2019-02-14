@@ -36,6 +36,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IAssetPairLinkService _assetPairLinkService;
         private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
         private readonly IFiatEquityStopLossService _fiatEquityStopLossService;
+        private readonly INoFreshQuotesStopLossService _noFreshQuotesStopLossService;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -55,6 +56,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IAssetPairLinkService assetPairLinkService,
             IPnLStopLossEngineService pnLStopLossEngineService,
             IFiatEquityStopLossService fiatEquityStopLossService,
+            INoFreshQuotesStopLossService noFreshQuotesStopLossService,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -73,6 +75,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _assetPairLinkService = assetPairLinkService;
             _pnLStopLossEngineService = pnLStopLossEngineService;
             _fiatEquityStopLossService = fiatEquityStopLossService;
+            _noFreshQuotesStopLossService = noFreshQuotesStopLossService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -183,9 +186,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             decimal pnLStopLossMarkup = await _pnLStopLossEngineService.GetTotalMarkupByAssetPairIdAsync(assetPair.Id);
 
-            decimal fiatEquityMarkup = await _fiatEquityStopLossService.GetFiatEquityMarkup(assetPair.Id);
+            decimal fiatEquityStopLossMarkup = await _fiatEquityStopLossService.GetFiatEquityMarkup(assetPair.Id);
 
-            // If FiatMarkup > 0 then apply FiatMarkup for ask prices only.
+            decimal stopLossMarkup = await _noFreshQuotesStopLossService.GetNoFreshQuotesMarkup(assetPair.Id);
 
             IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
                 quotes[0],
@@ -198,7 +201,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 instrument.AllowSmartMarkup,
                 marketMakerSettings.LimitOrderPriceMarkup,
                 pnLStopLossMarkup,
-                fiatEquityMarkup,
+                fiatEquityStopLossMarkup,
+                stopLossMarkup,
                 assetPair.Accuracy,
                 baseAsset.Accuracy);
 

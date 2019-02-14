@@ -6,6 +6,6 @@ namespace Lykke.Service.LiquidityEngine.Domain
     {
         public string AssetPairId { get; set; }
 
-        public IReadOnlyCollection<string> Messages { get; set; }
+        public IReadOnlyCollection<string> Messages { get; set; } = new List<string>();
     }
 }

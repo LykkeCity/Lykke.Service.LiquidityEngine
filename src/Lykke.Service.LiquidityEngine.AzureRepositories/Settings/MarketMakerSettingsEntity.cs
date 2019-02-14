@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using Lykke.AzureStorage.Tables;
 using Lykke.AzureStorage.Tables.Entity.Annotation;
 using Lykke.AzureStorage.Tables.Entity.ValueTypesMerging;
@@ -15,6 +16,8 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
         private decimal _fiatEquityThresholdTo;
         private decimal _fiatEquityMarkupFrom;
         private decimal _fiatEquityMarkupTo;
+        private TimeSpan _noFreshQuotesInterval;
+        private decimal _noFreshQuotesMarkup;
 
         public MarketMakerSettingsEntity()
         {
@@ -99,6 +102,32 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories.Settings
                 if (_fiatEquityMarkupTo != value)
                 {
                     _fiatEquityMarkupTo = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public TimeSpan  NoFreshQuotesInterval
+        {
+            get => _noFreshQuotesInterval;
+            set
+            {
+                if (_noFreshQuotesInterval != value)
+                {
+                    _noFreshQuotesInterval = value;
+                    MarkValueTypePropertyAsDirty();
+                }
+            }
+        }
+
+        public decimal NoFreshQuotesMarkup
+        {
+            get => _noFreshQuotesMarkup;
+            set
+            {
+                if (_noFreshQuotesMarkup != value)
+                {
+                    _noFreshQuotesMarkup = value;
                     MarkValueTypePropertyAsDirty();
                 }
             }

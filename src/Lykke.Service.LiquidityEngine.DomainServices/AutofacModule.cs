@@ -16,6 +16,7 @@ using Lykke.Service.LiquidityEngine.DomainServices.Instruments;
 using Lykke.Service.LiquidityEngine.DomainServices.InternalTrader;
 using Lykke.Service.LiquidityEngine.DomainServices.Logging;
 using Lykke.Service.LiquidityEngine.DomainServices.MarketMaker;
+using Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss;
 using Lykke.Service.LiquidityEngine.DomainServices.OrderBooks;
 using Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossEngines;
 using Lykke.Service.LiquidityEngine.DomainServices.PnLStopLossSettings;
@@ -205,6 +206,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<InstrumentMarkupService>()
                 .As<IInstrumentMarkupService>()
+                .SingleInstance();
+
+            builder.RegisterType<NoFreshQuotesStopLossService>()
+                .As<INoFreshQuotesStopLossService>()
                 .SingleInstance();
 
             RegisterTimers(builder);

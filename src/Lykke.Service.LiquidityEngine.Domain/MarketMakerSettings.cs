@@ -1,4 +1,6 @@
-﻿namespace Lykke.Service.LiquidityEngine.Domain
+﻿using System;
+
+namespace Lykke.Service.LiquidityEngine.Domain
 {
     /// <summary>
     /// Represent a market maker settings.
@@ -34,5 +36,15 @@
         /// Markup for <see cref="FiatEquityThresholdTo"/>.
         /// </summary>
         public decimal FiatEquityMarkupTo { get; set; }
+
+        /// <summary>
+        /// No fresh quotes interval
+        /// </summary>
+        public TimeSpan NoFreshQuotesInterval { get; set; }
+
+        /// <summary>
+        /// No fresh quotes markup
+        /// </summary>
+        public decimal NoFreshQuotesMarkup { get; set; }
     }
 }
