@@ -107,7 +107,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
                 error = Errors.AssetPairNotSupported;
             else if (Math.Round(internalOrder.Volume, instrument.VolumeAccuracy) < instrument.MinVolume)
                 error = Errors.TooSmallVolume;
-            else if (BitConverter.GetBytes(decimal.GetBits(internalOrder.Volume)[3])[2] > instrument.VolumeAccuracy)
+            else if (Math.Abs(internalOrder.Volume) % 1 * (decimal) Math.Pow(10, instrument.VolumeAccuracy) % 1 != 0)
                 error = Errors.InvalidVolume;
 
             if (!string.IsNullOrEmpty(error))
@@ -166,7 +166,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
             string assetId;
             decimal amount;
-            string comment = $"Liquidity engine reserve funds for internal trade. OrderId: {internalOrder.Id}";
 
             if (internalOrder.Type == LimitOrderType.Sell)
             {
@@ -179,14 +178,18 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
                 assetId = assetPair.QuotingAssetId;
                 amount = (internalOrder.Volume * internalOrder.Price).TruncateDecimalPlaces(asset.Accuracy, true);
-                comment += $"; Asset: {assetPair.BaseAssetId}; Price: {internalOrder.Price}";
             }
+
+            _log.InfoWithDetails("Reserve funds for internal trade",
+                new {OrderId = internalOrder.Id, Asset = assetId, Amount = amount});
 
             string error = null;
 
+            string walletId = await _settingsService.GetWalletIdAsync();
+
             try
             {
-                await _lykkeExchangeService.CashOutAsync(internalOrder.WalletId, assetId, amount, "empty", comment);
+                await _lykkeExchangeService.TransferAsync(internalOrder.WalletId, walletId, assetId, amount);
             }
             catch (NotEnoughFundsException)
             {
@@ -194,29 +197,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
             }
             catch (Exception)
             {
-                error = "An unexpected error occurred during cash-out funds from external wallet";
+                error = "An unexpected error occurred during reserving funds";
             }
 
             if (!string.IsNullOrEmpty(error))
             {
                 internalOrder.Status = InternalOrderStatus.Rejected;
                 internalOrder.RejectReason = error;
-
-                await _internalOrderRepository.UpdateAsync(internalOrder);
-
-                return false;
-            }
-
-            string walletId = await _settingsService.GetWalletIdAsync();
-
-            try
-            {
-                await _lykkeExchangeService.CashInAsync(walletId, assetId, amount, "empty", comment);
-            }
-            catch (Exception)
-            {
-                internalOrder.Status = InternalOrderStatus.Failed;
-                internalOrder.RejectReason = "An unexpected error occurred during cash-in funds to main wallet";
 
                 await _internalOrderRepository.UpdateAsync(internalOrder);
 
@@ -262,6 +249,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
             // ReSharper disable once PossibleNullReferenceException
             internalOrder.ExecutedPrice = externalTrade.Price;
             internalOrder.ExecutedVolume = externalTrade.Volume;
+            internalOrder.TradeId = externalTrade.Id;
             internalOrder.Status = InternalOrderStatus.Executed;
 
             await _internalOrderRepository.UpdateAsync(internalOrder);
@@ -279,7 +267,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
             string assetId;
             decimal amount;
-            string comment = $"Liquidity engine release reserved funds for internal trade. OrderId: {internalOrder.Id}";
 
             if (internalOrder.Type == LimitOrderType.Sell)
             {
@@ -292,25 +279,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
                 assetId = assetPair.QuotingAssetId;
                 amount = (internalOrder.Volume * internalOrder.Price).TruncateDecimalPlaces(asset.Accuracy, true);
-                comment += $"; Asset: {assetPair.BaseAssetId}; Price: {internalOrder.Price}";
             }
+
+            _log.InfoWithDetails("Releasing reserved funds for internal trade",
+                new {OrderId = internalOrder.Id, Asset = assetId, Amount = amount});
 
             string walletId = await _settingsService.GetWalletIdAsync();
 
             try
             {
-                await _lykkeExchangeService.CashOutAsync(walletId, assetId, amount, "empty", comment);
-
-                await _lykkeExchangeService.CashInAsync(internalOrder.WalletId, assetId, amount, "empty", comment);
+                await _lykkeExchangeService.TransferAsync(walletId, internalOrder.WalletId, assetId, amount);
             }
             catch (Exception exception)
             {
-                _log.ErrorWithDetails(exception, "Can not transfer back reserved funds",
-                    internalOrder);
+                _log.ErrorWithDetails(exception, "Can not transfer back reserved funds", internalOrder);
             }
 
             internalOrder.Status = InternalOrderStatus.Cancelled;
-
             await _internalOrderRepository.UpdateAsync(internalOrder);
         }
 
@@ -325,7 +310,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
             string assetId;
             decimal amount;
-            string comment = $"Liquidity engine transfer funds according internal trade. OrderId: {internalOrder.Id}";
 
             if (internalOrder.Type == LimitOrderType.Sell)
             {
@@ -334,7 +318,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
                 assetId = assetPair.QuotingAssetId;
                 amount = (internalOrder.ExecutedVolume.Value * internalOrder.ExecutedPrice.Value)
                     .TruncateDecimalPlaces(asset.Accuracy, true);
-                comment += $"; Asset: {assetPair.BaseAssetId}; Price: {internalOrder.Price}";
             }
             else
             {
@@ -342,13 +325,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
                 amount = internalOrder.ExecutedVolume.Value;
             }
 
+            _log.InfoWithDetails("Transfer funds according internal trade",
+                new {OrderId = internalOrder.Id, Asset = assetId, Amount = amount});
+
             string walletId = await _settingsService.GetWalletIdAsync();
 
             try
             {
-                await _lykkeExchangeService.CashOutAsync(walletId, assetId, amount, "empty", comment);
-
-                await _lykkeExchangeService.CashInAsync(internalOrder.WalletId, assetId, amount, "empty", comment);
+                await _lykkeExchangeService.TransferAsync(walletId, internalOrder.WalletId, assetId, amount);
             }
             catch (Exception exception)
             {
@@ -388,16 +372,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
             if (amount > 0)
             {
-                string comment =
-                    $"Liquidity engine transfer remaining funds according internal trade. OrderId: {internalOrder.Id}; Asset: {assetPair.BaseAssetId}; Price: {internalOrder.Price}";
+                _log.InfoWithDetails("Transfer remaining funds according internal trade",
+                    new {OrderId = internalOrder.Id, Asset = asset.Id, Amount = amount});
 
                 string walletId = await _settingsService.GetWalletIdAsync();
 
                 try
                 {
-                    await _lykkeExchangeService.CashOutAsync(walletId, asset.Id, amount, "empty", comment);
-
-                    await _lykkeExchangeService.CashInAsync(internalOrder.WalletId, asset.Id, amount, "empty", comment);
+                    await _lykkeExchangeService.TransferAsync(walletId, internalOrder.WalletId, asset.Id, amount);
                 }
                 catch (Exception exception)
                 {
