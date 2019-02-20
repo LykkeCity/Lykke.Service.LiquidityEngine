@@ -147,8 +147,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             _log.InfoWithDetails("Cash in response", result);
 
-            if (result.Code != 0)
-                throw new BalanceOperationException("Unexpected cash in response status", result.Code);
+            if (!result.IsOk())
+                throw new BalanceOperationException("Unexpected cash in response status");
 
             return result.TransactionId;
         }
@@ -174,12 +174,56 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             _log.InfoWithDetails("Cash out response", result);
 
-            if (result.Code != 0)
+            if (!result.IsOk())
             {
-                if(result.Code == BalanceOperationException.NotEnoughFundsCode)
+                if (result.Code == (int) MeStatusCodes.LowBalance)
                     throw new NotEnoughFundsException();
+
+                throw new BalanceOperationException("Unexpected cash out response status");
+            }
+
+            return result.TransactionId;
+        }
+
+        public async Task<string> TransferAsync(string sourceWalletId, string destinationWalletId, string assetId,
+            decimal amount, string transactionId = null)
+        {
+            _log.InfoWithDetails("Transfer request",
+                new {sourceWalletId, destinationWalletId, assetId, amount, transactionId});
+
+            ExchangeOperationResult result;
+
+            try
+            {
+                result = await _exchangeOperationsServiceClient.TransferAsync(
+                    destinationWalletId,
+                    sourceWalletId,
+                    (double) amount,
+                    assetId,
+                    transactionId: transactionId);
+            }
+            catch (Exception exception)
+            {
+                _log.ErrorWithDetails(exception,
+                    new {sourceWalletId, destinationWalletId, assetId, amount, transactionId});
+
+                throw new Exception("An error occurred while processing transfer request", exception);
+            }
+
+            if (result == null)
+                throw new Exception("ME result is null");
+
+            _log.InfoWithDetails("Transfer response", result);
+
+            if (!result.IsOk())
+            {
+                if (result.Code == (int) MeStatusCodes.LowBalance)
+                    throw new NotEnoughFundsException();
+
+                if (result.Code == (int) MeStatusCodes.Duplicate)
+                    throw new DuplicateTransferException();
                 
-                throw new BalanceOperationException("Unexpected cash out response status", result.Code);
+                throw new BalanceOperationException("Unexpected transfer response status");
             }
 
             return result.TransactionId;
