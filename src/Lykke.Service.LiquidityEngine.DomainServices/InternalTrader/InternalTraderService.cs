@@ -52,10 +52,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
 
         public async Task ExecuteAsync()
         {
-            IReadOnlyCollection<InternalOrder> internalOrders =
+            IReadOnlyCollection<InternalOrder> newInternalOrders =
                 await _internalOrderRepository.GetByStatusAsync(InternalOrderStatus.New);
 
-            foreach (InternalOrder internalOrder in internalOrders)
+            foreach (InternalOrder internalOrder in newInternalOrders)
             {
                 try
                 {
@@ -77,10 +77,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
                     {
                         if (internalOrder.Status == InternalOrderStatus.Failed)
                             await ReleaseReservedFundsAsync(internalOrder);
-
-                        continue;
                     }
+                }
+                catch (Exception exception)
+                {
+                    _log.ErrorWithDetails(exception, "An unexpected error occurred while processing internal order",
+                        internalOrder);
+                }
+            }
+            
+            IReadOnlyCollection<InternalOrder> executedInternalOrders =
+                await _internalOrderRepository.GetByStatusAsync(InternalOrderStatus.Executed);
 
+            foreach (InternalOrder internalOrder in executedInternalOrders)
+            {
+                try
+                {
                     if (!await TransferFundsAsync(internalOrder))
                         continue;
 
@@ -91,7 +103,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.InternalTrader
                 }
                 catch (Exception exception)
                 {
-                    _log.ErrorWithDetails(exception, "An unexpected error occurred while processing internal order",
+                    _log.ErrorWithDetails(exception, "An unexpected error occurred while completing internal order",
                         internalOrder);
                 }
             }
