@@ -122,7 +122,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             return assetPairLink != null ? assetPairLink.ExternalAssetPairId : assetPairId;
         }
 
-        private static Task<T> WrapAsync<T>(Func<Task<T>> action)
+        private Task<T> WrapAsync<T>(Func<Task<T>> action)
         {
             return Policy
                 .Handle<B2c2RestException>(exception =>
@@ -134,7 +134,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
                     return error != null && error.Code == ErrorCode.PriceNotValid;
                 })
-                .WaitAndRetryAsync(DefaultRetriesCount, attempt => TimeSpan.FromMilliseconds(500 * attempt))
+                .WaitAndRetryAsync(DefaultRetriesCount, attempt => TimeSpan.FromMilliseconds(500 * attempt),
+                    (exception, timeSpan, attempt, context) =>
+                    {
+                        _log.InfoWithDetails("Request failed waiting next retry", new
+                        {
+                            Error = exception.Message,
+                            Delay = timeSpan,
+                            Attempt = attempt
+                        });
+                    })
                 .ExecuteAsync(async () => await action());
         }
     }
