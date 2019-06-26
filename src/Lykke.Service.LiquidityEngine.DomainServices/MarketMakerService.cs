@@ -190,6 +190,23 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             decimal stopLossMarkup = await _noFreshQuotesStopLossService.GetNoFreshQuotesMarkup(assetPair.Id);
 
+            _log.InfoWithDetails("Arguments for Calculator.CalculateLimitOrders(...).", new
+            {
+                quotes,
+                levels = instrument.Levels.ToArray(),
+                baseAmountBalance = baseAssetBalance?.Amount ?? 0,
+                quoteAmountBalance = quoteAssetBalance?.Amount ?? 0,
+                timeSinceLastTradeTotalSeconds = (int)timeSinceLastTrade.TotalSeconds,
+                instrumentHalfLifePeriod = instrument.HalfLifePeriod,
+                instrumentAllowSmartMarkup = instrument.AllowSmartMarkup,
+                marketMakerSettingsLimitOrderPriceMarkup = marketMakerSettings.LimitOrderPriceMarkup,
+                pnLStopLossMarkup,
+                fiatEquityStopLossMarkup,
+                stopLossMarkup,
+                assetPairAccuracy = assetPair.Accuracy,
+                baseAssetAccuracy = baseAsset.Accuracy
+            });
+
             IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
                 quotes[0],
                 quotes[1],
