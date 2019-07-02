@@ -55,35 +55,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
                 return 0;
             }
 
-            _log.InfoWithDetails("Checking fiat equity markup.", new
-            {
-                assetPairId,
-                lykkeAssetPair,
-                quoteAssetSettings
-            });
-
             if (quoteAssetSettings.IsCrypto)
-            {
-                _log.InfoWithDetails("Quote asset is not fiat.", new
-                {
-                    isCrypto = quoteAssetSettings.IsCrypto,
-                    assetPairId,
-                    lykkeAssetPair,
-                    quoteAssetSettings
-                });
-
                 return 0;
-            }
                 
             decimal fiatEquity = GetFiatEquity();
-
-            _log.InfoWithDetails("Fiat equity", new
-            {
-                fiatEquity,
-                assetPairId,
-                lykkeAssetPair,
-                quoteAssetSettings
-            });
 
             if (fiatEquity >= 0)
                 return 0;
@@ -96,33 +71,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.FiatEquityStopLoss
             decimal markupTo = marketMakerSettings.FiatEquityMarkupTo;
 
             if (thresholdFrom >= thresholdTo)
-            {
-                _log.InfoWithDetails("thresholdFrom is bigger or equal to thresholdTo.", new
-                {
-                    thresholdFrom,
-                    thresholdTo,
-                    fiatEquity,
-                    assetPairId,
-                    lykkeAssetPair,
-                    quoteAssetSettings,
-                    marketMakerSettings
-                });
-
                 return 0;
-            }
 
             decimal markup =  CalculateMarkup(fiatEquity, thresholdFrom, thresholdTo, markupFrom, markupTo);
-
-            _log.InfoWithDetails("Calculated fiat equity markup.", new
-            {
-                thresholdFrom,
-                thresholdTo,
-                fiatEquity,
-                assetPairId,
-                lykkeAssetPair,
-                quoteAssetSettings,
-                marketMakerSettings
-            });
 
             return markup;
         }

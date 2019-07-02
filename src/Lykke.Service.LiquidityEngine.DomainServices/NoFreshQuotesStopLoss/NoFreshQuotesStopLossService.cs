@@ -38,15 +38,53 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
             decimal noFreshQuotesMarkup = marketMakerSettings.NoFreshQuotesMarkup;
 
             if (noFreshQuotesInterval == default(TimeSpan) || noFreshQuotesMarkup == default(decimal))
-                return 0;
+            {
+                _log.WarningWithDetails("No quotes check.", new
+                {
+                    assetPairId,
+                    noFreshQuotesIntervalEqual = noFreshQuotesInterval == default(TimeSpan),
+                    noFreshQuotesMarkupEqual = noFreshQuotesMarkup == default(decimal),
+                    noFreshQuotesInterval,
+                    noFreshQuotesMarkup
+                });
 
+                return 0;
+            }
+                
             Quote quote = await _quoteService.GetAsync(ExchangeNames.B2C2, assetPairId);
 
             if (quote == null)
+            {
+                _log.WarningWithDetails("Quote is null.", assetPairId);
+
                 return noFreshQuotesMarkup;
+            }
+
+            _log.WarningWithDetails("Checking time.", new
+            {
+                assetPairId,
+                quote.Time,
+                noFreshQuotesInterval
+            });
 
             if (DateTime.UtcNow - quote.Time > noFreshQuotesInterval)
+            {
+                _log.WarningWithDetails("No quotes.", new
+                {
+                    assetPairId,
+                    quote.Time,
+                    noFreshQuotesInterval
+                });
+
                 return noFreshQuotesMarkup;
+            }
+
+            _log.WarningWithDetails("There is a quote so markup is 0.", new
+            {
+                assetPairId,
+                quote.Time,
+                noFreshQuotesInterval
+            });
 
             return 0;
         }
