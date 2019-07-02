@@ -39,7 +39,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
 
             if (noFreshQuotesInterval == default(TimeSpan) || noFreshQuotesMarkup == default(decimal))
             {
-                _log.WarningWithDetails("No quotes check.", new
+                _log.InfoWithDetails("No quotes check.", new
                 {
                     assetPairId,
                     noFreshQuotesIntervalEqual = noFreshQuotesInterval == default(TimeSpan),
@@ -55,12 +55,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
 
             if (quote == null)
             {
-                _log.WarningWithDetails("Quote is null.", assetPairId);
+                _log.InfoWithDetails("Quote is null.", assetPairId);
 
                 return noFreshQuotesMarkup;
             }
 
-            _log.WarningWithDetails("Checking time.", new
+            _log.InfoWithDetails("Checking time.", new
             {
                 assetPairId,
                 quote.Time,
@@ -69,7 +69,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
 
             if (DateTime.UtcNow - quote.Time > noFreshQuotesInterval)
             {
-                _log.WarningWithDetails("No quotes.", new
+                _log.InfoWithDetails("No quotes.", new
                 {
                     assetPairId,
                     quote.Time,
@@ -79,7 +79,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
                 return noFreshQuotesMarkup;
             }
 
-            _log.WarningWithDetails("There is a quote so markup is 0.", new
+            _log.InfoWithDetails("There is a quote so markup is 0.", new
             {
                 assetPairId,
                 quote.Time,
