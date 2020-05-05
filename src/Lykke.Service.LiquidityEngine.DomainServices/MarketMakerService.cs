@@ -146,11 +146,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task<OrderBook> CalculateDirectOrderBookAsync(Instrument instrument)
         {
-            Quote[] quotes = _b2C2OrderBookService.GetQuotes(instrument.AssetPairId);
+            var externalAssetPairId = instrument.AssetPairId;
+
+            // workaround for Lykke production
+            if (externalAssetPairId.Contains("EOScoin"))
+                externalAssetPairId = externalAssetPairId.Replace("EOScoin", "EOS");
+
+            Quote[] quotes = _b2C2OrderBookService.GetQuotes(externalAssetPairId);
 
             if (quotes == null || quotes.Length != 2)
             {
-                _log.WarningWithDetails("No quotes for instrument", instrument.AssetPairId);
+                _log.WarningWithDetails("No quotes for instrument", externalAssetPairId);
                 return null;
             }
 
