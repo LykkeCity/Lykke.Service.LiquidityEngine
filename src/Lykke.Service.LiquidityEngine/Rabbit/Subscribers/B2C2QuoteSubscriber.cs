@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.ExchangeAdapter.Contracts;
@@ -57,7 +57,10 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 
         private Task ProcessMessageAsync(TickPrice tickPrice)
         {
-            return _quoteService.SetAsync(new Quote(tickPrice.Asset, tickPrice.Timestamp, tickPrice.Ask, tickPrice.Bid,
+            // workaround for Lykke production
+            var internalAssetPair = tickPrice.Asset.Replace("EOS", "EOScoin");
+
+            return _quoteService.SetAsync(new Quote(internalAssetPair, tickPrice.Timestamp, tickPrice.Ask, tickPrice.Bid,
                 tickPrice.Source));
         }
     }

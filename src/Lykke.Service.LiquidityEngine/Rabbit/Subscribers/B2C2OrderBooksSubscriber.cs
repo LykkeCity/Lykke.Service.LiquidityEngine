@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Common.ExchangeAdapter.Contracts;
@@ -56,6 +56,9 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 
         private Task ProcessMessageAsync(OrderBook orderBook)
         {
+            // workaround for Lykke production
+            var internalAssetPair = orderBook.Asset.Replace("EOS", "EOScoin");
+
             var sellLimitOrders = orderBook.Asks.Select(o => new Domain.LimitOrder
             {
                 Price = o.Price,
@@ -72,7 +75,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 
             return _b2C2OrderBookService.SetAsync(new Domain.OrderBook
             {
-                AssetPairId = orderBook.Asset,
+                AssetPairId = internalAssetPair,
                 Time = orderBook.Timestamp,
                 LimitOrders = sellLimitOrders.Concat(buyLimitOrders).ToArray()
             });
