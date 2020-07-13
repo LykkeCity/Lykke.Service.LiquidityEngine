@@ -108,7 +108,7 @@ LiquidityEngineService:
         Exchange:
           settings-key: LiquidityEngineService-Rabbit-Publishers-OrderBook-Exchange
       
-      OrderBooksUpdatesReport:
+      OrderBooksUpdatesReports:
         ConnectionString:
           settings-key: RawPriceRabbitMq
           types:
