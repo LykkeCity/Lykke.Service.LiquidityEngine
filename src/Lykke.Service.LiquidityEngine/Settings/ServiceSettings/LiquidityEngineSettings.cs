@@ -19,8 +19,6 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings
 
         public DbSettings Db { get; set; }
 
-        public MsSqlDbSettings MsSql { get; set; }
-
         public RabbitSettings Rabbit { get; set; }
 
         public DwhSettings Dwh { get; set; }

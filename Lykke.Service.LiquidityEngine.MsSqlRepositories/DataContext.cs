@@ -29,6 +29,7 @@ namespace Lykke.Service.LiquidityEngine.MsSqlRepositories
         private void BuildOrderBookUpdateReports(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OrderBookUpdateReportEntity>()
+                .ToTable("LEOrderBookUpdateReports")
                 .HasKey(c => new { c.Id });
 
             modelBuilder.Entity<OrderBookUpdateReportEntity>()
@@ -91,6 +92,7 @@ namespace Lykke.Service.LiquidityEngine.MsSqlRepositories
         private void BuildPlacedOrderReports(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PlacedOrderReportEntity>()
+                .ToTable("LEPlacedOrderReports")
                 .HasKey(c => new { c.Id });
 
             modelBuilder.Entity<PlacedOrderReportEntity>()

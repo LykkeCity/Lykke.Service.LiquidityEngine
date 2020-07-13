@@ -9,6 +9,6 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Publishe
 
         public PublisherSettings InternalOrderBooks { get; set; }
 
-        public PublisherSettings OrderBooksUpdatesReport { get; set; }
+        public PublisherSettings OrderBooksUpdatesReports { get; set; }
     }
 }
