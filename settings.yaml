@@ -6,10 +6,16 @@ LiquidityEngineService:
 
   AssetsCacheExpirationPeriod: 00:10:00
 
+  IsOrderBooksUpdateReportEnabled:
+    settings-key: LiquidityEngineService-IsOrderBooksUpdateReportEnabled
+
   Db:
     PostgresConnectionString:
       settings-key: LiquidityEngineService-PostgresConnectionString
       
+    MsSqlConnectionString:
+        settings-key: LiquidityEngineService-MsSqlConnectionString
+
     DataConnectionString:
       settings-key: LiquidityEngineService-DataConnectionString
       types:
@@ -73,7 +79,19 @@ LiquidityEngineService:
         Queue:
           settings-key: LiquidityEngineService-Rabbit-Subscribers-Quotes-Queue
 
+      OrderBooksUpdatesReports:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Publishers-OrderBooksUpdatesReport-Exchange
+        Queue:
+          settings-key: LiquidityEngineService-Rabbit-Publishers-OrderBooksUpdatesReport-Queue
+
+
     Publishers:
+
       InternalQuotes:
         ConnectionString:
           settings-key: RawPriceRabbitMq
@@ -81,6 +99,7 @@ LiquidityEngineService:
           - RabbitMq
         Exchange:
           settings-key: LiquidityEngineService-Rabbit-Publishers-TickPrice-Exchange
+      
       InternalOrderBooks:
         ConnectionString:
           settings-key: RawPriceRabbitMq
@@ -88,6 +107,14 @@ LiquidityEngineService:
           - RabbitMq
         Exchange:
           settings-key: LiquidityEngineService-Rabbit-Publishers-OrderBook-Exchange
+      
+      OrderBooksUpdatesReport:
+        ConnectionString:
+          settings-key: RawPriceRabbitMq
+          types:
+          - RabbitMq
+        Exchange:
+          settings-key: LiquidityEngineService-Rabbit-Publishers-OrderBooksUpdatesReport-Exchange
 
   Dwh:
     DatabaseName:
