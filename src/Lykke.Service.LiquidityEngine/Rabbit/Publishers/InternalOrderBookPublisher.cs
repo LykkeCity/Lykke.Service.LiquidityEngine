@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Publishers
             _publisher?.Stop();
         }
 
-        public Task PublishAsync(Lykke.Service.LiquidityEngine.Domain.OrderBook orderBook)
+        public Task PublishAsync(Domain.OrderBook orderBook)
         {
             IEnumerable<OrderBookItem> sellOrderBookItems = orderBook.LimitOrders
                 .Where(o => o.Type == Domain.LimitOrderType.Sell)

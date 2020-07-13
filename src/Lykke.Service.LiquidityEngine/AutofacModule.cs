@@ -40,12 +40,18 @@ namespace Lykke.Service.LiquidityEngine
                 _settings.CurrentValue.LiquidityEngineService.Name,
                 _settings.CurrentValue.LiquidityEngineService.WalletId,
                 _settings.CurrentValue.LiquidityEngineService.Dwh.DatabaseName,
-                _settings.CurrentValue.LiquidityEngineService.Dwh.StoredProcedures.Trades));
+                _settings.CurrentValue.LiquidityEngineService.Dwh.StoredProcedures.Trades,
+                _settings.CurrentValue.LiquidityEngineService.IsOrderBooksUpdateReportEnabled));
+            
             builder.RegisterModule(new AzureRepositories.AutofacModule(
                 _settings.Nested(o => o.LiquidityEngineService.Db.DataConnectionString),
                 _settings.Nested(o => o.LiquidityEngineService.Db.LykkeTradesMeQueuesDeduplicatorConnectionString)));
+            
             builder.RegisterModule(new PostgresRepositories.AutofacModule(
                 _settings.CurrentValue.LiquidityEngineService.Db.PostgresConnectionString));
+
+            builder.RegisterModule(new MsSqlRepositories.AutofacModule(
+                _settings.CurrentValue.LiquidityEngineService.Db.MsSqlConnectionString));
 
             builder.RegisterType<StartupManager>()
                 .As<IStartupManager>();
@@ -105,6 +111,11 @@ namespace Lykke.Service.LiquidityEngine
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Name))
                 .AsSelf()
                 .As<IInternalOrderBookPublisher>()
+                .SingleInstance();
+
+            builder.RegisterType<OrderBooksUpdatesReportReportPublisher>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers.OrderBooksUpdatesReport))
+                .As<IOrderBooksUpdatesReportPublisher>()
                 .SingleInstance();
 
             builder.RegisterType<LykkeTradeSubscriberMonitor>()

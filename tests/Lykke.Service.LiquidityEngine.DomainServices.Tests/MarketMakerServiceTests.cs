@@ -9,6 +9,8 @@ using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
+using Lykke.Service.LiquidityEngine.Domain.Publishers;
+using Lykke.Service.LiquidityEngine.Domain.Reports.OrderBookUpdates;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -63,6 +65,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
         private readonly Mock<IFiatEquityStopLossService> _fiatEquityStopLossService = new Mock<IFiatEquityStopLossService>();
 
         private readonly Mock<INoFreshQuotesStopLossService> _noFreshQuotesStopLossService = new Mock<INoFreshQuotesStopLossService>();
+
+        private readonly Mock<IOrderBooksUpdatesReportPublisher> _orderBooksUpdatesReportPublisher = new Mock<IOrderBooksUpdatesReportPublisher>();
 
         private readonly List<Instrument> _instruments = new List<Instrument>();
 
@@ -145,6 +149,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
             _pnLStopLossEngineService.Setup(o => o.GetTotalMarkupByAssetPairIdAsync(It.IsAny<string>()))
                 .Returns(() => Task.FromResult(0m));
 
+            _orderBooksUpdatesReportPublisher.Setup(o => o.PublishAsync(It.IsAny<OrderBookUpdateReport>()))
+                .Returns(() => Task.FromResult(0m));
+
             _service = new MarketMakerService(
                 _instrumentServiceMock.Object,
                 _lykkeExchangeServiceMock.Object,
@@ -163,6 +170,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
                 _pnLStopLossEngineService.Object,
                 _fiatEquityStopLossService.Object,
                 _noFreshQuotesStopLossService.Object,
+                _orderBooksUpdatesReportPublisher.Object,
+                false,
                 EmptyLogFactory.Instance);
         }
 

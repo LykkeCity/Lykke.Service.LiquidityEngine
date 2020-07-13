@@ -13,6 +13,8 @@ using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
+using Lykke.Service.LiquidityEngine.Domain.Publishers;
+using Lykke.Service.LiquidityEngine.Domain.Reports.OrderBookUpdates;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
@@ -37,6 +39,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IPnLStopLossEngineService _pnLStopLossEngineService;
         private readonly IFiatEquityStopLossService _fiatEquityStopLossService;
         private readonly INoFreshQuotesStopLossService _noFreshQuotesStopLossService;
+        private readonly IOrderBooksUpdatesReportPublisher _orderBooksUpdatesReportPublisher;
+        private readonly bool _isOrderBooksUpdateReportEnabled;
         private readonly ILog _log;
 
         public MarketMakerService(
@@ -57,6 +61,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             IPnLStopLossEngineService pnLStopLossEngineService,
             IFiatEquityStopLossService fiatEquityStopLossService,
             INoFreshQuotesStopLossService noFreshQuotesStopLossService,
+            IOrderBooksUpdatesReportPublisher orderBooksUpdatesReportPublisher,
+            bool isOrderBooksUpdateReportEnabled,
             ILogFactory logFactory)
         {
             _instrumentService = instrumentService;
@@ -76,6 +82,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _pnLStopLossEngineService = pnLStopLossEngineService;
             _fiatEquityStopLossService = fiatEquityStopLossService;
             _noFreshQuotesStopLossService = noFreshQuotesStopLossService;
+            _orderBooksUpdatesReportPublisher = orderBooksUpdatesReportPublisher;
+            _isOrderBooksUpdateReportEnabled = isOrderBooksUpdateReportEnabled;
             _log = logFactory.CreateLog(this);
         }
 
@@ -184,11 +192,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             MarketMakerSettings marketMakerSettings = await _marketMakerSettingsService.GetAsync();
 
+            decimal globalMarkup = marketMakerSettings.LimitOrderPriceMarkup;
+
+            decimal noQuotesMarkup = await _noFreshQuotesStopLossService.GetNoFreshQuotesMarkup(assetPair.Id);
+
             decimal pnLStopLossMarkup = await _pnLStopLossEngineService.GetTotalMarkupByAssetPairIdAsync(assetPair.Id);
 
             decimal fiatEquityStopLossMarkup = await _fiatEquityStopLossService.GetFiatEquityMarkup(assetPair.Id);
-
-            decimal noQuotesMarkup = await _noFreshQuotesStopLossService.GetNoFreshQuotesMarkup(assetPair.Id);
 
             _log.InfoWithDetails("Arguments for Calculator.CalculateLimitOrders(...).", new
             {
@@ -200,7 +210,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 timeSinceLastTradeTotalSeconds = (int)timeSinceLastTrade.TotalSeconds,
                 instrumentHalfLifePeriod = instrument.HalfLifePeriod,
                 instrumentAllowSmartMarkup = instrument.AllowSmartMarkup,
-                marketMakerSettingsLimitOrderPriceMarkup = marketMakerSettings.LimitOrderPriceMarkup,
+                marketMakerSettingsLimitOrderPriceMarkup = globalMarkup,
                 pnLStopLossMarkup,
                 fiatEquityStopLossMarkup,
                 noQuotesMarkup,
@@ -208,6 +218,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 baseAssetAccuracy = baseAsset.Accuracy,
                 instrument
             });
+
+            OrderBookUpdateReport orderBookUpdateReport = null;
+            if (_isOrderBooksUpdateReportEnabled)
+            {
+                orderBookUpdateReport = new OrderBookUpdateReport(DateTime.UtcNow);
+                orderBookUpdateReport.AssetPair = instrument.AssetPairId;
+                orderBookUpdateReport.FirstQuoteAsk = quotes[0].Ask;
+                orderBookUpdateReport.FirstQuoteBid = quotes[0].Bid;
+                orderBookUpdateReport.SecondQuoteAsk = quotes[1].Ask;
+                orderBookUpdateReport.SecondQuoteBid = quotes[1].Bid;
+                orderBookUpdateReport.QuoteDateTime = quotes[0].Time;
+                orderBookUpdateReport.GlobalMarkup = globalMarkup;
+                orderBookUpdateReport.NoFreshQuoteMarkup = noQuotesMarkup;
+                orderBookUpdateReport.PnLStopLossMarkup = pnLStopLossMarkup;
+                orderBookUpdateReport.FiatEquityMarkup = fiatEquityStopLossMarkup;
+            }
 
             IReadOnlyCollection<LimitOrder> limitOrders = Calculator.CalculateLimitOrders(
                 quotes[0],
@@ -218,12 +244,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 (int) timeSinceLastTrade.TotalSeconds,
                 instrument.HalfLifePeriod,
                 instrument.AllowSmartMarkup,
-                marketMakerSettings.LimitOrderPriceMarkup,
+                globalMarkup,
                 pnLStopLossMarkup,
                 fiatEquityStopLossMarkup,
                 noQuotesMarkup,
                 assetPair.Accuracy,
-                baseAsset.Accuracy);
+                baseAsset.Accuracy,
+                orderBookUpdateReport);
 
             await ValidateQuoteTimeoutAsync(limitOrders, quotes[0]);
 
@@ -237,6 +264,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             WriteInfoLog(instrument.AssetPairId, quotes, timeSinceLastTrade, limitOrders,
                 "Direct limit orders calculated");
+
+            if (orderBookUpdateReport != null)
+                await _orderBooksUpdatesReportPublisher.PublishAsync(orderBookUpdateReport);
 
             return new OrderBook
             {

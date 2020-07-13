@@ -8,6 +8,8 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Db
     {
         public string PostgresConnectionString { get; set; }
 
+        public string MsSqlConnectionString { get; set; }
+
         [AzureTableCheck]
         public string DataConnectionString { get; set; }
 

@@ -39,6 +39,7 @@ namespace Lykke.Service.LiquidityEngine
                         cfg.AddDataReaderMapping();
                         cfg.AddProfiles(typeof(AzureRepositories.AutoMapperProfile));
                         cfg.AddProfiles(typeof(PostgresRepositories.AutoMapperProfile));
+                        cfg.AddProfiles(typeof(MsSqlRepositories.AutoMapperProfile));
                         cfg.AddProfiles(typeof(AutoMapperProfile));
                     });
 

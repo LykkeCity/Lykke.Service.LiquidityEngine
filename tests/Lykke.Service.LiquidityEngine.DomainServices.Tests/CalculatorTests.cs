@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Reports.OrderBookUpdates;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
@@ -93,7 +94,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders =
                 Calculator.CalculateLimitOrders(quote1, quote2, levels, 0, 0, 0, 0, false, 0, 0, 0, 0, priceAccuracy,
-                    volumeAccuracy);
+                    volumeAccuracy, new OrderBookUpdateReport(DateTime.UtcNow));
 
             // assert
 
@@ -143,7 +144,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders = Calculator.CalculateLimitOrders(quote1, quote2, levels,
                 baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, 0, 0, 0, priceAccuracy,
-                volumeAccuracy);
+                volumeAccuracy, new OrderBookUpdateReport(DateTime.UtcNow));
 
             // assert
 
@@ -193,7 +194,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders = Calculator.CalculateLimitOrders(quote1, quote2, levels,
                 baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, 0, 0, 0, priceAccuracy,
-                volumeAccuracy);
+                volumeAccuracy, new OrderBookUpdateReport(DateTime.UtcNow));
 
             // assert
 
@@ -243,7 +244,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Tests
 
             IReadOnlyCollection<LimitOrder> actualLimitOrders = Calculator.CalculateLimitOrders(quote1, quote2, levels,
                 baseAssetBalance, quoteAssetBalance, timeSinceLastTrade, halfLifePeriod, true, 0, 0, 0, 0, priceAccuracy,
-                volumeAccuracy);
+                volumeAccuracy, new OrderBookUpdateReport(DateTime.UtcNow));
 
             // assert
 

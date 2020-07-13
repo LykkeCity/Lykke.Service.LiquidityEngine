@@ -1,4 +1,4 @@
-using Lykke.Service.LiquidityEngine.Domain;
+﻿using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.PostgresRepositories.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

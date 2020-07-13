@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\client\Lykke.Service.LiquidityEngine.Client\Lykke.Service.LiquidityEngine.Client.csproj" />
     <ProjectReference Include="..\..\contract\Lykke.Service.LiquidityEngine.Contract\Lykke.Service.LiquidityEngine.Contract.csproj" />
+    <ProjectReference Include="..\..\Lykke.Service.LiquidityEngine.MsSqlRepositories\Lykke.Service.LiquidityEngine.MsSqlRepositories.csproj" />
     <ProjectReference Include="..\Lykke.Service.LiquidityEngine.AzureRepositories\Lykke.Service.LiquidityEngine.AzureRepositories.csproj" />
     <ProjectReference Include="..\Lykke.Service.LiquidityEngine.Domain\Lykke.Service.LiquidityEngine.Domain.csproj" />
     <ProjectReference Include="..\Lykke.Service.LiquidityEngine.DomainServices\Lykke.Service.LiquidityEngine.DomainServices.csproj" />

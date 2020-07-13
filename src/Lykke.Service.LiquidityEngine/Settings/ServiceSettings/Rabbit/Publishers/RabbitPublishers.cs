@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Publishers
 {
@@ -8,5 +8,7 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Publishe
         public PublisherSettings InternalQuotes { get; set; }
 
         public PublisherSettings InternalOrderBooks { get; set; }
+
+        public PublisherSettings OrderBooksUpdatesReport { get; set; }
     }
 }

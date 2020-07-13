@@ -36,17 +36,20 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly string _walletId;
         private readonly string _database;
         private readonly string _tradesSpName;
+        private readonly bool _isOrderBooksUpdateReportEnabled;
 
         public AutofacModule(
             string instanceName,
             string walletId,
             string database,
-            string tradesSpName)
+            string tradesSpName,
+            bool isOrderBooksUpdateReportEnabled)
         {
             _instanceName = instanceName;
             _walletId = walletId;
             _database = database;
             _tradesSpName = tradesSpName;
+            _isOrderBooksUpdateReportEnabled = isOrderBooksUpdateReportEnabled;
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -181,6 +184,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<MarketMakerService>()
                 .As<IMarketMakerService>()
+                .WithParameter(new NamedParameter("_isOrderBooksUpdateReportEnabled", _isOrderBooksUpdateReportEnabled))
                 .SingleInstance();
 
             builder.RegisterType<HedgeService>()

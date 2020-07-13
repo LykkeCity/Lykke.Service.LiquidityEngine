@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Common;
 using Lykke.Service.LiquidityEngine.Domain;
+using Lykke.Service.LiquidityEngine.Domain.Reports;
+using Lykke.Service.LiquidityEngine.Domain.Reports.OrderBookUpdates;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
 {
@@ -25,6 +27,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             {
                 decimal sellPrice = (quote.Ask * (1 + instrumentLevel.Markup))
                     .TruncateDecimalPlaces(priceAccuracy, true);
+
                 decimal buyPrice = (quote.Bid * (1 - instrumentLevel.Markup))
                     .TruncateDecimalPlaces(priceAccuracy);
 
@@ -54,6 +57,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         /// <param name="noFreshQuotesStopLossMarkup">No fresh quotes stop loss markup.</param>
         /// <param name="priceAccuracy">The accuracy of price.</param>
         /// <param name="volumeAccuracy">The accuracy of volume.</param>
+        /// <param name="orderBookUpdateReport">OrderBooksUpdateReport.</param>
         /// <returns>A collection of limit orders.</returns>
         public static IReadOnlyCollection<LimitOrder> CalculateLimitOrders(
             Quote quote1,
@@ -69,7 +73,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             decimal fiatEquityStopLossMarkup,
             decimal noFreshQuotesStopLossMarkup,
             int priceAccuracy,
-            int volumeAccuracy)
+            int volumeAccuracy,
+            OrderBookUpdateReport orderBookUpdateReport)
         {
             var limitOrders = new List<LimitOrder>();
 
@@ -119,14 +124,29 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 (sellRawPrice * (1 + sellFirstLevelMarkup + commonMarkup + fiatEquityStopLossMarkup))
                 .TruncateDecimalPlaces(priceAccuracy, true);
 
+            LimitOrder sellFirstLevelLimitOrder =
+                LimitOrder.CreateSell(sellFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy));
+
             if (fiatEquityStopLossMarkup != decimal.MinusOne) // don't create sell orders if 'FiatEquityThresholdTo' exceeded
-                limitOrders.Add(LimitOrder.CreateSell(sellFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy)));
+                limitOrders.Add(sellFirstLevelLimitOrder);
 
             decimal buyFirstLevelPrice =
                 (buyRawPrice * (1 - (buyFirstLevelMarkup + commonMarkup)))
                 .TruncateDecimalPlaces(priceAccuracy);
 
-            limitOrders.Add(LimitOrder.CreateBuy(buyFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy)));
+            LimitOrder buyFirstLevelLimitOrder = 
+                LimitOrder.CreateBuy(buyFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy));
+
+            limitOrders.Add(buyFirstLevelLimitOrder);
+
+            if (orderBookUpdateReport != null)
+            {
+                orderBookUpdateReport.Orders.Add(
+                    new PlacedOrderReport(sellFirstLevelLimitOrder, sellFirstLevelMarkup, orderBookUpdateReport.Id));
+
+                orderBookUpdateReport.Orders.Add(
+                    new PlacedOrderReport(buyFirstLevelLimitOrder, buyFirstLevelMarkup, orderBookUpdateReport.Id));
+            }
 
             for (int i = 1; i < levels.Length; i++)
             {
@@ -146,20 +166,37 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 buyRawPrice = (buyMarketPrice * sumVolume - prevBuyMarketPrice * prevSumVolume) / levels[i].Volume;
 
-                decimal buyPrice = (buyRawPrice * (1 - (levels[i].Markup + commonMarkup)))
+                decimal buyLevelMarkup = 1 - (levels[i].Markup + commonMarkup);
+
+                decimal buyPrice = (buyRawPrice * buyLevelMarkup)
                     .TruncateDecimalPlaces(priceAccuracy);
 
-                limitOrders.Add(LimitOrder.CreateBuy(Math.Min(buyFirstLevelPrice, buyPrice),
-                    Math.Round(levels[i].Volume, volumeAccuracy)));
+                LimitOrder buyLimitOrder = LimitOrder.CreateBuy(Math.Min(buyFirstLevelPrice, buyPrice),
+                    Math.Round(levels[i].Volume, volumeAccuracy));
+
+                limitOrders.Add(buyLimitOrder);
 
                 if (fiatEquityStopLossMarkup == decimal.MinusOne) // don't create sell orders if 'FiatEquityThresholdTo' exceeded
                     continue;
 
-                decimal sellPrice = (sellRawPrice * (1 + levels[i].Markup + commonMarkup + fiatEquityStopLossMarkup))
+                decimal sellLevelMarkup = 1 + levels[i].Markup + commonMarkup + fiatEquityStopLossMarkup;
+
+                decimal sellPrice = (sellRawPrice * sellLevelMarkup)
                     .TruncateDecimalPlaces(priceAccuracy, true);
 
-                limitOrders.Add(LimitOrder.CreateSell(Math.Max(sellFirstLevelPrice, sellPrice),
-                    Math.Round(levels[i].Volume, volumeAccuracy)));
+                LimitOrder sellLimitOrder = LimitOrder.CreateSell(Math.Max(sellFirstLevelPrice, sellPrice),
+                    Math.Round(levels[i].Volume, volumeAccuracy));
+
+                limitOrders.Add(sellLimitOrder);
+
+                if (orderBookUpdateReport != null)
+                {
+                    orderBookUpdateReport.Orders.Add(
+                        new PlacedOrderReport(buyLimitOrder, buyLevelMarkup, orderBookUpdateReport.Id));
+
+                    orderBookUpdateReport.Orders.Add(
+                        new PlacedOrderReport(sellLimitOrder, sellLevelMarkup, orderBookUpdateReport.Id));
+                }
             }
 
             return limitOrders;

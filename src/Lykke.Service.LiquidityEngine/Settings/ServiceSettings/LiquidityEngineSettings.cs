@@ -13,9 +13,13 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings
 
         public string WalletId { get; set; }
 
+        public bool IsOrderBooksUpdateReportEnabled { get; set; }
+
         public TimeSpan AssetsCacheExpirationPeriod { get; set; }
 
         public DbSettings Db { get; set; }
+
+        public MsSqlDbSettings MsSql { get; set; }
 
         public RabbitSettings Rabbit { get; set; }
 

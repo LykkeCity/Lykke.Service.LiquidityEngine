@@ -12,6 +12,8 @@ namespace Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscrib
         
         public SubscriberSettings B2C2OrderBooks { get; set; }
 
+        public SubscriberSettings OrderBooksUpdatesReport { get; set; }
+
         public QuotesSettings Quotes { get; set; }
     }
 }
