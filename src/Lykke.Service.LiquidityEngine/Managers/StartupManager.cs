@@ -25,7 +25,9 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
         private readonly InternalQuotePublisher _internalQuotePublisher;
+        private readonly OrderBooksUpdatesReportSubscriber _orderBooksUpdatesReportSubscriber;
         private readonly InternalOrderBookPublisher _internalOrderBookPublisher;
+        private readonly OrderBooksUpdatesReportPublisher _orderBooksUpdatesReportPublisher;
         private readonly LykkeTradeSubscriberMonitor _lykkeTradeSubscriberMonitor;
         private readonly StorageMigrationService _storageMigrationService;
         private readonly ITradeService _tradeService;
@@ -42,8 +44,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
             B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
             QuoteSubscriber[] quoteSubscribers,
+            OrderBooksUpdatesReportSubscriber orderBooksUpdatesReportSubscriber,
             InternalQuotePublisher internalQuotePublisher,
             InternalOrderBookPublisher internalOrderBookPublisher,
+            OrderBooksUpdatesReportPublisher orderBooksUpdatesReportPublisher,
             LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor,
             StorageMigrationService storageMigrationService,
             ITradeService tradeService)
@@ -59,8 +63,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
             _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
             _quoteSubscribers = quoteSubscribers;
+            _orderBooksUpdatesReportSubscriber = orderBooksUpdatesReportSubscriber;
             _internalQuotePublisher = internalQuotePublisher;
             _internalOrderBookPublisher = internalOrderBookPublisher;
+            _orderBooksUpdatesReportPublisher = orderBooksUpdatesReportPublisher;
             _lykkeTradeSubscriberMonitor = lykkeTradeSubscriberMonitor;
             _storageMigrationService = storageMigrationService;
             _tradeService = tradeService;
@@ -71,6 +77,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _internalQuotePublisher.Start();
 
             _internalOrderBookPublisher.Start();
+
+            _orderBooksUpdatesReportPublisher.Start();
 
             _tradeService.Initialize();
 
@@ -84,6 +92,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
                 quoteSubscriber.Start();
 
             _lykkeTradeSubscriber.Start();
+
+            _orderBooksUpdatesReportSubscriber.Start();
 
             _lykkeBalancesTimer.Start();
 

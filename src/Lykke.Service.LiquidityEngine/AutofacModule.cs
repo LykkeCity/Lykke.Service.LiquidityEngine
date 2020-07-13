@@ -98,23 +98,22 @@ namespace Lykke.Service.LiquidityEngine
         private void RegisterRabbit(ContainerBuilder builder)
         {
             builder.RegisterType<InternalQuotePublisher>()
-                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers
-                    .InternalQuotes))
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers.InternalQuotes))
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Name))
                 .AsSelf()
                 .As<IInternalQuotePublisher>()
                 .SingleInstance();
 
             builder.RegisterType<InternalOrderBookPublisher>()
-                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers
-                    .InternalOrderBooks))
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers.InternalOrderBooks))
                 .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Name))
                 .AsSelf()
                 .As<IInternalOrderBookPublisher>()
                 .SingleInstance();
 
-            builder.RegisterType<OrderBooksUpdatesReportReportPublisher>()
-                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers.OrderBooksUpdatesReport))
+            builder.RegisterType<OrderBooksUpdatesReportPublisher>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Publishers.OrderBooksUpdatesReports))
+                .AsSelf()
                 .As<IOrderBooksUpdatesReportPublisher>()
                 .SingleInstance();
 
@@ -123,20 +122,22 @@ namespace Lykke.Service.LiquidityEngine
                 .SingleInstance();
 
             builder.RegisterType<LykkeTradeSubscriber>()
-                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
-                    .LykkeTrades))
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers.LykkeTrades))
                 .AsSelf()
                 .SingleInstance();
 
             builder.RegisterType<B2C2QuoteSubscriber>()
-                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
-                    .B2C2Quotes))
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers.B2C2Quotes))
                 .AsSelf()
                 .SingleInstance();
 
             builder.RegisterType<B2C2OrderBooksSubscriber>()
-                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers
-                    .B2C2OrderBooks))
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers.B2C2OrderBooks))
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<OrderBooksUpdatesReportSubscriber>()
+                .WithParameter(TypedParameter.From(_settings.CurrentValue.LiquidityEngineService.Rabbit.Subscribers.OrderBooksUpdatesReports))
                 .AsSelf()
                 .SingleInstance();
 

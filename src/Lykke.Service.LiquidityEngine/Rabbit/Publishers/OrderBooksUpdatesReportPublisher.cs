@@ -11,13 +11,13 @@ using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Publishers;
 namespace Lykke.Service.LiquidityEngine.Rabbit.Publishers
 {
     [UsedImplicitly]
-    public class OrderBooksUpdatesReportReportPublisher : IOrderBooksUpdatesReportPublisher, IDisposable
+    public class OrderBooksUpdatesReportPublisher : IOrderBooksUpdatesReportPublisher, IDisposable
     {
         private readonly ILogFactory _logFactory;
         private readonly PublisherSettings _settings;
         private RabbitMqPublisher<OrderBookUpdateReport> _publisher;
 
-        public OrderBooksUpdatesReportReportPublisher(
+        public OrderBooksUpdatesReportPublisher(
             PublisherSettings settings,
             ILogFactory logFactory)
         {

@@ -184,7 +184,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             builder.RegisterType<MarketMakerService>()
                 .As<IMarketMakerService>()
-                .WithParameter(new NamedParameter("_isOrderBooksUpdateReportEnabled", _isOrderBooksUpdateReportEnabled))
+                .WithParameter(new NamedParameter("isOrderBooksUpdateReportEnabled", _isOrderBooksUpdateReportEnabled))
                 .SingleInstance();
 
             builder.RegisterType<HedgeService>()

@@ -22,8 +22,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly B2C2QuoteSubscriber _b2C2QuoteSubscriber;
         private readonly B2C2OrderBooksSubscriber _b2C2OrderBooksSubscriber;
         private readonly QuoteSubscriber[] _quoteSubscribers;
+        private readonly OrderBooksUpdatesReportSubscriber _orderBooksUpdatesReportSubscriber;
         private readonly InternalQuotePublisher _internalQuotePublisher;
         private readonly InternalOrderBookPublisher _internalOrderBookPublisher;
+        private readonly OrderBooksUpdatesReportPublisher _orderBooksUpdatesReportPublisher;
         private readonly LykkeTradeSubscriberMonitor _lykkeTradeSubscriberMonitor;
 
         public ShutdownManager(
@@ -38,8 +40,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
             B2C2QuoteSubscriber b2C2QuoteSubscriber,
             B2C2OrderBooksSubscriber b2C2OrderBooksSubscriber,
             QuoteSubscriber[] quoteSubscribers,
+            OrderBooksUpdatesReportSubscriber orderBooksUpdatesReportSubscriber,
             InternalQuotePublisher internalQuotePublisher,
             InternalOrderBookPublisher internalOrderBookPublisher,
+            OrderBooksUpdatesReportPublisher orderBooksUpdatesReportPublisher,
             LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
@@ -53,8 +57,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _b2C2QuoteSubscriber = b2C2QuoteSubscriber;
             _b2C2OrderBooksSubscriber = b2C2OrderBooksSubscriber;
             _quoteSubscribers = quoteSubscribers;
+            _orderBooksUpdatesReportSubscriber = orderBooksUpdatesReportSubscriber;
             _internalQuotePublisher = internalQuotePublisher;
             _internalOrderBookPublisher = internalOrderBookPublisher;
+            _orderBooksUpdatesReportPublisher = orderBooksUpdatesReportPublisher;
             _lykkeTradeSubscriberMonitor = lykkeTradeSubscriberMonitor;
         }
 
@@ -75,6 +81,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
 
             _lykkeTradeSubscriber.Stop();
 
+            _orderBooksUpdatesReportSubscriber.Stop();
+
             _marketMakerTimer.Stop();
 
             _lykkeBalancesTimer.Stop();
@@ -88,6 +96,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _internalQuotePublisher.Stop();
 
             _internalOrderBookPublisher.Stop();
+
+            _orderBooksUpdatesReportPublisher.Stop();
 
             return Task.CompletedTask;
         }

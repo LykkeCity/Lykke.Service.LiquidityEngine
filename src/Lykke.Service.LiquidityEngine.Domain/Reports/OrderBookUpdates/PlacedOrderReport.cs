@@ -16,6 +16,10 @@ namespace Lykke.Service.LiquidityEngine.Domain.Reports.OrderBookUpdates
 
         public decimal LevelMarkup { get; set; }
 
+        public PlacedOrderReport()
+        {
+        }
+
         public PlacedOrderReport(Guid id, long orderBookUpdateReportId, LimitOrderType type, decimal price, decimal volume, decimal levelMarkup)
         {
             Id = id;
