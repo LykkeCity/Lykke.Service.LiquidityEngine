@@ -95,15 +95,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .Where(o => o.Mode == InstrumentMode.Idle || o.Mode == InstrumentMode.Active)
                 .ToArray();
 
+            DateTime iterationDateTime = DateTime.UtcNow;
+
             foreach (Instrument instrument in activeInstruments)
-                await ProcessInstrumentAsync(instrument);
+                await ProcessInstrumentAsync(instrument, iterationDateTime);
         }
 
-        private async Task ProcessInstrumentAsync(Instrument instrument)
+        private async Task ProcessInstrumentAsync(Instrument instrument, DateTime iterationDateTime)
         {
             try
             {
-                OrderBook directOrderBook = await CalculateDirectOrderBookAsync(instrument);
+                OrderBook directOrderBook = await CalculateDirectOrderBookAsync(instrument, iterationDateTime);
 
                 if (directOrderBook == null)
                     return;
@@ -152,7 +154,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }
         }
 
-        private async Task<OrderBook> CalculateDirectOrderBookAsync(Instrument instrument)
+        private async Task<OrderBook> CalculateDirectOrderBookAsync(Instrument instrument, DateTime iterationDateTime)
         {
             Quote[] quotes = _b2C2OrderBookService.GetQuotes(instrument.AssetPairId);
 
@@ -222,7 +224,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             OrderBookUpdateReport orderBookUpdateReport = null;
             if (_isOrderBooksUpdateReportEnabled)
             {
-                orderBookUpdateReport = new OrderBookUpdateReport(DateTime.UtcNow);
+                orderBookUpdateReport = new OrderBookUpdateReport(iterationDateTime);
                 orderBookUpdateReport.AssetPair = instrument.AssetPairId;
                 orderBookUpdateReport.FirstQuoteAsk = quotes[0].Ask;
                 orderBookUpdateReport.FirstQuoteBid = quotes[0].Bid;

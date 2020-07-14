@@ -1,0 +1,1 @@
+Manually applied migrations
