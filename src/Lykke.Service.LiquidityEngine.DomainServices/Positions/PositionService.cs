@@ -70,6 +70,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
             foreach (InternalTrade internalTrade in internalTrades)
             {
+                var now = DateTime.UtcNow;
+                _log.InfoWithDetails("Trade handled", new
+                {
+                    TradeTimestamp = internalTrade.Time,
+                    HandlingTimestamp = now,
+                    Diff = now - internalTrade.Time
+                });
+
                 Instrument instrument = await _instrumentService.FindAsync(internalTrade.AssetPairId);
 
                 if (instrument == null)
