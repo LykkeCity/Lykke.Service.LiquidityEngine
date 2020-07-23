@@ -71,10 +71,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
             foreach (InternalTrade internalTrade in internalTrades)
             {
                 var now = DateTime.UtcNow;
-                _log.InfoWithDetails("Trade handled", new
+                _log.InfoWithDetails("Lykke trade handled", new
                 {
+                    TradeId = internalTrade.Id,
                     TradeTimestamp = internalTrade.Time,
-                    HandlingTimestamp = now,
+                    Now = now,
                     Diff = now - internalTrade.Time
                 });
 
