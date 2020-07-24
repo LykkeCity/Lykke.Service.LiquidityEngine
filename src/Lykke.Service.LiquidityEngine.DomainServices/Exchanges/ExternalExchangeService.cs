@@ -105,8 +105,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 _log.InfoWithDetails("Request for quote and trade time", new
                 {
                     tradeResponse.TradeId,
-                    RequestForQuoteTime = swRequestForQuote.Elapsed,
-                    TradeRequestTime = swTradeRequest.Elapsed
+                    RequestForQuoteTime = swRequestForQuote.ElapsedMilliseconds,
+                    TradeRequestTime = swTradeRequest.ElapsedMilliseconds
                 });
 
                 return tradeResponse;

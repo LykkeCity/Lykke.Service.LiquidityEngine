@@ -96,7 +96,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                     .Where(o => o.Trades?.Count > 0)
                     .ToArray();
 
-                _log.InfoWithDetails("Trades received", new {Count = orders.Length});
+                _log.InfoWithDetails("Trades received", new { Count = orders.Length });
 
                 if (orders.Any())
                 {

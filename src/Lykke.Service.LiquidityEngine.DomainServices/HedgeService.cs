@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -43,6 +44,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         public async Task ExecuteAsync()
         {
+            var sw = new Stopwatch();
+
+            sw.Start();
+
             IReadOnlyCollection<Position> positions = await _positionService.GetOpenAllAsync();
 
             await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Long), PositionType.Long);
@@ -50,6 +55,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Short), PositionType.Short);
 
             await CloseRemainingVolumeAsync();
+
+            sw.Stop();
+
+            _log.InfoWithDetails("HedgeService.ExecuteAsync() complete", new { Latency = sw.ElapsedMilliseconds });
         }
 
         private async Task ClosePositionsAsync(IEnumerable<Position> positions, PositionType positionType)
@@ -86,7 +95,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     await _positionService.CloseAsync(group.ToArray(), externalTrade);
 
                     await _remainingVolumeService.RegisterVolumeAsync(group.Key,
-                        (originalVolume - volume) * GetSign(positionType));
+                        (originalVolume - externalTrade.Volume) * GetSign(positionType));
                 }
             }
         }
@@ -121,7 +130,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     await _positionService.CloseRemainingVolumeAsync(instrument.AssetPairId, externalTrade);
 
                     await _remainingVolumeService.RegisterVolumeAsync(instrument.AssetPairId,
-                        volume * GetSign(positionType) * -1);
+                        externalTrade.Volume * GetSign(positionType) * -1);
                 }
             }
         }

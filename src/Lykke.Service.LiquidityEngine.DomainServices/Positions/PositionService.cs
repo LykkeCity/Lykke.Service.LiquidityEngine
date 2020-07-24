@@ -70,15 +70,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
             foreach (InternalTrade internalTrade in internalTrades)
             {
-                var now = DateTime.UtcNow;
-                _log.InfoWithDetails("Lykke trade handled", new
-                {
-                    TradeId = internalTrade.Id,
-                    TradeTimestamp = internalTrade.Time,
-                    Now = now,
-                    Diff = now - internalTrade.Time
-                });
-
                 Instrument instrument = await _instrumentService.FindAsync(internalTrade.AssetPairId);
 
                 if (instrument == null)
@@ -86,6 +77,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     _log.WarningWithDetails("Can not open position. Unknown instrument.", internalTrade);
                     continue;
                 }
+
+                Position position = null;
 
                 if (internalTrade.AssetPairId != instrument.AssetPairId)
                 {
@@ -101,9 +94,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                             ? Calculator.CalculateDirectSellPrice(internalTrade.Price, quote, crossInstrument.IsInverse)
                             : Calculator.CalculateDirectBuyPrice(internalTrade.Price, quote, crossInstrument.IsInverse);
 
-                        positions.Add(Position.Open(instrument.AssetPairId, price, internalTrade.Price,
+                        position = Position.Open(instrument.AssetPairId, price, internalTrade.Price,
                             internalTrade.Volume, quote, crossInstrument.AssetPairId, internalTrade.Type,
-                            internalTrade.Id));
+                            internalTrade.Id);
+
+                        positions.Add(position);
                     }
                     else
                     {
@@ -112,8 +107,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                 }
                 else
                 {
-                    positions.Add(Position.Open(instrument.AssetPairId, internalTrade.Price, internalTrade.Volume,
-                        internalTrade.Type, internalTrade.Id));
+                    position = Position.Open(instrument.AssetPairId, internalTrade.Price, internalTrade.Volume,
+                        internalTrade.Type, internalTrade.Id);
+
+                    positions.Add(position);
+                }
+
+                var now = DateTime.UtcNow;
+
+                if (position != null)
+                {
+                    _log.InfoWithDetails("Lykke trade handled", new
+                    {
+                        TradeId = internalTrade.Id,
+                        PositionId = position.Id,
+                        TradeTimestamp = internalTrade.Time,
+                        Now = now,
+                        Latency = (now - internalTrade.Time).TotalMilliseconds
+                    });
                 }
             }
 
@@ -196,7 +207,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                 foreach (var closedPositionHandler in _closedPositionHandlers)
                     await closedPositionHandler.HandleClosedPositionAsync(position);
 
-                _log.InfoWithDetails("Position closed", position);
+                _log.InfoWithDetails("Position closed", new
+                {
+                    position,
+                    PositionId = position.Id,
+                    Latency = (position.CloseDate - position.Date).TotalMilliseconds
+                });
             }
         }
 
