@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -54,6 +55,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
         private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, decimal? price,
             Side side)
         {
+            var swHedgeTradeTotal = new Stopwatch();
+
+            swHedgeTradeTotal.Start();
+
             string instrument = await GetInstrumentAsync(assetPairId);
 
             var request = new RequestForQuoteRequest(instrument, side, volume);
@@ -64,7 +69,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             {
                 _log.InfoWithDetails("Get quote request", request);
 
+                var swRequestForQuote = new Stopwatch();
+
+                swRequestForQuote.Start();
+
                 response = await _client.RequestForQuoteAsync(request);
+                
+                swRequestForQuote.Stop();
 
                 _log.InfoWithDetails("Get quote response", response);
 
@@ -81,11 +92,33 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
                 _log.InfoWithDetails("Execute trade request", tradeRequest);
 
+                var swTradeRequest = new Stopwatch();
+
+                swTradeRequest.Start();
+
                 Trade tradeResponse = await _client.TradeAsync(tradeRequest);
+
+                swTradeRequest.Stop();
 
                 _log.InfoWithDetails("Execute trade response", tradeResponse);
 
+                _log.InfoWithDetails("Request for quote and trade time", new
+                {
+                    tradeResponse.TradeId,
+                    RequestForQuoteTime = swRequestForQuote.ElapsedMilliseconds,
+                    TradeRequestTime = swTradeRequest.ElapsedMilliseconds
+                });
+
                 return tradeResponse;
+            });
+
+            swHedgeTradeTotal.Stop();
+
+            _log.InfoWithDetails("Total hedge trade time", new
+            {
+                trade.TradeId,
+                TradeCreated = trade.Created,
+                HedgeTradeTotalTime = swHedgeTradeTotal
             });
 
             return new ExternalTrade

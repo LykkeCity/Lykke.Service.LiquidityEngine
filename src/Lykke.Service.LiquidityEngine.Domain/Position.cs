@@ -94,7 +94,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
 
         public void Close(ExternalTrade externalTrade)
         {
-            CloseDate = DateTime.UtcNow;
+            CloseDate = externalTrade.Time;
             ClosePrice = externalTrade.Price;
 
             int volumeSign = Type == PositionType.Long ? 1 : -1;
