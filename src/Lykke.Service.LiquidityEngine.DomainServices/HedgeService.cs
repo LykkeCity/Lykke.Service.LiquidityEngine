@@ -58,7 +58,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             sw.Stop();
 
-            _log.InfoWithDetails("HedgeService.ExecuteAsync() complete", new { Latency = sw.ElapsedMilliseconds });
+            _log.Info("HedgeService.ExecuteAsync() complete", new { Latency = sw.ElapsedMilliseconds });
         }
 
         private async Task ClosePositionsAsync(IEnumerable<Position> positions, PositionType positionType)

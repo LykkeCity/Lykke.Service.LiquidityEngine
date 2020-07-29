@@ -117,7 +117,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
                 if (position != null)
                 {
-                    _log.InfoWithDetails("Lykke trade handled", new
+                    _log.Info("Lykke trade handled", new
                     {
                         TradeId = internalTrade.Id,
                         PositionId = position.Id,
