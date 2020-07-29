@@ -67,7 +67,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             Trade trade = await WrapAsync(async () =>
             {
-                _log.InfoWithDetails("Get quote request", request);
+                _log.Info("Get quote request", request);
 
                 var swRequestForQuote = new Stopwatch();
 
@@ -77,7 +77,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 
                 swRequestForQuote.Stop();
 
-                _log.InfoWithDetails("Get quote response", response);
+                _log.Info("Get quote response", response);
 
                 if (price.HasValue)
                 {
@@ -90,7 +90,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
                 var tradeRequest = new TradeRequest(response);
 
-                _log.InfoWithDetails("Execute trade request", tradeRequest);
+                _log.Info("Execute trade request", tradeRequest);
 
                 var swTradeRequest = new Stopwatch();
 
@@ -102,7 +102,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
                 _log.InfoWithDetails("Execute trade response", tradeResponse);
 
-                _log.InfoWithDetails("Request for quote and trade time", new
+                _log.Info("Request for quote and trade time", new
                 {
                     tradeResponse.TradeId,
                     RequestForQuoteTime = swRequestForQuote.ElapsedMilliseconds,
@@ -114,11 +114,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             swHedgeTradeTotal.Stop();
 
-            _log.InfoWithDetails("Total hedge trade time", new
+            _log.Info("Total hedge trade time", new
             {
                 trade.TradeId,
                 TradeCreated = trade.Created,
-                HedgeTradeTotalTime = swHedgeTradeTotal
+                HedgeTradeTotalTime = swHedgeTradeTotal.ElapsedMilliseconds,
+                PositionLifeTotalTime = (DateTime.UtcNow - trade.Created).TotalMilliseconds
             });
 
             return new ExternalTrade
