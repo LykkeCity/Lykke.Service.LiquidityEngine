@@ -1,9 +1,13 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Lykke.Service.LiquidityEngine.Domain.Services
 {
     public interface IMarketMakerService
     {
-        Task UpdateOrderBooksAsync();
+        void Start();
+
+        void Stop();
+
+        Task UpdateOrderBooksAsync(string assetPairId = null);
     }
 }

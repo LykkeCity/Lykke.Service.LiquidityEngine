@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using Common.Log;
@@ -42,6 +43,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IOrderBooksUpdatesReportPublisher _orderBooksUpdatesReportPublisher;
         private readonly bool _isOrderBooksUpdateReportEnabled;
         private readonly ILog _log;
+        private readonly Dictionary<string, Instrument> _instrumentsToUpdate = new Dictionary<string, Instrument>();
+        private readonly ManualResetEventSlim _slim = new ManualResetEventSlim(false, 1);
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public MarketMakerService(
             IInstrumentService instrumentService,
@@ -87,34 +91,104 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _log = logFactory.CreateLog(this);
         }
 
-        public async Task UpdateOrderBooksAsync()
+        public void Start()
         {
-            var startedAt = DateTime.UtcNow;
+            try
+            {
+                Task.Run(TryUpdateOrderBooksAsync);
+            }
+            catch (Exception ex)
+            {
+                _log.Warning("Something went wrong in MarketMakerService.Start().", ex);
+            }
+        }
 
+        public void Stop()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
+        public async Task TryUpdateOrderBooksAsync()
+        {
+            while (true)
+            {
+                try
+                {
+                    try
+                    {
+                        _slim.Wait(_cancellationTokenSource.Token);
+                        _slim.Reset();
+                    }
+                    catch (OperationCanceledException e)
+                    {
+                        break;
+                    }
+
+                    var startedAt = DateTime.UtcNow;
+
+                    List<Instrument> instrumentsToUpdate;
+
+                    lock (_instrumentsToUpdate)
+                    {
+                        instrumentsToUpdate = _instrumentsToUpdate.Values.ToList();
+
+                        _instrumentsToUpdate.Clear();
+                    }
+
+                    var iterationDateTime = DateTime.UtcNow;
+
+                    foreach (Instrument instrument in instrumentsToUpdate)
+                        await ProcessInstrumentAsync(instrument, iterationDateTime);
+
+                    var finishedAt = DateTime.UtcNow;
+
+                    _log.Info("MarketMakerService.TryUpdateOrderBooksAsync() completed.", new
+                    {
+                        IstrumentsCount = instrumentsToUpdate.Count,
+                        StartedAt = startedAt,
+                        FinishedAt = finishedAt,
+                        Latency = (finishedAt - startedAt).TotalMilliseconds
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Something went wrong in MarketMakerService.TryUpdateOrderBooksAsync().", ex);
+                }
+            }
+        }
+
+        public async Task UpdateOrderBooksAsync(string assetPairId = null)
+        {
             IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
 
             IReadOnlyCollection<Instrument> activeInstruments = instruments
                 .Where(o => o.Mode == InstrumentMode.Idle || o.Mode == InstrumentMode.Active)
                 .ToArray();
 
-            DateTime iterationDateTime = DateTime.UtcNow;
-
-            foreach (Instrument instrument in activeInstruments)
-                await ProcessInstrumentAsync(instrument, iterationDateTime);
-
-            var finishedAt = DateTime.UtcNow;
-
-            _log.Info("MarketMakerService.UpdateOrderBooksAsync() completed.", new
+            lock (_instrumentsToUpdate)
             {
-                IstrumentsCount = activeInstruments.Count,
-                StartedAt = startedAt,
-                FinishedAt = finishedAt,
-                Latency = (finishedAt - startedAt).TotalMilliseconds
-            });
+                if (!string.IsNullOrWhiteSpace(assetPairId))
+                {
+                    var instrument = instruments.FirstOrDefault(x => x.AssetPairId == assetPairId);
+
+                    if (instrument != null)
+                        _instrumentsToUpdate[assetPairId] = instrument;
+                }
+                else
+                {
+                    foreach (var instrument in activeInstruments)
+                        _instrumentsToUpdate[instrument.AssetPairId] = instrument;
+                }
+
+                _slim.Set();
+            }
         }
 
-        private async Task ProcessInstrumentAsync(Instrument instrument, DateTime iterationDateTime)
+        private async Task ProcessInstrumentAsync(Instrument instrument, DateTime iterationDateTime = default(DateTime))
         {
+            if (iterationDateTime == default(DateTime))
+                iterationDateTime = DateTime.UtcNow;
+
             try
             {
                 var startedAt = DateTime.UtcNow;

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Sdk;
+using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.Timers;
 using Lykke.Service.LiquidityEngine.Rabbit;
 using Lykke.Service.LiquidityEngine.Rabbit.Publishers;
@@ -27,6 +28,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly InternalOrderBookPublisher _internalOrderBookPublisher;
         private readonly OrderBooksUpdatesReportPublisher _orderBooksUpdatesReportPublisher;
         private readonly LykkeTradeSubscriberMonitor _lykkeTradeSubscriberMonitor;
+        private readonly IHedgeService _hedgeService;
+        private readonly IMarketMakerService _marketMakerService;
 
         public ShutdownManager(
             LykkeBalancesTimer lykkeBalancesTimer,
@@ -44,7 +47,9 @@ namespace Lykke.Service.LiquidityEngine.Managers
             InternalQuotePublisher internalQuotePublisher,
             InternalOrderBookPublisher internalOrderBookPublisher,
             OrderBooksUpdatesReportPublisher orderBooksUpdatesReportPublisher,
-            LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor)
+            LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor,
+            IHedgeService hedgeService,
+            IMarketMakerService marketMakerService)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
             _externalBalancesTimer = externalBalancesTimer;
@@ -62,6 +67,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _internalOrderBookPublisher = internalOrderBookPublisher;
             _orderBooksUpdatesReportPublisher = orderBooksUpdatesReportPublisher;
             _lykkeTradeSubscriberMonitor = lykkeTradeSubscriberMonitor;
+            _hedgeService = hedgeService;
+            _marketMakerService = marketMakerService;
         }
 
         public Task StopAsync()
@@ -85,11 +92,15 @@ namespace Lykke.Service.LiquidityEngine.Managers
 
             _marketMakerTimer.Stop();
 
+            _marketMakerService.Stop();
+
             _lykkeBalancesTimer.Stop();
 
             _externalBalancesTimer.Stop();
 
             _hedgingTimer.Stop();
+
+            _hedgeService.Stop();
 
             _pnLStopLossEngineTimer.Stop();
             

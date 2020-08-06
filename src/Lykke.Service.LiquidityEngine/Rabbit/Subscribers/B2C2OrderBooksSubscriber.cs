@@ -15,6 +15,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
     {
         private readonly SubscriberSettings _settings;
         private readonly IB2C2OrderBookService _b2C2OrderBookService;
+        private readonly IMarketMakerService _marketMakerService;
         private readonly ILogFactory _logFactory;
         private readonly ILog _log;
 
@@ -23,10 +24,12 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         public B2C2OrderBooksSubscriber(
             SubscriberSettings settings,
             IB2C2OrderBookService b2C2OrderBookService,
+            IMarketMakerService marketMakerService,
             ILogFactory logFactory)
         {
             _settings = settings;
             _b2C2OrderBookService = b2C2OrderBookService;
+            _marketMakerService = marketMakerService;
             _logFactory = logFactory;
             _log = logFactory.CreateLog(this);
         }
@@ -57,7 +60,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             _subscriber?.Dispose();
         }
 
-        private Task ProcessMessageAsync(OrderBook orderBook)
+        private async Task ProcessMessageAsync(OrderBook orderBook)
         {
             // workaround for Lykke production
             var internalAssetPair = orderBook.Asset.Replace("EOS", "EOScoin");
@@ -86,12 +89,16 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 Type = Domain.LimitOrderType.Buy
             });
 
-            return _b2C2OrderBookService.SetAsync(new Domain.OrderBook
+            var newOrderBook = new Domain.OrderBook
             {
                 AssetPairId = internalAssetPair,
                 Time = orderBook.Timestamp,
                 LimitOrders = sellLimitOrders.Concat(buyLimitOrders).ToArray()
-            });
+            };
+
+            await _b2C2OrderBookService.SetAsync(newOrderBook);
+
+            await _marketMakerService.UpdateOrderBooksAsync(newOrderBook.AssetPairId);
         }
     }
 }

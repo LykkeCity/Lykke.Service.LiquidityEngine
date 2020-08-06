@@ -26,6 +26,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         private readonly ISettingsService _settingsService;
         private readonly IPositionService _positionService;
         private readonly IDeduplicator _deduplicator;
+        private readonly IHedgeService _hedgeService;
         private readonly ILogFactory _logFactory;
         private readonly ILog _log;
 
@@ -36,6 +37,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             ISettingsService settingsService,
             IPositionService positionService,
             IDeduplicator deduplicator,
+            IHedgeService hedgeService,
             ILogFactory logFactory)
         {
             _settings = settings;
@@ -43,6 +45,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             _positionService = positionService;
             _deduplicator = deduplicator;
             _logFactory = logFactory;
+            _hedgeService = hedgeService;
             _log = logFactory.CreateLog(this);
         }
 
@@ -154,6 +157,8 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 _log.WarningWithDetails("Trades processing takes more than one minute", internalTrades);
 
             await processTask;
+
+            await _hedgeService.ExecuteAsync();
         }
 
         private static IReadOnlyList<InternalTrade> Map(Order order, bool completed)

@@ -31,6 +31,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly LykkeTradeSubscriberMonitor _lykkeTradeSubscriberMonitor;
         private readonly StorageMigrationService _storageMigrationService;
         private readonly ITradeService _tradeService;
+        private readonly IHedgeService _hedgeService;
+        private readonly IMarketMakerService _marketMakerService;
 
         public StartupManager(
             LykkeBalancesTimer lykkeBalancesTimer,
@@ -50,7 +52,9 @@ namespace Lykke.Service.LiquidityEngine.Managers
             OrderBooksUpdatesReportPublisher orderBooksUpdatesReportPublisher,
             LykkeTradeSubscriberMonitor lykkeTradeSubscriberMonitor,
             StorageMigrationService storageMigrationService,
-            ITradeService tradeService)
+            ITradeService tradeService,
+            IHedgeService hedgeService,
+            IMarketMakerService marketMakerService)
         {
             _lykkeBalancesTimer = lykkeBalancesTimer;
             _externalBalancesTimer = externalBalancesTimer;
@@ -70,6 +74,8 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _lykkeTradeSubscriberMonitor = lykkeTradeSubscriberMonitor;
             _storageMigrationService = storageMigrationService;
             _tradeService = tradeService;
+            _hedgeService = hedgeService;
+            _marketMakerService = marketMakerService;
         }
 
         public async Task StartAsync()
@@ -100,6 +106,10 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _externalBalancesTimer.Start();
 
             _marketMakerTimer.Start();
+
+            _marketMakerService.Start();
+
+            _hedgeService.Start();
 
             _hedgingTimer.Start();
 

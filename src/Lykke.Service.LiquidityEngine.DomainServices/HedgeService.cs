@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
@@ -22,6 +22,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IMarketMakerStateService _marketMakerStateService;
         private readonly IRemainingVolumeService _remainingVolumeService;
         private readonly ILog _log;
+        private readonly ManualResetEventSlim _slim = new ManualResetEventSlim(false, 1);
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private readonly Dictionary<string, Tuple<int, int>> _attempts =
             new Dictionary<string, Tuple<int, int>>();
@@ -42,29 +44,71 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             _log = logFactory.CreateLog(this);
         }
 
+        public void Start()
+        {
+            try
+            {
+                Task.Run(TryHedgeAsync);
+            }
+            catch (Exception ex)
+            {
+                _log.Warning("Something went wrong in HedgeService.Start().", ex);
+            }
+        }
+
+        public void Stop()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
+        public async Task TryHedgeAsync()
+        {
+            while (true)
+            {
+                try
+                {
+                    try
+                    {
+                        _slim.Wait(_cancellationTokenSource.Token);
+                        _slim.Reset();
+                    }
+                    catch (OperationCanceledException e)
+                    {
+                        break;
+                    }
+
+                    var startedAt = DateTime.UtcNow;
+
+                    IReadOnlyCollection<Position> positions = await _positionService.GetOpenAllAsync();
+
+                    await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Long), PositionType.Long);
+
+                    await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Short), PositionType.Short);
+
+                    await CloseRemainingVolumeAsync();
+
+                    var finishedAt = DateTime.UtcNow;
+
+                    if (positions.Count != 0)
+                        _log.Info("HedgeService.ExecuteAsync() completed.", new
+                        {
+                            PositionsCount = positions.Count,
+                            TradeIds = positions.Select(x => x.TradeId).ToList(),
+                            StartedAt = startedAt,
+                            FinishedAt = finishedAt,
+                            Latency = (finishedAt - startedAt).TotalMilliseconds
+                        });
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("Something went wrong in TryHedgeAsync.", ex);
+                }
+            }
+        }
+
         public async Task ExecuteAsync()
         {
-            var startedAt = DateTime.UtcNow;
-
-            IReadOnlyCollection<Position> positions = await _positionService.GetOpenAllAsync();
-
-            await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Long), PositionType.Long);
-
-            await ClosePositionsAsync(positions.Where(o => o.Type == PositionType.Short), PositionType.Short);
-
-            await CloseRemainingVolumeAsync();
-
-            var finishedAt = DateTime.UtcNow;
-
-            if (positions.Count != 0)
-                _log.Info("HedgeService.ExecuteAsync() completed.", new
-                {
-                    PositionsCount = positions.Count,
-                    TradeIds = positions.Select(x => x.TradeId).ToList(),
-                    StartedAt = startedAt,
-                    FinishedAt = finishedAt,
-                    Latency = (finishedAt - startedAt).TotalMilliseconds
-                });
+            _slim.Set();
         }
 
         private async Task ClosePositionsAsync(IEnumerable<Position> positions, PositionType positionType)
