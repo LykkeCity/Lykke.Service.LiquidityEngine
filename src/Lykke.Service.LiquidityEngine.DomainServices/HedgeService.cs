@@ -22,7 +22,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IMarketMakerStateService _marketMakerStateService;
         private readonly IRemainingVolumeService _remainingVolumeService;
         private readonly ILog _log;
-        private readonly ManualResetEventSlim _slim = new ManualResetEventSlim(false, 1);
+        private readonly object _syncManualResetEvent = new object();
+        private readonly ManualResetEventSlim _manualResetEvent = new ManualResetEventSlim(false, 1);
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private readonly Dictionary<string, Tuple<int, int>> _attempts =
@@ -69,10 +70,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 {
                     try
                     {
-                        _slim.Wait(_cancellationTokenSource.Token);
-                        _slim.Reset();
+                        _manualResetEvent.Wait(_cancellationTokenSource.Token);
+                        lock (_syncManualResetEvent)
+                        {
+                            _manualResetEvent.Reset();
+                        }
                     }
-                    catch (OperationCanceledException e)
+                    catch (OperationCanceledException)
                     {
                         break;
                     }
@@ -108,7 +112,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         public async Task ExecuteAsync()
         {
-            _slim.Set();
+            lock (_syncManualResetEvent)
+            {
+                _manualResetEvent.Set();
+            }
         }
 
         private async Task ClosePositionsAsync(IEnumerable<Position> positions, PositionType positionType)

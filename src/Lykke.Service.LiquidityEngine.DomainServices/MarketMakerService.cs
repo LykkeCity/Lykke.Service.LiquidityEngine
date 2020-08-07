@@ -43,8 +43,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly IOrderBooksUpdatesReportPublisher _orderBooksUpdatesReportPublisher;
         private readonly bool _isOrderBooksUpdateReportEnabled;
         private readonly ILog _log;
+        private readonly object _syncInstruments = new object();
         private readonly Dictionary<string, Instrument> _instrumentsToUpdate = new Dictionary<string, Instrument>();
-        private readonly ManualResetEventSlim _slim = new ManualResetEventSlim(false, 1);
+        private readonly object _syncManualResetEvent = new object();
+        private readonly ManualResetEventSlim _manualResetEvent = new ManualResetEventSlim(false, 1);
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         public MarketMakerService(
@@ -116,8 +118,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 {
                     try
                     {
-                        _slim.Wait(_cancellationTokenSource.Token);
-                        _slim.Reset();
+                        _manualResetEvent.Wait(_cancellationTokenSource.Token);
+
+                        lock (_syncManualResetEvent)
+                        {
+                            _manualResetEvent.Reset();
+                        }
                     }
                     catch (OperationCanceledException)
                     {
@@ -128,7 +134,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     List<Instrument> instrumentsToUpdate;
 
-                    lock (_instrumentsToUpdate)
+                    lock (_syncInstruments)
                     {
                         instrumentsToUpdate = _instrumentsToUpdate.Values.ToList();
 
@@ -165,7 +171,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .Where(o => o.Mode == InstrumentMode.Idle || o.Mode == InstrumentMode.Active)
                 .ToArray();
 
-            lock (_instrumentsToUpdate)
+            lock (_syncInstruments)
             {
                 if (!string.IsNullOrWhiteSpace(assetPairId))
                 {
@@ -180,7 +186,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                         _instrumentsToUpdate[instrument.AssetPairId] = instrument;
                 }
 
-                _slim.Set();
+                lock (_syncManualResetEvent)
+                {
+                    _manualResetEvent.Set();
+                }
             }
         }
 
