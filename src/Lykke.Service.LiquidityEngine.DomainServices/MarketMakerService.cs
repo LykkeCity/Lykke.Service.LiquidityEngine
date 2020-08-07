@@ -185,11 +185,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     foreach (var instrument in activeInstruments)
                         _instrumentsToUpdate[instrument.AssetPairId] = instrument;
                 }
+            }
 
-                lock (_syncManualResetEvent)
-                {
-                    _manualResetEvent.Set();
-                }
+            lock (_syncManualResetEvent)
+            {
+                _manualResetEvent.Set();
             }
         }
 

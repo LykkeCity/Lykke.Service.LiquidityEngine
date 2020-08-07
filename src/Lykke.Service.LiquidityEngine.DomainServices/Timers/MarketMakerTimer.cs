@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -24,14 +24,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
             Log = logFactory.CreateLog(this);
         }
         
-        protected override Task OnExecuteAsync(CancellationToken cancellation)
+        protected override async Task OnExecuteAsync(CancellationToken cancellation)
         {
-            return _marketMakerService.UpdateOrderBooksAsync();
+            var settings = (await _timersSettingsService.GetAsync()).MarketMaker;
+
+            if (settings.TotalMilliseconds < 1)
+                return;
+
+            await _marketMakerService.UpdateOrderBooksAsync();
         }
 
         protected override async Task<TimeSpan> GetDelayAsync()
         {
             TimersSettings timersSettings = await _timersSettingsService.GetAsync();
+
+            if (timersSettings.MarketMaker.TotalMilliseconds < 1)
+                return TimeSpan.FromMinutes(1);
 
             return timersSettings.MarketMaker;
         }
