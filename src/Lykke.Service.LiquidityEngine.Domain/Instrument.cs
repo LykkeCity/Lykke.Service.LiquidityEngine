@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MoreLinq;
 
 namespace Lykke.Service.LiquidityEngine.Domain
 {
@@ -168,6 +169,39 @@ namespace Lykke.Service.LiquidityEngine.Domain
             CrossInstruments = (CrossInstruments ?? new CrossInstrument[0])
                 .Where(o => o.AssetPairId != crossAssetPairId)
                 .ToArray();
+        }
+
+        public decimal ApplyVolume(decimal volume, TradeType side)
+        {
+            foreach (var level in Levels.OrderBy(x => x.Number))
+            {
+                var volumeLevel = side == TradeType.Buy ? level.BuyVolume : level.SellVolume;
+
+                var size = Math.Min(volumeLevel, volume);
+
+                volumeLevel -= size;
+                volume -= size;
+
+                if (side == TradeType.Buy)
+                    level.BuyVolume = volumeLevel;
+                else
+                    level.SellVolume = volumeLevel;
+
+                if (volumeLevel <= 0)
+                    return 0;
+            }
+
+            return volume;
+        }
+
+        public void ResetTradingVolume()
+        {
+            foreach (var level in Levels)
+            {
+                level.BuyVolume = level.Volume;
+
+                level.SellVolume = level.Volume;
+            }
         }
     }
 }

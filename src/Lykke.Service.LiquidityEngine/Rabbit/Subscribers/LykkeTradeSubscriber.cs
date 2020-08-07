@@ -14,6 +14,7 @@ using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Timers;
 using Lykke.Service.LiquidityEngine.DomainServices.Utils;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers;
 
@@ -27,6 +28,8 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         private readonly IPositionService _positionService;
         private readonly IDeduplicator _deduplicator;
         private readonly IHedgeService _hedgeService;
+        private readonly IInstrumentService _instrumentService;
+        private readonly ITimersSettingsService _timersSettingsService;
         private readonly ILogFactory _logFactory;
         private readonly ILog _log;
 
@@ -38,13 +41,17 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             IPositionService positionService,
             IDeduplicator deduplicator,
             IHedgeService hedgeService,
-            ILogFactory logFactory)
+            ILogFactory logFactory,
+            IInstrumentService instrumentService,
+            ITimersSettingsService timersSettingsService)
         {
             _settings = settings;
             _settingsService = settingsService;
             _positionService = positionService;
             _deduplicator = deduplicator;
             _logFactory = logFactory;
+            _instrumentService = instrumentService;
+            _timersSettingsService = timersSettingsService;
             _hedgeService = hedgeService;
             _log = logFactory.CreateLog(this);
         }
@@ -159,6 +166,26 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             await processTask;
 
             await _hedgeService.ExecuteAsync();
+
+            await ApplyVolumeToLevels(internalTrades);
+        }
+
+        private async Task ApplyVolumeToLevels(List<InternalTrade> internalTrades)
+        {
+            var timerSettings = await _timersSettingsService.GetAsync();
+
+            if (timerSettings.MarketMaker.TotalMilliseconds > 0)
+                foreach (var internalTrade in internalTrades)
+                {
+                    var remainingVolume =
+                        await _instrumentService.ApplyVolumeAsync(internalTrade.AssetPairId, Math.Abs(internalTrade.Volume),
+                            internalTrade.Type);
+
+                    if (remainingVolume > 0)
+                        _log.Warning(
+                            $"Can't apply trade volume to remaining in levels, remainingVolume = '{remainingVolume}'.", null,
+                            internalTrade);
+                }
         }
 
         private static IReadOnlyList<InternalTrade> Map(Order order, bool completed)

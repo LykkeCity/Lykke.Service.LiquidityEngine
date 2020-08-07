@@ -13,14 +13,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
     {
         private readonly IMarketMakerService _marketMakerService;
         private readonly ITimersSettingsService _timersSettingsService;
+        private readonly IInstrumentService _instrumentService;
 
         public MarketMakerTimer(
             IMarketMakerService marketMakerService,
             ITimersSettingsService timersSettingsService,
-            ILogFactory logFactory)
+            ILogFactory logFactory,
+            IInstrumentService instrumentService)
         {
             _marketMakerService = marketMakerService;
             _timersSettingsService = timersSettingsService;
+            _instrumentService = instrumentService;
             Log = logFactory.CreateLog(this);
         }
         
@@ -30,6 +33,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Timers
 
             if (settings.TotalMilliseconds < 1)
                 return;
+
+            await _instrumentService.ResetTradingVolumeAsync();
 
             await _marketMakerService.UpdateOrderBooksAsync();
         }

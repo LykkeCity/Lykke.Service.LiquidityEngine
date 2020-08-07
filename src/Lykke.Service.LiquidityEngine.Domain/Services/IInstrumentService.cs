@@ -27,10 +27,14 @@ namespace Lykke.Service.LiquidityEngine.Domain.Services
 
         Task RemoveLevelByNumberAsync(string assetPairId, int levelNumber);
 
+        Task<decimal> ApplyVolumeAsync(string assetPairId, decimal volume, TradeType side);
+
         Task AddCrossInstrumentAsync(string assetPairId, CrossInstrument crossInstrument);
 
         Task UpdateCrossInstrumentAsync(string assetPairId, CrossInstrument crossInstrument);
 
         Task RemoveCrossInstrumentAsync(string assetPairId, string crossAssetPairId);
+
+        Task ResetTradingVolumeAsync();
     }
 }

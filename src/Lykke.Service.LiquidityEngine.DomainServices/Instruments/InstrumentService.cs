@@ -186,6 +186,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             _log.InfoWithDetails("Level volume was removed from the instrument", instrument);
         }
 
+        public async Task<decimal> ApplyVolumeAsync(string assetPairId, decimal volume, TradeType side)
+        {
+            Instrument instrument = await GetByAssetPairIdAsync(assetPairId);
+
+            var remainingVolume = instrument.ApplyVolume(volume, side);
+
+            return remainingVolume;
+        }
+
         public async Task AddCrossInstrumentAsync(string assetPairId, CrossInstrument crossInstrument)
         {
             IReadOnlyCollection<Instrument> instruments = await GetAllAsync();
@@ -232,6 +241,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Instruments
             _cache.Set(instrument);
 
             _log.InfoWithDetails("Cross instrument was removed from the instrument", instrument);
+        }
+
+        public async Task ResetTradingVolumeAsync()
+        {
+            var instruments = await GetAllAsync();
+
+            foreach (var instrument in instruments)
+            {
+                instrument.ResetTradingVolume();
+            }
         }
     }
 }
