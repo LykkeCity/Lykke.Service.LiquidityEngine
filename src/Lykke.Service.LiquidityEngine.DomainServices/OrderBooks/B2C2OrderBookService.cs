@@ -1,6 +1,9 @@
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Log;
 using JetBrains.Annotations;
+using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.Services;
@@ -11,15 +14,28 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.OrderBooks
     public class B2C2OrderBookService : IB2C2OrderBookService
     {
         private readonly InMemoryCache<OrderBook> _cache;
+        private readonly ILog _log;
 
-        public B2C2OrderBookService()
+        public B2C2OrderBookService(ILogFactory logFactory)
         {
             _cache = new InMemoryCache<OrderBook>(orderBook => orderBook.AssetPairId, true);
+
+            _log = logFactory.CreateLog(this);
         }
 
         public Task SetAsync(OrderBook orderBook)
         {
             _cache.Set(orderBook);
+
+            var now = DateTime.UtcNow;
+
+            _log.Info("B2C2 order book time", new
+            {
+                AssetPairId = orderBook.AssetPairId,
+                OrderBookTimestamp = orderBook.Time,
+                Now = now,
+                Latency = (now - orderBook.Time).TotalMilliseconds
+            });
 
             return Task.CompletedTask;
         }

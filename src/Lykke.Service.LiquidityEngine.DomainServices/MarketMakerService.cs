@@ -119,7 +119,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                         _slim.Wait(_cancellationTokenSource.Token);
                         _slim.Reset();
                     }
-                    catch (OperationCanceledException e)
+                    catch (OperationCanceledException)
                     {
                         break;
                     }
