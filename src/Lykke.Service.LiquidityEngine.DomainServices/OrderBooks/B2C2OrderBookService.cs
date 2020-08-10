@@ -27,16 +27,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.OrderBooks
         {
             _cache.Set(orderBook);
 
-            var now = DateTime.UtcNow;
-
-            _log.Info("B2C2 order book time", new
-            {
-                AssetPairId = orderBook.AssetPairId,
-                OrderBookTimestamp = orderBook.Time,
-                Now = now,
-                Latency = (now - orderBook.Time).TotalMilliseconds
-            });
-
             return Task.CompletedTask;
         }
 
