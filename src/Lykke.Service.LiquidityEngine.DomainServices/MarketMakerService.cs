@@ -193,7 +193,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }
         }
 
-        private async Task ProcessInstrumentAsync(Instrument instrument, DateTime iterationDateTime = default(DateTime))
+        private async Task ProcessInstrumentAsync(Instrument instrument, DateTime iterationDateTime)
         {
             if (iterationDateTime == default(DateTime))
                 iterationDateTime = DateTime.UtcNow;
