@@ -187,7 +187,7 @@ namespace Lykke.Service.LiquidityEngine.Domain
                 else
                     level.SellVolume = volumeLevel;
 
-                if (volumeLevel <= 0)
+                if (volume <= 0)
                     return 0;
             }
 
