@@ -52,74 +52,75 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
             => ExecuteLimitOrderAsync(assetPairId, volume, price,
                 limitOrderType == LimitOrderType.Sell ? Side.Sell : Side.Buy);
 
-        private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, decimal? price,
-            Side side)
+        private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, decimal? price, Side side)
         {
+            var hedgingStartedAt = DateTime.UtcNow;
+
+            DateTime b2c2RequestFinishedAt;
+
             var swHedgeTradeTotal = new Stopwatch();
 
             swHedgeTradeTotal.Start();
 
             string instrument = await GetInstrumentAsync(assetPairId);
 
-            var request = new RequestForQuoteRequest(instrument, side, volume);
-
-            RequestForQuoteResponse response;
-
-            Trade trade = await WrapAsync(async () =>
+            OrderResponse orderResponse = await WrapAsync(async () =>
             {
-                _log.Info("Get quote request", request);
+                var swOrderRequest = new Stopwatch();
 
-                var swRequestForQuote = new Stopwatch();
+                swOrderRequest.Start();
 
-                swRequestForQuote.Start();
+                var orderRequest = new OrderRequest();
 
-                response = await _client.RequestForQuoteAsync(request);
-                
-                swRequestForQuote.Stop();
+                orderRequest.ClientOrderId = Guid.NewGuid().ToString();
+                orderRequest.Side = side;
+                orderRequest.Instrument = instrument;
+                orderRequest.OrderType = OrderType.MKT;
+                orderRequest.Quantity = volume;
+                orderRequest.ValidUntil = DateTime.UtcNow.AddSeconds(3);
 
-                _log.Info("Get quote response", response);
+                _log.Info("Order request", orderRequest);
 
-                if (price.HasValue)
+                var hedgingRequestStartedAt = DateTime.UtcNow;
+
+                OrderResponse order = await _client.OrderAsync(orderRequest);
+
+                swOrderRequest.Stop();
+
+                b2c2RequestFinishedAt = DateTime.UtcNow;
+
+                _log.Info("Order response", orderRequest);
+
+                Trade orderTrade = order.Trades.Single();
+
+                _log.Info("Order time", new
                 {
-                    if (side == Side.Sell && price.Value > response.Price)
-                        throw new NotEnoughLiquidityException();
-
-                    if (side == Side.Buy && price.Value < response.Price)
-                        throw new NotEnoughLiquidityException();
-                }
-
-                var tradeRequest = new TradeRequest(response);
-
-                _log.Info("Execute trade request", tradeRequest);
-
-                var swTradeRequest = new Stopwatch();
-
-                swTradeRequest.Start();
-
-                Trade tradeResponse = await _client.TradeAsync(tradeRequest);
-
-                swTradeRequest.Stop();
-
-                _log.InfoWithDetails("Execute trade response", tradeResponse);
-
-                _log.Info("Request for quote and trade time", new
-                {
-                    tradeResponse.TradeId,
-                    RequestForQuoteTime = swRequestForQuote.ElapsedMilliseconds,
-                    TradeRequestTime = swTradeRequest.ElapsedMilliseconds
+                    AssetPairId = assetPairId,
+                    Volume = volume,
+                    TradeId = orderTrade.TradeId,
+                    ClientOrderId = orderRequest.ClientOrderId,
+                    OrderId = order.OrderId,
+                    OrderRequestTime = swOrderRequest.ElapsedMilliseconds,
+                    StartedAt = hedgingRequestStartedAt,
+                    B2C2RequestFinishedAt = b2c2RequestFinishedAt,
+                    Latency = (b2c2RequestFinishedAt - hedgingRequestStartedAt).TotalMilliseconds
                 });
 
-                return tradeResponse;
+                return order;
             });
 
             swHedgeTradeTotal.Stop();
 
+            var trade = orderResponse.Trades.Single();
+
             _log.Info("Total hedge trade time", new
             {
-                trade.TradeId,
+                TradeId = trade.TradeId,
                 TradeCreated = trade.Created,
-                HedgeTradeTotalTime = swHedgeTradeTotal.ElapsedMilliseconds,
-                PositionLifeTotalTime = (DateTime.UtcNow - trade.Created).TotalMilliseconds
+                OrderId = orderResponse.OrderId,
+                ClientOrderId = orderResponse.ClientOrderId,
+                OrderCreated = orderResponse.Created,
+                HedgeTradeTotalTime = swHedgeTradeTotal
             });
 
             return new ExternalTrade
