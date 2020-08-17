@@ -98,6 +98,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             var trade = orderResponse.Trades.Single();
 
+            var hedgingFinishedAt = DateTime.UtcNow;
+
             _log.Info("Total hedge trade time", new
             {
                 TradeId = trade.TradeId,
