@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,6 +40,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
         public async Task ApplyAsync(string assetPairId, IReadOnlyCollection<LimitOrder> limitOrders)
         {
+            var totalOrderPlacementStartedAt = DateTime.UtcNow;
+
             string walletId = await _settingsService.GetWalletIdAsync();
 
             if (string.IsNullOrEmpty(walletId))
@@ -80,7 +82,19 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             try
             {
+                var startedAt = DateTime.UtcNow;
+
                 response = await _matchingEngineClient.PlaceMultiLimitOrderAsync(multiLimitOrder);
+
+                var finishedAt = DateTime.UtcNow;
+
+                _log.Info("_matchingEngineClient.PlaceMultiLimitOrderAsync() finished.", new
+                {
+                    AssetPairId = assetPairId,
+                    StartedAt = finishedAt,
+                    FinishedAt = finishedAt,
+                    Latency = (finishedAt - startedAt).TotalMilliseconds
+                });
             }
             catch (Exception exception)
             {
@@ -122,6 +136,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 _log.WarningWithDetails("ME didn't return status for orders",
                     $"pair: {assetPairId}, orders: {string.Join(", ", ignoredOrdersByMe)}");
             }
+
+            var totalOrderPlacementFinishedAt = DateTime.UtcNow;
+
+            _log.Info("LykkeExchangeService.ApplyAsync() finished.", new
+            {
+                AssetPairId = assetPairId,
+                StartedAt = totalOrderPlacementStartedAt,
+                FinishedAt = totalOrderPlacementFinishedAt,
+                Latency = (totalOrderPlacementFinishedAt - totalOrderPlacementStartedAt).TotalMilliseconds
+            });
 
             _log.InfoWithDetails("ME place multi limit order response", response);
         }

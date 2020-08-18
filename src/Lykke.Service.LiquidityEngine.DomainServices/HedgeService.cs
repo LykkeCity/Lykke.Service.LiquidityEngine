@@ -44,9 +44,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         public async Task ExecuteAsync()
         {
-            var sw = new Stopwatch();
-
-            sw.Start();
+            var startedAt = DateTime.UtcNow;
 
             IReadOnlyCollection<Position> positions = await _positionService.GetOpenAllAsync();
 
@@ -56,15 +54,25 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             await CloseRemainingVolumeAsync();
 
-            sw.Stop();
+            var finishedAt = DateTime.UtcNow;
 
-            _log.Info("HedgeService.ExecuteAsync() complete", new { Latency = sw.ElapsedMilliseconds });
+            if (positions.Count != 0)
+                _log.Info("HedgeService.ExecuteAsync() completed.", new
+                {
+                    PositionsCount = positions.Count,
+                    TradeIds = positions.Select(x => x.TradeId).ToList(),
+                    StartedAt = startedAt,
+                    FinishedAt = finishedAt,
+                    Latency = (finishedAt - startedAt).TotalMilliseconds
+                });
         }
 
         private async Task ClosePositionsAsync(IEnumerable<Position> positions, PositionType positionType)
         {
             foreach (IGrouping<string, Position> group in positions.GroupBy(o => o.AssetPairId))
             {
+                var startedAt = DateTime.UtcNow;
+
                 MarketMakerState marketMakerState = await _marketMakerStateService.GetStateAsync();
 
                 if (marketMakerState.Status != MarketMakerStatus.Active)
@@ -97,11 +105,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     await _remainingVolumeService.RegisterVolumeAsync(group.Key,
                         (originalVolume - externalTrade.Volume) * GetSign(positionType));
                 }
+
+                var finishedAt = DateTime.UtcNow;
+
+                _log.Info("HedgeService.ClosePositionsAsync() completed.", new
+                {
+                    AssetPairId = instrument.AssetPairId,
+                    TradeIds = positions.Select(x => x.TradeId).ToList(),
+                    StartedAt = startedAt,
+                    FinishedAt = finishedAt,
+                    Latency = (finishedAt - startedAt).TotalMilliseconds
+                });
             }
         }
 
         private async Task CloseRemainingVolumeAsync()
         {
+            var startedAt = DateTime.UtcNow;
+
             IReadOnlyCollection<RemainingVolume> remainingVolumes = await _remainingVolumeService.GetAllAsync();
 
             foreach (RemainingVolume remainingVolume in remainingVolumes)
@@ -133,11 +154,22 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                         externalTrade.Volume * GetSign(positionType) * -1);
                 }
             }
+
+            var finishedAt = DateTime.UtcNow;
+
+            _log.Info("HedgeService.CloseRemainingVolumeAsync() completed.", new
+            {
+                StartedAt = startedAt,
+                FinishedAt = finishedAt,
+                Latency = (finishedAt - startedAt).TotalMilliseconds
+            });
         }
 
         private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume,
             PositionType positionType)
         {
+            var startedAt = DateTime.UtcNow;
+
             ExternalTrade externalTrade = null;
 
             if (!_attempts.TryGetValue(assetPairId, out Tuple<int, int> attempt))
@@ -182,6 +214,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                         attempt = attempt.Item1
                     });
             }
+
+            var finishedAt = DateTime.UtcNow;
+
+            _log.Info("HedgeService.ExecuteLimitOrderAsync() completed.", new
+            {
+                AssetPairId = assetPairId,
+                StartedAt = startedAt,
+                FinishedAt = finishedAt,
+                Latency = (finishedAt - startedAt).TotalMilliseconds
+            });
 
             return externalTrade;
         }

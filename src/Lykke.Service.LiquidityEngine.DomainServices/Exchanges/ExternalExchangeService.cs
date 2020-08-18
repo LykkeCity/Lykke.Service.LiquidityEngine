@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -12,7 +11,6 @@ using Lykke.B2c2Client.Models.Rest;
 using Lykke.Common.Log;
 using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
-using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Polly;
@@ -54,21 +52,13 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
         private async Task<ExternalTrade> ExecuteLimitOrderAsync(string assetPairId, decimal volume, decimal? price, Side side)
         {
-            var hedgingStartedAt = DateTime.UtcNow;
-
-            DateTime b2c2RequestFinishedAt;
-
-            var swHedgeTradeTotal = new Stopwatch();
-
-            swHedgeTradeTotal.Start();
+            var startedAt = DateTime.UtcNow;
 
             string instrument = await GetInstrumentAsync(assetPairId);
 
             OrderResponse orderResponse = await WrapAsync(async () =>
             {
-                var swOrderRequest = new Stopwatch();
-
-                swOrderRequest.Start();
+                var orderStartedAt = DateTime.UtcNow;
 
                 var orderRequest = new OrderRequest();
 
@@ -81,13 +71,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
                 _log.Info("Order request", orderRequest);
 
-                var hedgingRequestStartedAt = DateTime.UtcNow;
-
                 OrderResponse order = await _client.OrderAsync(orderRequest);
 
-                swOrderRequest.Stop();
-
-                b2c2RequestFinishedAt = DateTime.UtcNow;
+                var orderFinishedAt = DateTime.UtcNow;
 
                 _log.Info("Order response", orderRequest);
 
@@ -100,16 +86,15 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                     TradeId = orderTrade.TradeId,
                     ClientOrderId = orderRequest.ClientOrderId,
                     OrderId = order.OrderId,
-                    OrderRequestTime = swOrderRequest.ElapsedMilliseconds,
-                    StartedAt = hedgingRequestStartedAt,
-                    B2C2RequestFinishedAt = b2c2RequestFinishedAt,
-                    Latency = (b2c2RequestFinishedAt - hedgingRequestStartedAt).TotalMilliseconds
+                    OrderStartedAt = orderStartedAt,
+                    OrderFinishedAt = orderFinishedAt,
+                    Latency = (orderFinishedAt - orderStartedAt).TotalMilliseconds
                 });
 
                 return order;
             });
 
-            swHedgeTradeTotal.Stop();
+            var finishedAt = DateTime.UtcNow;
 
             var trade = orderResponse.Trades.Single();
 
@@ -120,7 +105,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 OrderId = orderResponse.OrderId,
                 ClientOrderId = orderResponse.ClientOrderId,
                 OrderCreated = orderResponse.Created,
-                HedgeTradeTotalTime = swHedgeTradeTotal
+                HedgeTradeStartedAt = startedAt,
+                HedgeTradeFinishedAt = finishedAt,
+                HedgeTradeTotalTime = (finishedAt - startedAt).TotalMilliseconds
             });
 
             return new ExternalTrade

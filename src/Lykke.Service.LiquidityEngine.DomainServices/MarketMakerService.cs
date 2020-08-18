@@ -89,6 +89,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         public async Task UpdateOrderBooksAsync()
         {
+            var startedAt = DateTime.UtcNow;
+
             IReadOnlyCollection<Instrument> instruments = await _instrumentService.GetAllAsync();
 
             IReadOnlyCollection<Instrument> activeInstruments = instruments
@@ -99,12 +101,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             foreach (Instrument instrument in activeInstruments)
                 await ProcessInstrumentAsync(instrument, iterationDateTime);
+
+            var finishedAt = DateTime.UtcNow;
+
+            _log.Info("MarketMakerService.UpdateOrderBooksAsync() completed.", new
+            {
+                IstrumentsCount = activeInstruments.Count,
+                StartedAt = startedAt,
+                FinishedAt = finishedAt,
+                Latency = (finishedAt - startedAt).TotalMilliseconds
+            });
         }
 
         private async Task ProcessInstrumentAsync(Instrument instrument, DateTime iterationDateTime)
         {
             try
             {
+                var startedAt = DateTime.UtcNow;
+
                 OrderBook directOrderBook = await CalculateDirectOrderBookAsync(instrument, iterationDateTime);
 
                 if (directOrderBook == null)
@@ -147,6 +161,16 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     await _lykkeExchangeService.ApplyAsync(orderBook.AssetPairId, allowedLimitOrders);
                 }
+
+                var finishedAt = DateTime.UtcNow;
+
+                _log.Info("MarketMakerService.ProcessInstrumentAsync() completed.", new
+                {
+                    AssetPairId = instrument.AssetPairId,
+                    StartedAt = startedAt,
+                    FinishedAt = finishedAt,
+                    Latency = (finishedAt - startedAt).TotalMilliseconds
+                });
             }
             catch (Exception exception)
             {

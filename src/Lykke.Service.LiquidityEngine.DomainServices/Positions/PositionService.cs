@@ -66,6 +66,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
         public async Task OpenAsync(IReadOnlyCollection<InternalTrade> internalTrades)
         {
+            var startedAt = DateTime.UtcNow;
+
             var positions = new List<Position>();
 
             foreach (InternalTrade internalTrade in internalTrades)
@@ -77,8 +79,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                     _log.WarningWithDetails("Can not open position. Unknown instrument.", internalTrade);
                     continue;
                 }
-
-                Position position = null;
 
                 if (internalTrade.AssetPairId != instrument.AssetPairId)
                 {
@@ -94,7 +94,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                             ? Calculator.CalculateDirectSellPrice(internalTrade.Price, quote, crossInstrument.IsInverse)
                             : Calculator.CalculateDirectBuyPrice(internalTrade.Price, quote, crossInstrument.IsInverse);
 
-                        position = Position.Open(instrument.AssetPairId, price, internalTrade.Price,
+                        var position = Position.Open(instrument.AssetPairId, price, internalTrade.Price,
                             internalTrade.Volume, quote, crossInstrument.AssetPairId, internalTrade.Type,
                             internalTrade.Id);
 
@@ -107,24 +107,10 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
                 }
                 else
                 {
-                    position = Position.Open(instrument.AssetPairId, internalTrade.Price, internalTrade.Volume,
+                    var position = Position.Open(instrument.AssetPairId, internalTrade.Price, internalTrade.Volume,
                         internalTrade.Type, internalTrade.Id);
 
                     positions.Add(position);
-                }
-
-                var now = DateTime.UtcNow;
-
-                if (position != null)
-                {
-                    _log.Info("Lykke trade handled", new
-                    {
-                        TradeId = internalTrade.Id,
-                        PositionId = position.Id,
-                        TradeTimestamp = internalTrade.Time,
-                        Now = now,
-                        Latency = (now - internalTrade.Time).TotalMilliseconds
-                    });
                 }
             }
 
@@ -155,6 +141,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Positions
 
                 _log.InfoWithDetails("Position opened", position);
             }
+
+            var finishedAt = DateTime.UtcNow;
+
+            _log.Info("PositionService.OpenAsync() completed.", new
+            {
+                PositionsCount = positions.Count,
+                TradeIds = positions.Select(x => x.TradeId).ToList(),
+                StartedAt = startedAt,
+                FinishedAt = finishedAt,
+                Latency = (finishedAt - startedAt).TotalMilliseconds
+            });
         }
 
         public async Task CloseAsync(InternalOrder internalOrder, ExternalTrade externalTrade)

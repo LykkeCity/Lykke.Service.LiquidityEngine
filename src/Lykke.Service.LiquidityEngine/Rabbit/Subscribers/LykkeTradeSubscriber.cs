@@ -116,6 +116,19 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         {
             var internalTrades = new List<InternalTrade>();
 
+            var now = DateTime.UtcNow;
+
+            foreach (var trade in orders.SelectMany(x => x.Trades))
+            {
+                _log.Info("Lykke trade handled", new
+                {
+                    TradeId = trade.TradeId,
+                    TradeTimestamp = trade.Timestamp,
+                    Now = now,
+                    Latency = (now - trade.Timestamp).TotalMilliseconds
+                });
+            }
+
             foreach (Order order in orders)
             {
                 // The limit order fully executed. The remaining volume is zero.
