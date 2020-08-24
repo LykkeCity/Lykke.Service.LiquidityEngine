@@ -172,7 +172,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     .TruncateDecimalPlaces(priceAccuracy);
 
                 LimitOrder buyLimitOrder = LimitOrder.CreateBuy(Math.Min(buyFirstLevelPrice, buyPrice),
-                    Math.Round(levels[i].BuyVolume, volumeAccuracy));
+                    Math.Round(levels[i].Volume, volumeAccuracy));
 
                 limitOrders.Add(buyLimitOrder);
 
@@ -185,7 +185,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     .TruncateDecimalPlaces(priceAccuracy, true);
 
                 LimitOrder sellLimitOrder = LimitOrder.CreateSell(Math.Max(sellFirstLevelPrice, sellPrice),
-                    Math.Round(levels[i].SellVolume, volumeAccuracy));
+                    Math.Round(levels[i].Volume, volumeAccuracy));
 
                 limitOrders.Add(sellLimitOrder);
 
