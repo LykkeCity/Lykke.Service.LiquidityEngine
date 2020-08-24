@@ -20,28 +20,11 @@
         /// <summary>
         /// The volume of the limit order for this level.
         /// </summary>
-        public decimal Volume
-        {
-            get => _volume;
-            set { _volume = value;
-                BuyVolume = value;
-                SellVolume = value;
-            }
-        }
+        public decimal Volume { get; set; }
 
         /// <summary>
         /// The risk markup.
         /// </summary>
         public decimal Markup { get; set; }
-
-        /// <summary>
-        /// Remaining volume of the limit order for buy level.
-        /// </summary>
-        public decimal BuyVolume { get; set; }
-
-        /// <summary>
-        /// Remaining volume of the limit order for sell level.
-        /// </summary>
-        public decimal SellVolume { get; set; }
     }
 }

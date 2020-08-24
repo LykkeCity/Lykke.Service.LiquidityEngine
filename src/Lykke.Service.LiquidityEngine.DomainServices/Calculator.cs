@@ -125,7 +125,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .TruncateDecimalPlaces(priceAccuracy, true);
 
             LimitOrder sellFirstLevelLimitOrder =
-                LimitOrder.CreateSell(sellFirstLevelPrice, Math.Round(levels[0].SellVolume, volumeAccuracy));
+                LimitOrder.CreateSell(sellFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy));
 
             if (fiatEquityStopLossMarkup != decimal.MinusOne) // don't create sell orders if 'FiatEquityThresholdTo' exceeded
                 limitOrders.Add(sellFirstLevelLimitOrder);
@@ -135,7 +135,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 .TruncateDecimalPlaces(priceAccuracy);
 
             LimitOrder buyFirstLevelLimitOrder = 
-                LimitOrder.CreateBuy(buyFirstLevelPrice, Math.Round(levels[0].BuyVolume, volumeAccuracy));
+                LimitOrder.CreateBuy(buyFirstLevelPrice, Math.Round(levels[0].Volume, volumeAccuracy));
 
             limitOrders.Add(buyFirstLevelLimitOrder);
 

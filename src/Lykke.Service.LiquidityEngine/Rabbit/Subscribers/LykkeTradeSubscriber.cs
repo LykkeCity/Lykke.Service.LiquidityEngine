@@ -41,18 +41,14 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             IPositionService positionService,
             IDeduplicator deduplicator,
             IHedgeService hedgeService,
-            ILogFactory logFactory,
-            IInstrumentService instrumentService,
-            ITimersSettingsService timersSettingsService)
+            ILogFactory logFactory)
         {
             _settings = settings;
             _settingsService = settingsService;
             _positionService = positionService;
             _deduplicator = deduplicator;
-            _logFactory = logFactory;
-            _instrumentService = instrumentService;
-            _timersSettingsService = timersSettingsService;
             _hedgeService = hedgeService;
+            _logFactory = logFactory;
             _log = logFactory.CreateLog(this);
         }
 
@@ -166,26 +162,6 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             await processTask;
 
             await _hedgeService.ExecuteAsync();
-
-            await ApplyVolumeToLevels(internalTrades);
-        }
-
-        private async Task ApplyVolumeToLevels(List<InternalTrade> internalTrades)
-        {
-            var timerSettings = await _timersSettingsService.GetAsync();
-
-            if (timerSettings.MarketMaker.TotalMilliseconds > 0)
-                foreach (var internalTrade in internalTrades)
-                {
-                    var remainingVolume =
-                        await _instrumentService.ApplyVolumeAsync(internalTrade.AssetPairId, Math.Abs(internalTrade.Volume),
-                            internalTrade.Type);
-
-                    if (remainingVolume > 0)
-                        _log.Warning(
-                            $"Can't apply trade volume to remaining in levels, remainingVolume = '{remainingVolume}'.", null,
-                            internalTrade);
-                }
         }
 
         private static IReadOnlyList<InternalTrade> Map(Order order, bool completed)
