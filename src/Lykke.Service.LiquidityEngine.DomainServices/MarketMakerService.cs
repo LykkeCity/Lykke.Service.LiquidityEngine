@@ -17,6 +17,7 @@ using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.Publishers;
 using Lykke.Service.LiquidityEngine.Domain.Reports.OrderBookUpdates;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Metrics;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
 {
@@ -155,6 +156,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                         FinishedAt = finishedAt,
                         Latency = (finishedAt - startedAt).TotalMilliseconds
                     });
+
+                    PrometheusMetrics.MarketMakingLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
                 }
                 catch (Exception ex)
                 {
@@ -254,6 +257,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     FinishedAt = finishedAt,
                     Latency = (finishedAt - startedAt).TotalMilliseconds
                 });
+
+                PrometheusMetrics.MarketMakingAssetPairLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
             }
             catch (Exception exception)
             {

@@ -13,6 +13,7 @@ using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Consts;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Metrics;
 using Polly;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
@@ -111,6 +112,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 HedgeTradeFinishedAt = finishedAt,
                 HedgeTradeTotalTime = (finishedAt - startedAt).TotalMilliseconds
             });
+
+            PrometheusMetrics.HedgeB2C2OrderRequestLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
 
             return new ExternalTrade
             {

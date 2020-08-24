@@ -7,7 +7,9 @@ using Lykke.Common.Log;
 using Lykke.RabbitMqBroker;
 using Lykke.RabbitMqBroker.Subscriber;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Metrics;
 using Lykke.Service.LiquidityEngine.Settings.ServiceSettings.Rabbit.Subscribers;
+using Prometheus;
 
 namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 {
@@ -74,6 +76,8 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
                 Now = now,
                 Latency = (now - orderBook.Timestamp).TotalMilliseconds
             });
+
+            PrometheusMetrics.B2C2OrderBookLatency.Inc((now - orderBook.Timestamp).TotalMilliseconds);
 
             var sellLimitOrders = orderBook.Asks.Select(o => new Domain.LimitOrder
             {

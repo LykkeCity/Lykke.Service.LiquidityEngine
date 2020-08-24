@@ -10,6 +10,7 @@ using AutoMapper.Data;
 using Lykke.Common.InternalExchange.Client.Models;
 using Lykke.Service.LiquidityEngine.Swagger;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 
 namespace Lykke.Service.LiquidityEngine
 {
@@ -73,6 +74,8 @@ namespace Lykke.Service.LiquidityEngine
         public void Configure(IApplicationBuilder app)
         {
             app.UseLykkeConfiguration(options => { options.SwaggerOptions = _swaggerOptions; });
+
+            app.UseMetricServer();
         }
     }
 }

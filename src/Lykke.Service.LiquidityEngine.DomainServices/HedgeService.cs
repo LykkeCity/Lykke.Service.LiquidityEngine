@@ -9,6 +9,7 @@ using Lykke.Service.LiquidityEngine.Domain;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.MarketMaker;
 using Lykke.Service.LiquidityEngine.Domain.Services;
+using Lykke.Service.LiquidityEngine.DomainServices.Metrics;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices
 {
@@ -102,6 +103,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                             FinishedAt = finishedAt,
                             Latency = (finishedAt - startedAt).TotalMilliseconds
                         });
+
+                    PrometheusMetrics.HedgeTotalLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
                 }
                 catch (Exception ex)
                 {
@@ -167,6 +170,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                     FinishedAt = finishedAt,
                     Latency = (finishedAt - startedAt).TotalMilliseconds
                 });
+
+                PrometheusMetrics.HedgeAssetPairLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
             }
         }
 

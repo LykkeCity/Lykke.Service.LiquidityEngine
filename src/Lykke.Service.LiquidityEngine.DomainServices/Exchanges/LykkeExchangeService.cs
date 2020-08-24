@@ -14,6 +14,7 @@ using Lykke.Service.LiquidityEngine.Domain.Exceptions;
 using Lykke.Service.LiquidityEngine.Domain.Extensions;
 using Lykke.Service.LiquidityEngine.Domain.Services;
 using Lykke.Service.LiquidityEngine.DomainServices.Extensions;
+using Lykke.Service.LiquidityEngine.DomainServices.Metrics;
 using Lykke.Service.LiquidityEngine.DomainServices.Utils;
 
 namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
@@ -95,6 +96,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                     FinishedAt = finishedAt,
                     Latency = (finishedAt - startedAt).TotalMilliseconds
                 });
+
+                PrometheusMetrics.MarketMakingMeRequestLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
             }
             catch (Exception exception)
             {
