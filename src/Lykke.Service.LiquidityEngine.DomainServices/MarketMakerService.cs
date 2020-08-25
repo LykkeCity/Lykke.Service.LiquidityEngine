@@ -199,14 +199,21 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
         private async Task ProcessInstrumentAsync(Instrument instrument, DateTime iterationDateTime)
         {
-            if (iterationDateTime == default(DateTime))
-                iterationDateTime = DateTime.UtcNow;
-
             try
             {
                 var startedAt = DateTime.UtcNow;
 
                 OrderBook directOrderBook = await CalculateDirectOrderBookAsync(instrument, iterationDateTime);
+
+                var finishedObCalculationAt = DateTime.UtcNow;
+
+                _log.Info("MarketMakerService.CalculateDirectOrderBookAsync() completed.", new
+                {
+                    AssetPairId = instrument.AssetPairId,
+                    StartedAt = startedAt,
+                    FinishedAt = finishedObCalculationAt,
+                    Latency = (finishedObCalculationAt - startedAt).TotalMilliseconds
+                });
 
                 if (directOrderBook == null)
                     return;
