@@ -30,6 +30,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private readonly Dictionary<string, Tuple<int, int>> _attempts =
             new Dictionary<string, Tuple<int, int>>();
 
+        private readonly object _remainingSync = new object();
+        private DateTime _lastCloseRemaining = DateTime.UtcNow.AddMinutes(-1);
+
         public HedgeService(
             IPositionService positionService,
             IInstrumentService instrumentService,
@@ -177,6 +180,17 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
         private async Task CloseRemainingVolumeAsync()
         {
             var startedAt = DateTime.UtcNow;
+
+            // close remaining volumes once per 1 min
+            lock (_remainingSync)
+            {
+                if ((startedAt - _lastCloseRemaining).TotalSeconds > 60)
+                {
+                    _lastCloseRemaining = startedAt;
+                }
+                else
+                    return;
+            }
 
             IReadOnlyCollection<RemainingVolume> remainingVolumes = await _remainingVolumeService.GetAllAsync();
 
