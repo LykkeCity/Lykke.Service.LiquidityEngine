@@ -149,13 +149,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     var finishedAt = DateTime.UtcNow;
 
-                    _log.Info("MarketMakerService.TryUpdateOrderBooksAsync() completed.", new
-                    {
-                        IstrumentsCount = instrumentsToUpdate.Count,
-                        StartedAt = startedAt,
-                        FinishedAt = finishedAt,
-                        Latency = (finishedAt - startedAt).TotalMilliseconds
-                    });
+                    if (instrumentsToUpdate.Count > 0)
+                        _log.Info("MarketMakerService.TryUpdateOrderBooksAsync() completed.", new
+                        {
+                            IstrumentsCount = instrumentsToUpdate.Count,
+                            StartedAt = startedAt,
+                            FinishedAt = finishedAt,
+                            Latency = (finishedAt - startedAt).TotalMilliseconds
+                        });
 
                     PrometheusMetrics.MarketMakingLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
                 }
