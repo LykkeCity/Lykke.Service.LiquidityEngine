@@ -90,7 +90,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
 
             _orderBooksUpdatesReportSubscriber.Stop();
 
-            _marketMakerTimer.Stop();
+            //_marketMakerTimer.Stop();
 
             _marketMakerService.Stop();
 

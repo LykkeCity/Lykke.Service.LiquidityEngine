@@ -105,7 +105,7 @@ namespace Lykke.Service.LiquidityEngine.Managers
 
             _externalBalancesTimer.Start();
 
-            _marketMakerTimer.Start();
+            //_marketMakerTimer.Start();
 
             _marketMakerService.Start();
 
