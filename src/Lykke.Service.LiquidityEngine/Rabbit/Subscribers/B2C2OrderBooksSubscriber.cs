@@ -69,13 +69,13 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 
             var now = DateTime.UtcNow;
 
-            _log.Info("B2C2 Order Book handled.", new
-            {
-                AssetPairId = orderBook.Asset,
-                OrderBookTimestamp = orderBook.Timestamp,
-                Now = now,
-                Latency = (now - orderBook.Timestamp).TotalMilliseconds
-            });
+            //_log.Info("B2C2 Order Book handled.", new
+            //{
+            //    AssetPairId = orderBook.Asset,
+            //    OrderBookTimestamp = orderBook.Timestamp,
+            //    Now = now,
+            //    Latency = (now - orderBook.Timestamp).TotalMilliseconds
+            //});
 
             PrometheusMetrics.B2C2OrderBookLatency.Inc((now - orderBook.Timestamp).TotalMilliseconds);
 

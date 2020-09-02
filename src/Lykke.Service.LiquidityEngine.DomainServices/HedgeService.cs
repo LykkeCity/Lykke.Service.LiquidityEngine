@@ -97,14 +97,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     var finishedAt = DateTime.UtcNow;
 
-                    _log.Info("HedgeService.ExecuteAsync() completed.", new
-                    {
-                        PositionsCount = positions.Count,
-                        TradeIds = positions.Select(x => x.TradeId).ToList(),
-                        StartedAt = startedAt,
-                        FinishedAt = finishedAt,
-                        Latency = (finishedAt - startedAt).TotalMilliseconds
-                    });
+                    //_log.Info("HedgeService.ExecuteAsync() completed.", new
+                    //{
+                    //    PositionsCount = positions.Count,
+                    //    TradeIds = positions.Select(x => x.TradeId).ToList(),
+                    //    StartedAt = startedAt,
+                    //    FinishedAt = finishedAt,
+                    //    Latency = (finishedAt - startedAt).TotalMilliseconds
+                    //});
 
                     PrometheusMetrics.HedgeTotalLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
                 }
