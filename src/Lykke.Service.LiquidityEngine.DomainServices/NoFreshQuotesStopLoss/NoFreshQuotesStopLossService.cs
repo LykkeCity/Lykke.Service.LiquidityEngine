@@ -60,16 +60,9 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
                 return noFreshQuotesMarkup;
             }
 
-            _log.InfoWithDetails("Checking time.", new
-            {
-                assetPairId,
-                quote.Time,
-                noFreshQuotesInterval
-            });
-
             if (DateTime.UtcNow - quote.Time > noFreshQuotesInterval)
             {
-                _log.InfoWithDetails("No quotes.", new
+                _log.ErrorWithDetails(null, "No quotes.", new
                 {
                     assetPairId,
                     quote.Time,
