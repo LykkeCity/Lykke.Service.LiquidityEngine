@@ -205,16 +205,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                 OrderBook directOrderBook = await CalculateDirectOrderBookAsync(instrument, iterationDateTime);
 
-                var finishedObCalculationAt = DateTime.UtcNow;
-
-                //_log.Info("MarketMakerService.CalculateDirectOrderBookAsync() completed.", new
-                //{
-                //    AssetPairId = instrument.AssetPairId,
-                //    StartedAt = startedAt,
-                //    FinishedAt = finishedObCalculationAt,
-                //    Latency = (finishedObCalculationAt - startedAt).TotalMilliseconds
-                //});
-
                 if (directOrderBook == null)
                     return;
 
@@ -257,14 +247,6 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 }
 
                 var finishedAt = DateTime.UtcNow;
-
-                //_log.Info("MarketMakerService.ProcessInstrumentAsync() completed.", new
-                //{
-                //    AssetPairId = instrument.AssetPairId,
-                //    StartedAt = startedAt,
-                //    FinishedAt = finishedAt,
-                //    Latency = (finishedAt - startedAt).TotalMilliseconds
-                //});
 
                 PrometheusMetrics.MarketMakingAssetPairLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
             }
