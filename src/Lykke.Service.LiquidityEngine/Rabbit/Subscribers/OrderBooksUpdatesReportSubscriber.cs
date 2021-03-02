@@ -59,11 +59,11 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
 
         private async Task ProcessMessageAsync(OrderBookUpdateReport orderBookUpdateReport)
         {
-            _log.InfoWithDetails("OrderBookUpdateReport is about to be saved...", orderBookUpdateReport);
+            //_log.InfoWithDetails("OrderBookUpdateReport is about to be saved...", orderBookUpdateReport);
 
             await _orderBookUpdateReportRepository.InsertAsync(orderBookUpdateReport);
 
-            _log.InfoWithDetails("OrderBookUpdateReport was saved.", orderBookUpdateReport);
+            //_log.InfoWithDetails("OrderBookUpdateReport was saved.", orderBookUpdateReport);
         }
     }
 }

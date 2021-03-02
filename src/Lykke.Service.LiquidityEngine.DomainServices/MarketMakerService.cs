@@ -304,24 +304,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             decimal fiatEquityStopLossMarkup = await _fiatEquityStopLossService.GetFiatEquityMarkup(assetPair.Id);
 
-            _log.InfoWithDetails("Arguments for Calculator.CalculateLimitOrders(...).", new
-            {
-                instrument.AssetPairId,
-                quotes,
-                levels = instrument.Levels.ToArray(),
-                baseAmountBalance = baseAssetBalance?.Amount ?? 0,
-                quoteAmountBalance = quoteAssetBalance?.Amount ?? 0,
-                timeSinceLastTradeTotalSeconds = (int)timeSinceLastTrade.TotalSeconds,
-                instrumentHalfLifePeriod = instrument.HalfLifePeriod,
-                instrumentAllowSmartMarkup = instrument.AllowSmartMarkup,
-                marketMakerSettingsLimitOrderPriceMarkup = globalMarkup,
-                pnLStopLossMarkup,
-                fiatEquityStopLossMarkup,
-                noQuotesMarkup,
-                assetPairAccuracy = assetPair.Accuracy,
-                baseAssetAccuracy = baseAsset.Accuracy,
-                instrument
-            });
+            //_log.InfoWithDetails("Arguments for Calculator.CalculateLimitOrders(...).", new
+            //{
+            //    instrument.AssetPairId,
+            //    quotes,
+            //    levels = instrument.Levels.ToArray(),
+            //    baseAmountBalance = baseAssetBalance?.Amount ?? 0,
+            //    quoteAmountBalance = quoteAssetBalance?.Amount ?? 0,
+            //    timeSinceLastTradeTotalSeconds = (int)timeSinceLastTrade.TotalSeconds,
+            //    instrumentHalfLifePeriod = instrument.HalfLifePeriod,
+            //    instrumentAllowSmartMarkup = instrument.AllowSmartMarkup,
+            //    marketMakerSettingsLimitOrderPriceMarkup = globalMarkup,
+            //    pnLStopLossMarkup,
+            //    fiatEquityStopLossMarkup,
+            //    noQuotesMarkup,
+            //    assetPairAccuracy = assetPair.Accuracy,
+            //    baseAssetAccuracy = baseAsset.Accuracy,
+            //    instrument
+            //});
 
             OrderBookUpdateReport orderBookUpdateReport = null;
             if (_isOrderBooksUpdateReportEnabled)

@@ -72,12 +72,12 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.NoFreshQuotesStopLoss
                 return noFreshQuotesMarkup;
             }
 
-            _log.InfoWithDetails("There is a quote so markup is 0.", new
-            {
-                assetPairId,
-                quote.Time,
-                noFreshQuotesInterval
-            });
+            //_log.InfoWithDetails("There is a quote so markup is 0.", new
+            //{
+            //    assetPairId,
+            //    quote.Time,
+            //    noFreshQuotesInterval
+            //});
 
             return 0;
         }
