@@ -89,6 +89,8 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                     OrderId = order.OrderId,
                     OrderStartedAt = orderStartedAt,
                     OrderFinishedAt = orderFinishedAt,
+                    OrderCreated = order.Created,
+                    OrderTradeCreated = orderTrade.Created,
                     Latency = (orderFinishedAt - orderStartedAt).TotalMilliseconds
                 });
 
