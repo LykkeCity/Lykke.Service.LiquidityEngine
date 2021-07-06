@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Common.Log;
 using Lykke.Common.ExchangeAdapter.Contracts;
 using Lykke.Common.Log;
 using Lykke.RabbitMqBroker;
@@ -18,7 +17,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
         private readonly ILogFactory _logFactory;
 
         private RabbitMqSubscriber<TickPrice> _subscriber;
-        
+
         public B2C2QuoteSubscriber(
             SubscriberSettings settings,
             IQuoteService quoteService,
@@ -28,7 +27,7 @@ namespace Lykke.Service.LiquidityEngine.Rabbit.Subscribers
             _quoteService = quoteService;
             _logFactory = logFactory;
         }
-        
+
         public void Start()
         {
             var settings = RabbitMqSubscriptionSettings

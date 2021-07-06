@@ -20,7 +20,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.MarketMaker
         public MarketMakerStateService(IMarketMakerStateRepository marketMakerStateRepository, ILogFactory logFactory)
         {
             _marketMakerStateRepository = marketMakerStateRepository;
-            _cache = new InMemoryCache<MarketMakerState>(settings => CacheKey, true);
+            _cache = new InMemoryCache<MarketMakerState>(settings => CacheKey, false);
             _log = logFactory.CreateLog(this);
         }
 

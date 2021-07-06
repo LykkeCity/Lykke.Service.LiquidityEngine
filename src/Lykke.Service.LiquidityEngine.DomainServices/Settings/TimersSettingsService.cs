@@ -18,7 +18,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
         public TimersSettingsService(ITimersSettingsRepository timersSettingsRepository)
         {
             _timersSettingsRepository = timersSettingsRepository;
-            _cache = new InMemoryCache<TimersSettings>(settings => CacheKey, true);
+            _cache = new InMemoryCache<TimersSettings>(settings => CacheKey, false);
         }
 
         public async Task<TimersSettings> GetAsync()
@@ -46,7 +46,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
 
                 if (timersSettings.InternalTrader == TimeSpan.Zero)
                     timersSettings.InternalTrader = TimeSpan.FromSeconds(5);
-                
+
                 if (timersSettings.PnLStopLoss == TimeSpan.Zero)
                     timersSettings.PnLStopLoss = TimeSpan.FromSeconds(1);
 

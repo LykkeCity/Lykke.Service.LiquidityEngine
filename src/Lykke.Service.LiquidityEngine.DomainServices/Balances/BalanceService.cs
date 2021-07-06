@@ -49,7 +49,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Balances
         public Task<Balance> GetByAssetIdAsync(string exchange, string assetId)
         {
             Balance balance = _cache.Get(GetKey(assetId, exchange)) ?? new Balance(exchange, assetId, decimal.Zero);
-            
+
             return Task.FromResult(balance);
         }
 
