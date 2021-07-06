@@ -18,7 +18,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
         public QuoteTimeoutSettingsService(IQuoteTimeoutSettingsRepository quoteTimeoutSettingsRepository)
         {
             _quoteTimeoutSettingsRepository = quoteTimeoutSettingsRepository;
-            _cache = new InMemoryCache<QuoteTimeoutSettings>(settings => CacheKey, true);
+            _cache = new InMemoryCache<QuoteTimeoutSettings>(settings => CacheKey, false);
         }
 
         public async Task<QuoteTimeoutSettings> GetAsync()

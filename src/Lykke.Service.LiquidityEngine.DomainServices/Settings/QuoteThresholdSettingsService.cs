@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Lykke.Service.LiquidityEngine.Domain;
@@ -17,7 +18,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Settings
         public QuoteThresholdSettingsService(IQuoteThresholdSettingsRepository quoteThresholdSettingsRepository)
         {
             _quoteThresholdSettingsRepository = quoteThresholdSettingsRepository;
-            _cache = new InMemoryCache<QuoteThresholdSettings>(settings => CacheKey, true);
+            _cache = new InMemoryCache<QuoteThresholdSettings>(settings => CacheKey, false);
         }
 
         public async Task<QuoteThresholdSettings> GetAsync()
