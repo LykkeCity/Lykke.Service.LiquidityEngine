@@ -56,11 +56,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
             CreateMap<InternalTrade, InternalTradeEntity>(MemberList.Source);
             CreateMap<InternalTradeEntity, InternalTrade>(MemberList.Destination);
 
-            CreateMap<SettlementTrade, SettlementTradeEntity>(MemberList.Source)
-                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Timestamp));
-            CreateMap<SettlementTradeEntity, SettlementTrade>(MemberList.Destination)
-                .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Date));
-
             CreateMap<Position, PositionEntity>(MemberList.Source)
                 .ForMember(dest => dest.Trades, opt => opt.MapFrom(src => src.TradeId));
             CreateMap<PositionEntity, Position>(MemberList.Destination)

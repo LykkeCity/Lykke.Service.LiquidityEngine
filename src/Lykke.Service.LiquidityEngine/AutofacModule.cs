@@ -39,8 +39,6 @@ namespace Lykke.Service.LiquidityEngine
             builder.RegisterModule(new DomainServices.AutofacModule(
                 _settings.CurrentValue.LiquidityEngineService.Name,
                 _settings.CurrentValue.LiquidityEngineService.WalletId,
-                _settings.CurrentValue.LiquidityEngineService.Dwh.DatabaseName,
-                _settings.CurrentValue.LiquidityEngineService.Dwh.StoredProcedures.Trades,
                 _settings.CurrentValue.LiquidityEngineService.IsOrderBooksUpdateReportEnabled));
             
             builder.RegisterModule(new AzureRepositories.AutofacModule(

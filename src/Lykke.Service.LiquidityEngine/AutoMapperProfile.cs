@@ -72,7 +72,6 @@ namespace Lykke.Service.LiquidityEngine
 
             CreateMap<ExternalTrade, ExternalTradeModel>(MemberList.Source);
             CreateMap<InternalTrade, InternalTradeModel>(MemberList.Source);
-            CreateMap<SettlementTrade, SettlementTradeModel>(MemberList.Source);
 
             CreateMap<Position, PositionModel>(MemberList.Source)
                 .ForMember(dest => dest.Trades, opt => opt.MapFrom(src => string.IsNullOrEmpty(src.TradeId)

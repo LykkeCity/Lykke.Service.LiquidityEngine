@@ -17,7 +17,6 @@ namespace Lykke.Service.LiquidityEngine.Managers
         private readonly ExternalBalancesTimer _externalBalancesTimer;
         private readonly MarketMakerTimer _marketMakerTimer;
         private readonly HedgingTimer _hedgingTimer;
-        private readonly SettlementsTimer _settlementsTimer;
         private readonly InternalTraderTimer _internalTraderTimer;
         private readonly PnLStopLossEngineTimer _pnLStopLossEngineTimer;
         private readonly LykkeTradeSubscriber _lykkeTradeSubscriber;
@@ -39,7 +38,6 @@ namespace Lykke.Service.LiquidityEngine.Managers
             ExternalBalancesTimer externalBalancesTimer,
             MarketMakerTimer marketMakerTimer,
             HedgingTimer hedgingTimer,
-            SettlementsTimer settlementsTimer,
             InternalTraderTimer internalTraderTimer,
             PnLStopLossEngineTimer pnLStopLossEngineTimer,
             LykkeTradeSubscriber lykkeTradeSubscriber,
@@ -60,7 +58,6 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _externalBalancesTimer = externalBalancesTimer;
             _marketMakerTimer = marketMakerTimer;
             _hedgingTimer = hedgingTimer;
-            _settlementsTimer = settlementsTimer;
             _internalTraderTimer = internalTraderTimer;
             _pnLStopLossEngineTimer = pnLStopLossEngineTimer;
             _lykkeTradeSubscriber = lykkeTradeSubscriber;
@@ -112,8 +109,6 @@ namespace Lykke.Service.LiquidityEngine.Managers
             _hedgeService.Start();
 
             _hedgingTimer.Start();
-
-            _settlementsTimer.Start();
 
             _internalTraderTimer.Start();
 

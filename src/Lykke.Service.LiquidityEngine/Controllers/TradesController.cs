@@ -17,12 +17,10 @@ namespace Lykke.Service.LiquidityEngine.Controllers
     public class TradesController : Controller, ITradesApi
     {
         private readonly ITradeService _tradeService;
-        private readonly ISettlementTradeService _settlementTradeService;
 
-        public TradesController(ITradeService tradeService, ISettlementTradeService settlementTradeService)
+        public TradesController(ITradeService tradeService)
         {
             _tradeService = tradeService;
-            _settlementTradeService = settlementTradeService;
         }
 
         /// <inheritdoc/>
@@ -99,18 +97,6 @@ namespace Lykke.Service.LiquidityEngine.Controllers
                     AssetPairId = assetPairId,
                     LastInternalTradeTime = lastInternalTradeTime
                 });
-        }
-
-        /// <inheritdoc/>
-        /// <response code="200">A collection of settlement trades.</response>
-        [HttpGet("settlement")]
-        [ProducesResponseType(typeof(IReadOnlyCollection<SettlementTradeModel>), (int) HttpStatusCode.OK)]
-        public async Task<IReadOnlyCollection<SettlementTradeModel>> GetSettlementTradesAsync()
-        {
-            IReadOnlyCollection<SettlementTrade> settlementTrades =
-                await _settlementTradeService.GetAllAsync();
-
-            return Mapper.Map<SettlementTradeModel[]>(settlementTrades);
         }
     }
 }

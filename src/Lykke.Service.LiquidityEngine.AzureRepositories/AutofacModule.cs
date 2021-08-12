@@ -130,12 +130,6 @@ namespace Lykke.Service.LiquidityEngine.AzureRepositories
                 .Named<IInternalTradeRepository>("InternalTradeRepositoryAzure")
                 .SingleInstance();
 
-            builder.Register(container => new SettlementTradeRepository(
-                    AzureTableStorage<SettlementTradeEntity>.Create(_connectionString,
-                        "SettlementTrades", container.Resolve<ILogFactory>())))
-                .As<ISettlementTradeRepository>()
-                .SingleInstance();
-
             builder.Register(container => new PositionRepository(
                     AzureTableStorage<PositionEntity>.Create(_connectionString,
                         "Positions", container.Resolve<ILogFactory>()),

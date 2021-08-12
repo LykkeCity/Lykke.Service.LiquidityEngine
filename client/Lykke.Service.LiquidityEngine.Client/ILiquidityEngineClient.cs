@@ -70,11 +70,6 @@ namespace Lykke.Service.LiquidityEngine.Client
         IReportsApi Reports { get; }
 
         /// <summary>
-        /// Settlements API.
-        /// </summary>
-        ISettlementsApi Settlements { get; }
-
-        /// <summary>
         /// Trades API.
         /// </summary>
         ITradesApi Trades { get; }
