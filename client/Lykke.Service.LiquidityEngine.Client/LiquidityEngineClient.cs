@@ -10,7 +10,7 @@ namespace Lykke.Service.LiquidityEngine.Client
     {
         /// <summary>
         /// Initializes a new instance of <see cref="LiquidityEngineClient"/> with <param name="httpClientGenerator"></param>.
-        /// </summary> 
+        /// </summary>
         public LiquidityEngineClient(IHttpClientGenerator httpClientGenerator)
         {
             AssetPairLinks = httpClientGenerator.Generate<IAssetPairLinksApi>();
@@ -25,6 +25,7 @@ namespace Lykke.Service.LiquidityEngine.Client
             Quotes = httpClientGenerator.Generate<IQuotesApi>();
             Positions = httpClientGenerator.Generate<IPositionsApi>();
             Reports = httpClientGenerator.Generate<IReportsApi>();
+            Settlements = httpClientGenerator.Generate<ISettlementsApi>();
             Trades = httpClientGenerator.Generate<ITradesApi>();
             PnLStopLossSettings = httpClientGenerator.Generate<IPnLStopLossSettingsApi>();
             PnLStopLossEngines = httpClientGenerator.Generate<IPnLStopLossEnginesApi>();
@@ -68,6 +69,9 @@ namespace Lykke.Service.LiquidityEngine.Client
 
         /// <inheritdoc/>
         public IReportsApi Reports { get; }
+
+        /// <inheritdoc/>
+        public ISettlementsApi Settlements { get; set; }
 
         /// <inheritdoc/>
         public ITradesApi Trades { get; }
