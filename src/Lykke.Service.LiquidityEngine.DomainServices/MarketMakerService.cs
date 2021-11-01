@@ -149,14 +149,14 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
                     var finishedAt = DateTime.UtcNow;
 
-                    //if (instrumentsToUpdate.Count > 0)
-                    //    _log.Info("MarketMakerService.TryUpdateOrderBooksAsync() completed.", new
-                    //    {
-                    //        IstrumentsCount = instrumentsToUpdate.Count,
-                    //        StartedAt = startedAt,
-                    //        FinishedAt = finishedAt,
-                    //        Latency = (finishedAt - startedAt).TotalMilliseconds
-                    //    });
+                    if (instrumentsToUpdate.Count > 0)
+                        _log.Debug("MarketMakerService.TryUpdateOrderBooksAsync() completed.", new
+                        {
+                            IstrumentsCount = instrumentsToUpdate.Count,
+                            StartedAt = startedAt,
+                            FinishedAt = finishedAt,
+                            Latency = (finishedAt - startedAt).TotalMilliseconds
+                        });
 
                     PrometheusMetrics.MarketMakingLatency.Inc((finishedAt - startedAt).TotalMilliseconds);
                 }
@@ -304,24 +304,24 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             decimal fiatEquityStopLossMarkup = await _fiatEquityStopLossService.GetFiatEquityMarkup(assetPair.Id);
 
-            //_log.InfoWithDetails("Arguments for Calculator.CalculateLimitOrders(...).", new
-            //{
-            //    instrument.AssetPairId,
-            //    quotes,
-            //    levels = instrument.Levels.ToArray(),
-            //    baseAmountBalance = baseAssetBalance?.Amount ?? 0,
-            //    quoteAmountBalance = quoteAssetBalance?.Amount ?? 0,
-            //    timeSinceLastTradeTotalSeconds = (int)timeSinceLastTrade.TotalSeconds,
-            //    instrumentHalfLifePeriod = instrument.HalfLifePeriod,
-            //    instrumentAllowSmartMarkup = instrument.AllowSmartMarkup,
-            //    marketMakerSettingsLimitOrderPriceMarkup = globalMarkup,
-            //    pnLStopLossMarkup,
-            //    fiatEquityStopLossMarkup,
-            //    noQuotesMarkup,
-            //    assetPairAccuracy = assetPair.Accuracy,
-            //    baseAssetAccuracy = baseAsset.Accuracy,
-            //    instrument
-            //});
+            _log.DebugWithDetails("Arguments for Calculator.CalculateLimitOrders(...).", new
+            {
+                instrument.AssetPairId,
+                quotes,
+                levels = instrument.Levels.ToArray(),
+                baseAmountBalance = baseAssetBalance?.Amount ?? 0,
+                quoteAmountBalance = quoteAssetBalance?.Amount ?? 0,
+                timeSinceLastTradeTotalSeconds = (int)timeSinceLastTrade.TotalSeconds,
+                instrumentHalfLifePeriod = instrument.HalfLifePeriod,
+                instrumentAllowSmartMarkup = instrument.AllowSmartMarkup,
+                marketMakerSettingsLimitOrderPriceMarkup = globalMarkup,
+                pnLStopLossMarkup,
+                fiatEquityStopLossMarkup,
+                noQuotesMarkup,
+                assetPairAccuracy = assetPair.Accuracy,
+                baseAssetAccuracy = baseAsset.Accuracy,
+                instrument
+            });
 
             OrderBookUpdateReport orderBookUpdateReport = null;
             if (_isOrderBooksUpdateReportEnabled)
@@ -366,7 +366,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             await ValidateBalanceAsync(limitOrders, assetPair);
 
-            WriteInfoLog(instrument.AssetPairId, quotes, timeSinceLastTrade, limitOrders,
+            WriteDebugLog(instrument.AssetPairId, quotes, timeSinceLastTrade, limitOrders,
                 "Direct limit orders calculated");
 
             if (orderBookUpdateReport != null)
@@ -417,7 +417,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
 
             await ValidateBalanceAsync(crossLimitOrders, assetPair);
 
-            WriteInfoLog(crossInstrument.AssetPairId, directOrderBook.AssetPairId, quote, crossLimitOrders,
+            WriteDebugLog(crossInstrument.AssetPairId, directOrderBook.AssetPairId, quote, crossLimitOrders,
                 "Cross limit orders calculated");
 
             return new OrderBook
@@ -599,11 +599,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
                 SetError(orderBooks.SelectMany(o => o.LimitOrders), LimitOrderError.Idle);
         }
 
-        private void WriteInfoLog(string assetPair, Quote[] quotes, TimeSpan timeSinceLastTrade,
+        private void WriteDebugLog(string assetPair, Quote[] quotes, TimeSpan timeSinceLastTrade,
             IEnumerable<LimitOrder> limitOrders, string message,
-            [CallerMemberName] string process = nameof(WriteInfoLog))
+            [CallerMemberName] string process = nameof(WriteDebugLog))
         {
-            _log.InfoWithDetails(message, new
+            _log.DebugWithDetails(message, new
             {
                 AssetPair = assetPair,
                 TimeSinceLastTrade = timeSinceLastTrade,
@@ -621,11 +621,11 @@ namespace Lykke.Service.LiquidityEngine.DomainServices
             }, "data", process);
         }
 
-        private void WriteInfoLog(string assetPair, string directAssetPair, Quote quote,
+        private void WriteDebugLog(string assetPair, string directAssetPair, Quote quote,
             IEnumerable<LimitOrder> limitOrders, string message,
-            [CallerMemberName] string process = nameof(WriteInfoLog))
+            [CallerMemberName] string process = nameof(WriteDebugLog))
         {
-            _log.InfoWithDetails(message, new
+            _log.DebugWithDetails(message, new
             {
                 AssetPair = assetPair,
                 DirectAssetPair = directAssetPair,

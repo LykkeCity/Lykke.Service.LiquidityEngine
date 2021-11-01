@@ -8,6 +8,15 @@ namespace Lykke.Service.LiquidityEngine.Domain.Extensions
 {
     public static class LogExtensions
     {
+        public static void DebugWithDetails(this ILog log,
+            string message,
+            object context,
+            string prefix = "data",
+            [CallerMemberName] string process = nameof(DebugWithDetails))
+        {
+            log.Debug(message, GetContext(context, prefix), process: process);
+        }
+        
         public static void InfoWithDetails(this ILog log,
             string message,
             object context,

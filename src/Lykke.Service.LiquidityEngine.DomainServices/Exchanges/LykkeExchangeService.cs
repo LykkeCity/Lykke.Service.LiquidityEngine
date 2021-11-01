@@ -77,7 +77,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 CancelMode = CancelMode.BothSides
             };
 
-            _log.InfoWithDetails("ME place multi limit order request", multiLimitOrder);
+            _log.DebugWithDetails("ME place multi limit order request", multiLimitOrder);
 
             MultiLimitOrderResponse response;
 
@@ -89,7 +89,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
                 var finishedAt = DateTime.UtcNow;
 
-                _log.Info("_matchingEngineClient.PlaceMultiLimitOrderAsync() finished.", new
+                _log.Debug("_matchingEngineClient.PlaceMultiLimitOrderAsync() finished.", new
                 {
                     AssetPairId = assetPairId,
                     StartedAt = finishedAt,
@@ -142,7 +142,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
 
             var totalOrderPlacementFinishedAt = DateTime.UtcNow;
 
-            _log.Info("LykkeExchangeService.ApplyAsync() finished.", new
+            _log.Debug("LykkeExchangeService.ApplyAsync() finished.", new
             {
                 AssetPairId = assetPairId,
                 StartedAt = totalOrderPlacementStartedAt,
@@ -150,7 +150,7 @@ namespace Lykke.Service.LiquidityEngine.DomainServices.Exchanges
                 Latency = (totalOrderPlacementFinishedAt - totalOrderPlacementStartedAt).TotalMilliseconds
             });
 
-            _log.InfoWithDetails("ME place multi limit order response", response);
+            _log.DebugWithDetails("ME place multi limit order response", response);
         }
 
         public async Task<string> CashInAsync(string clientId, string assetId, decimal amount, string userId,

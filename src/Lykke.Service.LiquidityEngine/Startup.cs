@@ -8,9 +8,10 @@ using System;
 using AutoMapper;
 using AutoMapper.Data;
 using Lykke.Common.InternalExchange.Client.Models;
+using Lykke.Logs;
 using Lykke.Service.LiquidityEngine.Swagger;
-using Microsoft.Extensions.Logging;
 using Prometheus;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Lykke.Service.LiquidityEngine
 {
@@ -63,6 +64,8 @@ namespace Lykke.Service.LiquidityEngine
 
                     logs.Extended = extendedLogs =>
                     {
+                        extendedLogs.SetMinimumLevel(LogLevel.Information);
+                        
                         extendedLogs.AddAdditionalSlackChannel("liquidity-market-maker-errors",
                             channelOptions => { channelOptions.MinLogLevel = LogLevel.Warning; });
                     };
