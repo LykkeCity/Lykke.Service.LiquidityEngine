@@ -57,7 +57,7 @@ namespace Lykke.Service.LiquidityEngine
 
                 options.Logs = logs =>
                 {
-                    logs.AzureTableName = $"LiquidityEngineLog-{DateTime.UtcNow.Date:yyyy-MM-dd}";
+                    logs.AzureTableName = $"LiquidityEngineLog{DateTime.UtcNow.Date:yyyyMMdd}";
                     logs.AzureTableConnectionStringResolver =
                         settings => settings.LiquidityEngineService.Db.LogsConnectionString;
 
