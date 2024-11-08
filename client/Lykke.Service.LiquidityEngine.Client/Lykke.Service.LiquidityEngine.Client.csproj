@@ -25,6 +25,6 @@
   <ItemGroup>
     <PackageReference Include="Lykke.HttpClientGenerator" Version="2.3.0" />
     <PackageReference Include="Lykke.SettingsReader" Version="4.2.0" />
-    <PackageReference Include="Refit" Version="4.6.58" />
+    <PackageReference Include="Refit" Version="7.2.22" />
   </ItemGroup>
 </Project>
